@@ -4,7 +4,8 @@ import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 import type {TemplateLiteral} from "acorn";
 import {JSDOM} from "jsdom";
-import type {PluginOption} from "vite";
+import type {PluginOption, ViteDevServer} from "vite";
+import type {OutputBundle, OutputChunk} from "rollup";
 import type {Cell} from "../lib/notebook.js";
 import {deserialize} from "../lib/serialize.js";
 import {Sourcemap} from "../javascript/sourcemap.js";
@@ -19,6 +20,12 @@ export interface TransformTemplateParams {
   path: string;
   /** Absolute path of the notebook source */
   filename: string;
+  /** Vite dev server instance */
+  server?: ViteDevServer;
+  /** Rollup output bundle */
+  bundle?: OutputBundle;
+  /** Rollup output chunk */
+  chunk?: OutputChunk;
 }
 
 export interface ObservableOptions {
