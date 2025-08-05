@@ -4,8 +4,8 @@ import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 import type {TemplateLiteral} from "acorn";
 import {JSDOM} from "jsdom";
-import type {PluginOption, IndexHtmlTransformContext} from "vite";
-import type {Cell, Notebook} from "../lib/notebook.js";
+import type {PluginOption} from "vite";
+import type {Cell} from "../lib/notebook.js";
 import {deserialize} from "../lib/serialize.js";
 import {Sourcemap} from "../javascript/sourcemap.js";
 import {transpile} from "../javascript/transpile.js";
@@ -15,14 +15,10 @@ import {highlight} from "../runtime/stdlib/highlight.js";
 import {MarkdownRenderer} from "../runtime/stdlib/md.js";
 
 export interface TransformTemplateParams {
-  /** The template HTML to be transformed. */
-  template: string;
-  /** The notebook input. */
-  input: string;
-  /** Vite Hot Module Reload context. */
-  context: IndexHtmlTransformContext;
-  /** The parsed Observable Notebook */
-  notebook: Notebook;
+  /** Relative path of the notebook source */
+  path: string;
+  /** Absolute path of the notebook source */
+  filename: string;
 }
 
 export interface ObservableOptions {
@@ -35,7 +31,7 @@ export interface ObservableOptions {
   /** The path to the page template; defaults to the default template. */
   template?: string;
   /** A function which performs a per-page transformation of the template HTML. */
-  transformTemplate?: (params: TransformTemplateParams) => string;
+  transformTemplate?: (template: string, params?: TransformTemplateParams) => string | Promise<string>;
 }
 
 export function observable({
@@ -61,7 +57,7 @@ export function observable({
         const notebook = deserialize(input, {parser});
         let tsource = await readFile(template, "utf-8");
         if (transformTemplate) {
-          tsource = transformTemplate({template: tsource, input, context, notebook});
+          tsource = await transformTemplate(tsource, context);
         }
         const document = parser.parseFromString(tsource, "text/html");
         const statics = new Set<Cell>();
