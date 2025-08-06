@@ -4,8 +4,7 @@ import {dirname, join, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 import type {TemplateLiteral} from "acorn";
 import {JSDOM} from "jsdom";
-import type {PluginOption, ViteDevServer} from "vite";
-import type {OutputBundle, OutputChunk} from "rollup";
+import type {PluginOption, IndexHtmlTransformContext} from "vite";
 import type {Cell} from "../lib/notebook.js";
 import {deserialize} from "../lib/serialize.js";
 import {Sourcemap} from "../javascript/sourcemap.js";
@@ -14,19 +13,6 @@ import {parseTemplate} from "../javascript/template.js";
 import {collectAssets} from "../runtime/stdlib/assets.js";
 import {highlight} from "../runtime/stdlib/highlight.js";
 import {MarkdownRenderer} from "../runtime/stdlib/md.js";
-
-export interface TransformTemplateParams {
-  /** Relative path of the notebook source */
-  path: string;
-  /** Absolute path of the notebook source */
-  filename: string;
-  /** Vite dev server instance */
-  server?: ViteDevServer;
-  /** Rollup output bundle */
-  bundle?: OutputBundle;
-  /** Rollup output chunk */
-  chunk?: OutputChunk;
-}
 
 export interface ObservableOptions {
   /** The global window, for the default parser and serializer implementations. */
@@ -38,7 +24,7 @@ export interface ObservableOptions {
   /** The path to the page template; defaults to the default template. */
   template?: string;
   /** A function which performs a per-page transformation of the template HTML. */
-  transformTemplate?: (template: string, params: TransformTemplateParams) => string | Promise<string>;
+  transformTemplate?: (template: string, context: IndexHtmlTransformContext) => string | Promise<string>;
 }
 
 export function observable({
