@@ -38,7 +38,7 @@ export interface ObservableOptions {
   /** The path to the page template; defaults to the default template. */
   template?: string;
   /** A function which performs a per-page transformation of the template HTML. */
-  transformTemplate?: (template: string, params?: TransformTemplateParams) => string | Promise<string>;
+  transformTemplate?: (template: string, params: TransformTemplateParams) => string | Promise<string>;
 }
 
 export function observable({
