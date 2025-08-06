@@ -63,7 +63,7 @@ export function observable({
       async handler(input, context) {
         const notebook = deserialize(input, {parser});
         let tsource = await readFile(template, "utf-8");
-        if (transformTemplate) {
+        if (transformTemplate !== undefined) {
           tsource = await transformTemplate(tsource, context);
         }
         const document = parser.parseFromString(tsource, "text/html");
