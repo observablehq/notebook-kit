@@ -6,9 +6,18 @@ import {parseJavaScript} from "./parse.js";
 import {Sourcemap} from "./sourcemap.js";
 import {transpileTemplate} from "./template.js";
 
+const FunctionConstructors = {
+  regular: Object.getPrototypeOf(function () { }).constructor,
+  async: Object.getPrototypeOf(async function () { }).constructor,
+  generator: Object.getPrototypeOf(function* () { }).constructor,
+  asyncGenerator: Object.getPrototypeOf(async function* () { }).constructor,
+} as const;
+
+type ConcreteFunction = (...args: unknown[]) => unknown;
+
 export type TranspiledJavaScript = {
-  /** the source code of a JavaScript function defining the primary variable */
-  body: string;
+  /** the source code of a JavaScript function defining the primary variable, or the function itself when concreteBody is true */
+  body: string | ConcreteFunction;
   /** any unbound references in body; corresponds to the body arguments, in order */
   inputs?: string[];
   /** if present, the body returns an object of named outputs; alternative to output */
@@ -28,8 +37,21 @@ export type TranspileOptions = {
   resolveLocalImports?: boolean;
   /** If true, resolve file using import.meta.url (so Vite treats it as an asset). */
   resolveFiles?: boolean;
+  /** If true, creates a function instance rather than a string for the body. */
+  concreteBody?: boolean;
 };
 
+// Overloads for better typing of body depending on concreteBody
+export function transpile(
+  input: string,
+  mode: Cell["mode"],
+  options: TranspileOptions & { concreteBody: true }
+): Omit<TranspiledJavaScript, "body"> & { body: ConcreteFunction };
+export function transpile(
+  input: string,
+  mode: Cell["mode"],
+  options?: TranspileOptions
+): Omit<TranspiledJavaScript, "body"> & { body: string };
 export function transpile(
   input: string,
   mode: Cell["mode"],
@@ -45,6 +67,29 @@ function transpileMode(input: string, mode: Exclude<Cell["mode"], "ojs">): strin
   const tag = mode === "tex" ? "tex.block" : mode === "sql" ? "__sql(db, Inputs.table)" : mode; // for now
   const raw = mode === "html" || mode === "tex" || mode === "dot";
   return transpileTemplate(input, tag, raw);
+}
+
+function constructFunction(bodyStr: string) {
+  const { body } = parseJavaScript(bodyStr);
+  if (body.type !== "FunctionExpression" && body.type !== "ArrowFunctionExpression") {
+    throw new Error(`Unsupported function type: ${body.type}`);
+  }
+
+  const func = body.async && body.generator ?
+    FunctionConstructors.asyncGenerator :
+    body.async ?
+      FunctionConstructors.async :
+      body.generator ?
+        FunctionConstructors.generator :
+        FunctionConstructors.regular;
+
+  const params = body.params?.map((param) => bodyStr.slice(param.start, param.end)).join(", ") ?? "";
+  const isBlock = body.body.type === "BlockStatement";
+  const { start, end } = body.body;
+  const inner = isBlock
+    ? bodyStr.slice(start + 1, end - 1)
+    : `return ${bodyStr.slice(start, end)}`;
+  return func(params, inner);
 }
 
 export function transpileJavaScript(
@@ -65,7 +110,10 @@ export function transpileJavaScript(
   if (outputs.length > 0) output.insertRight(input.length, `\nreturn {${outputs}};`);
   if (cell.expression) output.insertRight(input.length, `\n)`);
   output.insertRight(input.length, "\n}");
-  const body = String(output);
+  let body: string | ConcreteFunction = String(output);
   const autodisplay = cell.expression && !(inputs.includes("display") || inputs.includes("view"));
-  return {body, inputs, outputs, autodisplay};
+  if (options?.concreteBody) {
+    body = constructFunction(body as string);
+  }
+  return { body, inputs, outputs, autodisplay };
 }
