@@ -14,7 +14,6 @@
     "notebooks": "tsx bin/notebooks.ts",
     "download": "tsx bin/notebooks.ts download",
     "docs:preview": "tsx --watch bin/notebooks.ts preview --root docs --template docs/observable.tmpl",
-    "docs:build-dev": "tsx bin/notebooks.ts build --root docs --template docs/observable.tmpl --no-minify -- $(find docs -path 'docs/.observable' -prune -o -name '*.html' -print)",
     "docs:build": "tsx bin/notebooks.ts build --root docs --template docs/observable.tmpl -- $(find docs -path 'docs/.observable' -prune -o -name '*.html' -print)"
   },
   "bin": {
