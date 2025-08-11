@@ -2,10 +2,10 @@ import type {Module, Variable, VariableDefinition} from "@observablehq/runtime";
 import {Runtime} from "@observablehq/runtime";
 import type {DisplayState} from "./display.js";
 import {clear, display, observe} from "./display.js";
-import {library} from "./stdlib/index.js";
-import {input} from "./stdlib/generators/index.js";
-import {Mutator} from "./stdlib/mutable.js";
 import {fileAttachments} from "./stdlib/fileAttachment.js";
+import {input} from "./stdlib/generators/index.js";
+import {library} from "./stdlib/index.js";
+import {Mutator} from "./stdlib/mutable.js";
 
 export type DefineState = DisplayState & {
   /** the runtime variables associated with this cell */
