@@ -1,4 +1,5 @@
-import {Runtime, type Module, type Variable, type VariableDefinition} from "@observablehq/runtime";
+import type {Module, Variable, VariableDefinition} from "@observablehq/runtime";
+import {Runtime} from "@observablehq/runtime";
 import type {DisplayState} from "./display.js";
 import {clear, display, observe} from "./display.js";
 import {library} from "./stdlib/index.js";
@@ -32,18 +33,29 @@ export type Definition = {
   assets?: Map<string, string>;
 };
 
-export class NotebookInstance {
+export class NotebookRuntime {
+  readonly runtime: Runtime & {fileAttachments: typeof fileAttachments};
+  readonly main: Module;
 
-  readonly runtime = Object.assign(new Runtime({ ...library, __ojs_runtime: () => this.runtime }), { fileAttachments });
-  readonly main = (this.runtime as typeof this.runtime & { main: Module }).main = this.runtime.module();
-
-  constructor() {
+  constructor(builtins = library) {
+    const runtime = new Runtime({...builtins, __ojs_runtime: () => runtime});
+    this.runtime = Object.assign(runtime, {fileAttachments});
+    this.main = runtime.module();
   }
 
   define(state: DefineState, definition: Definition, observer = observe): void {
-    const { id, body, inputs = [], outputs = [], output, autodisplay, autoview, automutable } = definition;
+    const {
+      id,
+      body,
+      inputs = [],
+      outputs = [],
+      output,
+      autodisplay,
+      autoview,
+      automutable
+    } = definition;
     const variables = state.variables;
-    const v = this.main.variable(observer(state, definition), { shadow: {} });
+    const v = this.main.variable(observer(state, definition), {shadow: {}});
     const vid = output ?? (outputs.length ? `cell ${id}` : null);
     if (inputs.includes("display") || inputs.includes("view")) {
       let displayVersion = -1; // the variable._version of currently-displayed values
@@ -64,7 +76,7 @@ export class NotebookInstance {
       );
       v._shadow.set("display", vd);
       if (inputs.includes("view")) {
-        const vv = new (v.constructor as typeof Variable)(2, v._module, null, { shadow: {} });
+        const vv = new (v.constructor as typeof Variable)(2, v._module, null, {shadow: {}});
         vv._shadow.set("display", vd);
         vv.define(["display"], (display) => (value: unknown) => input(display(value)));
         v._shadow.set("view", vv);
@@ -100,19 +112,21 @@ export class NotebookInstance {
   }
 }
 
-const defaultInstance = new NotebookInstance();
+const defaultNotebook = new NotebookRuntime();
 
-export const runtime = defaultInstance.runtime;
-export const main = defaultInstance.main;
+export const runtime = defaultNotebook.runtime;
+export const main = defaultNotebook.main;
 
 main.constructor.prototype.defines = function (this: Module, name: string): boolean {
   return (
-    this._scope.has(name) ||
-    this._builtins.has(name) ||
-    this._runtime._builtin._scope.has(name)
+    this._scope.has(name) || this._builtins.has(name) || this._runtime._builtin._scope.has(name)
   );
 };
 
-export function define(state: DefineState, definition: Definition, observer = observe): void {
-  defaultInstance.define(state, definition, observer);
+export function define(
+  state: DefineState,
+  definition: Definition,
+  observer?: typeof observe
+): void {
+  defaultNotebook.define(state, definition, observer);
 }
