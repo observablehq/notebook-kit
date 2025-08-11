@@ -27,7 +27,6 @@ export default async function run(args?: string[]): Promise<void> {
       },
       minify: {
         type: "boolean",
-        // Default to true; use --no-minify to disable
         default: true
       },
       template: {
