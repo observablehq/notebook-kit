@@ -13,7 +13,7 @@
     "lint": "tsc --noEmit && eslint bin src types",
     "notebooks": "tsx bin/notebooks.ts",
     "download": "tsx bin/notebooks.ts download",
-    "docs:preview": "tsx --watch bin/notebooks.ts preview --root docs --template docs/observable.tmpl",
+    "docs:preview": "tsx --watch bin/notebooks.ts preview --base /notebook-kit/ --root docs --template docs/observable.tmpl",
     "docs:build": "tsx bin/notebooks.ts build --root docs --template docs/observable.tmpl -- $(find docs -path 'docs/.observable' -prune -o -name '*.html' -print)"
   },
   "bin": {
