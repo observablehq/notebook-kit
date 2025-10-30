@@ -33,6 +33,8 @@ export interface QueryOptionsSpec {
   id?: number;
   /** if present, results are at least as fresh as the specified date */
   since?: Date | string | number;
+  /** if present, the type of the database */
+  type?: string;
 }
 
 export interface QueryOptions extends QueryOptionsSpec {
@@ -49,10 +51,11 @@ export const DatabaseClient = (name: string, options?: QueryOptionsSpec): Databa
   return new DatabaseClientImpl(name, normalizeOptions(options));
 };
 
-function normalizeOptions({id, since}: QueryOptionsSpec = {}): QueryOptions {
+function normalizeOptions({id, since, type}: QueryOptionsSpec = {}): QueryOptions {
   const options: QueryOptions = {};
   if (id !== undefined) options.id = id;
   if (since !== undefined) options.since = new Date(since);
+  if (type !== undefined) options.type = type;
   return options;
 }
 

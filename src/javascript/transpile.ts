@@ -1,5 +1,7 @@
+import {DatabaseConfig} from "../databases/index.js";
 import type {Cell} from "../lib/notebook.js";
 import {toCell} from "../lib/notebook.js";
+import {rewriteDatabaseClient} from "./databaseClient.js";
 import {rewriteFileExpressions} from "./files.js";
 import {hasImportDeclaration} from "./imports.js";
 import {rewriteImportDeclarations, rewriteImportExpressions} from "./imports.js";
@@ -31,6 +33,8 @@ export type TranspileOptions = {
   resolveLocalImports?: boolean;
   /** If true, resolve file using import.meta.url (so Vite treats it as an asset). */
   resolveFiles?: boolean;
+  /** If present, a map of database names to their types for DatabaseClient rewriting. */
+  databases?: Map<string, Partial<DatabaseConfig>>;
 };
 
 /** @deprecated */
@@ -86,6 +90,7 @@ export function transpileJavaScript(
   rewriteImportDeclarations(output, cell.body, inputs, options);
   rewriteImportExpressions(output, cell.body, options);
   if (options?.resolveFiles) rewriteFileExpressions(output, cell.body);
+  if (options?.databases) rewriteDatabaseClient(output, cell.body, options.databases);
   if (cell.expression) output.insertLeft(0, `return (\n`);
   output.insertLeft(0, `${async ? "async " : ""}(${inputs}) => {\n`);
   if (outputs.length > 0) output.insertRight(input.length, `\nreturn {${outputs}};`);

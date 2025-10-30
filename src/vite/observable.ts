@@ -7,7 +7,7 @@ import {fileURLToPath} from "node:url";
 import type {TemplateLiteral} from "acorn";
 import {JSDOM} from "jsdom";
 import type {PluginOption, IndexHtmlTransformContext} from "vite";
-import {getQueryCachePath} from "../databases/index.js";
+import {getDatabaseConfigs, getQueryCachePath} from "../databases/index.js";
 import {getInterpreterCachePath, getInterpreterCommand} from "../interpreters/index.js";
 import {getInterpreterMethod, isInterpreter} from "../lib/interpreters.js";
 import type {Cell, Notebook} from "../lib/notebook.js";
@@ -84,6 +84,7 @@ export function observable({
         const statics = new Set<Cell>();
         const assets = new Set<string>();
         const md = MarkdownRenderer({document});
+        const databases = await getDatabaseConfigs(context.filename);
 
         const {version} = (await import("../../package.json", {with: {type: "json"}})).default;
         let generator = document.querySelector("meta[name=generator]");
@@ -195,7 +196,7 @@ ${Array.from(assets)
 ${notebook.cells
   .filter((cell) => !statics.has(cell))
   .map((cell) => {
-    const transpiled = transpile(cell, {resolveFiles: true});
+    const transpiled = transpile(cell, {resolveFiles: true, databases});
     return `
 define(
   {

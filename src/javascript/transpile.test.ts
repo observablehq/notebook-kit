@@ -60,3 +60,46 @@ it("transpiles node cells", () => {
   expect(transpile("process.stdout.write(`Node $\\{process.version}`);", "node")).toMatchSnapshot();
   expect(transpile("process.stdout.write(`Node \\$\\{process.version}`);", "node")).toMatchSnapshot();
 });
+
+it("transpiles DatabaseClient", () => {
+  expect(transpile('const client = new DatabaseClient("name", {type: "duckdb"});', "js")).toMatchSnapshot();
+});
+
+it("rewrites DatabaseClient calls with type option", () => {
+  const databases = new Map([["duckdb-base", {type: "duckdb"}], ["postgres-base", {type: "postgres"}], ["mydb-base", {type: "sqlite"}]]);
+  expect(transpile('DatabaseClient("duckdb-base")', "js", {databases})).toMatchSnapshot();
+  expect(transpile('const client = DatabaseClient("postgres-base");', "js", {databases})).toMatchSnapshot();
+  expect(transpile('const x = DatabaseClient("mydb-base");', "js", {databases})).toMatchSnapshot();
+});
+
+it("does not rewrite DatabaseClient with existing options", () => {
+  const databases = new Map([["duckdb-base", {type: "duckdb"}]]);
+  expect(transpile('DatabaseClient("duckdb-base", {id: 1})', "js", {databases})).toMatchSnapshot();
+  expect(transpile('DatabaseClient("duckdb-base", {type: "postgres"})', "js", {databases})).toMatchSnapshot();
+});
+
+it("throws error for unknown database name", () => {
+  const databases = new Map([["duckdb-base", {type: "duckdb"}]]);
+  expect(() => transpile('DatabaseClient("unknown")', "js", {databases})).toThrow("database not found: unknown");
+});
+
+it("throws error for non-string-literal database name", () => {
+  const databases = new Map([["duckdb-base", {type: "duckdb"}]]);
+  expect(() => transpile("DatabaseClient(dbName)", "js", {databases})).toThrow("DatabaseClient name must be a string literal");
+  expect(() => transpile("DatabaseClient(`template-${x}`)", "js", {databases})).toThrow("DatabaseClient name must be a string literal");
+});
+
+it("rewrites DatabaseClient with default database names", () => {
+  const databases = new Map();
+  expect(transpile('DatabaseClient("postgres")', "js", {databases})).toMatchSnapshot();
+  expect(transpile('DatabaseClient("duckdb")', "js", {databases})).toMatchSnapshot();
+  expect(transpile('DatabaseClient("sqlite")', "js", {databases})).toMatchSnapshot();
+});
+
+it("rewrites DatabaseClient with file extension detection", () => {
+  const databases = new Map();
+  expect(transpile('DatabaseClient("data.duckdb")', "js", {databases})).toMatchSnapshot();
+  expect(transpile('DatabaseClient("mydata.db")', "js", {databases})).toMatchSnapshot();
+  expect(transpile('DatabaseClient("path/to/file.duckdb")', "js", {databases})).toMatchSnapshot();
+  expect(transpile('DatabaseClient("path/to/file.db")', "js", {databases})).toMatchSnapshot();
+});

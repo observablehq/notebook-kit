@@ -1,5 +1,216 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`does not rewrite DatabaseClient with existing options 1`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("duckdb-base", {id: 1})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`does not rewrite DatabaseClient with existing options 2`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("duckdb-base", {type: "postgres"})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`rewrites DatabaseClient calls with type option 1`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("duckdb-base", {type: "duckdb"})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`rewrites DatabaseClient calls with type option 2`] = `
+{
+  "autodisplay": false,
+  "body": "(DatabaseClient) => {
+const client = DatabaseClient("postgres-base", {type: "postgres"});
+return {client};
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [
+    "client",
+  ],
+}
+`;
+
+exports[`rewrites DatabaseClient calls with type option 3`] = `
+{
+  "autodisplay": false,
+  "body": "(DatabaseClient) => {
+const x = DatabaseClient("mydb-base", {type: "sqlite"});
+return {x};
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [
+    "x",
+  ],
+}
+`;
+
+exports[`rewrites DatabaseClient with default database names 1`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("postgres", {type: "postgres"})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`rewrites DatabaseClient with default database names 2`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("duckdb", {type: "duckdb"})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`rewrites DatabaseClient with default database names 3`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("sqlite", {type: "sqlite"})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`rewrites DatabaseClient with file extension detection 1`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("data.duckdb", {type: "duckdb"})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`rewrites DatabaseClient with file extension detection 2`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("mydata.db", {type: "sqlite"})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`rewrites DatabaseClient with file extension detection 3`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("path/to/file.duckdb", {type: "duckdb"})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`rewrites DatabaseClient with file extension detection 4`] = `
+{
+  "autodisplay": true,
+  "body": "(DatabaseClient) => {
+return (
+DatabaseClient("path/to/file.db", {type: "sqlite"})
+)
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [],
+}
+`;
+
+exports[`transpiles DatabaseClient 1`] = `
+{
+  "autodisplay": false,
+  "body": "(DatabaseClient) => {
+const client = new DatabaseClient("name", {type: "duckdb"});
+return {client};
+}",
+  "inputs": [
+    "DatabaseClient",
+  ],
+  "output": undefined,
+  "outputs": [
+    "client",
+  ],
+}
+`;
+
 exports[`transpiles JavaScript expressions 1`] = `
 {
   "autodisplay": true,

@@ -96,3 +96,28 @@ export async function getQueryCachePath(
   const cacheName = `${await nameHash(databaseName)}-${await hash(strings, ...params)}.json`;
   return join(sourceDir, ".observable", "cache", cacheName);
 }
+
+/**
+ * Reads partial database configurations from the .observable/databases.json file.
+ * For security reasons, no identifiers or passwords are returned.
+ */
+export async function getDatabaseConfigs(
+  sourcePath: string
+): Promise<Map<string, Partial<DatabaseConfig>>> {
+  const sourceDir = dirname(sourcePath);
+  const configPath = join(sourceDir, ".observable", "databases.json");
+  const databases = new Map<string, Partial<DatabaseConfig>>();
+
+  try {
+    const configs = (await json(createReadStream(configPath, "utf-8"))) as Record<
+      string,
+      DatabaseConfig
+    >;
+    for (const [name, config] of Object.entries(configs)) {
+      databases.set(name, {type: config.type});
+    }
+  } catch (error) {
+    if (!isEnoent(error)) throw error;
+  }
+  return databases;
+}
