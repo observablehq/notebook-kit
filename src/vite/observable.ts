@@ -100,8 +100,10 @@ export function observable({
         for (const cell of notebook.cells) {
           const {id, mode, pinned, hidden, format, value} = cell;
           const contents = document.createDocumentFragment();
-          const div = contents.appendChild(document.createElement("div"));
-          div.id = `cell-${id}`;
+          const divId = `cell-${id}`;
+          let div = document.getElementById(divId);
+          div ??= contents.appendChild(document.createElement("div"));
+          div.id = divId;
           div.className = "observablehq observablehq--cell";
           if (mode === "md" && !hidden) {
             const template = parseTemplate(value);
