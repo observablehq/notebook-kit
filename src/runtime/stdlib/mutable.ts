@@ -4,7 +4,7 @@ import {observe} from "./generators/observe.js";
 // generated value to be mutated. Therefore, direct mutation is only allowed
 // within the defining cell, but the cell can also export functions that allows
 // other cells to mutate the value as desired.
-export function Mutable<T>(value: T): AsyncGenerator<Awaited<T>, void, unknown> & {value: T} {
+export function Mutable<T>(value: T): ObservableAsyncGenerator<Awaited<T>> & {value: T} {
   let change: (value: T) => void;
   return Object.defineProperty(
     observe((_: (value: T) => void) => {
@@ -16,7 +16,7 @@ export function Mutable<T>(value: T): AsyncGenerator<Awaited<T>, void, unknown> 
       get: () => value,
       set: (x) => ((value = x), void change?.(value))
     }
-  ) as AsyncGenerator<Awaited<T>, void, unknown> & {value: T};
+  ) as ObservableAsyncGenerator<Awaited<T>> & {value: T};
 }
 
 export function Mutator<T>(value: T) {
