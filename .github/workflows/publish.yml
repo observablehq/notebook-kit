@@ -5,12 +5,13 @@ on:
   release:
     types: [published]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -21,4 +22,4 @@ jobs:
       - run: yarn --frozen-lockfile
       - run: yarn test
       - run: yarn lint
-      - run: npm publish --provenance --access public
+      - run: npm publish --access public
