@@ -1,7 +1,7 @@
 declare module "@observablehq/runtime" {
-  type VariableOptions = {shadow?: unknown};
+  type VariableOptions = {shadow?: Record<string, () => unknown>};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  type VariableDefinition = (...inputs: any[]) => any;
+  type VariableDefinition = (...inputs: any[]) => unknown;
   type ObserverOption = Observer | boolean | null;
   interface Observer {
     pending?(): void;
