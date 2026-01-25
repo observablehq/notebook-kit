@@ -1,4 +1,4 @@
-import type {Module, Variable, VariableDefinition} from "@observablehq/runtime";
+import type {Module, Variable, VariableDefinition, VariableOptions} from "@observablehq/runtime";
 import type {DisplayState} from "./display.js";
 import {clear, display, observe} from "./display.js";
 import {input} from "./stdlib/generators/index.js";
@@ -14,6 +14,8 @@ export type Definition = {
   id: number;
   /** the cell’s definition function */
   body: VariableDefinition;
+  /** any shadowed variables */
+  shadow?: VariableOptions["shadow"];
   /** the names of this cell’s inputs (unbound references), if any */
   inputs?: string[];
   /** the names of this cell’s outputs (top-level declarations), if any */
@@ -31,9 +33,9 @@ export type Definition = {
 };
 
 export function define(main: Module, state: DefineState, definition: Definition, observer = observe): void {
-  const {id, body, inputs = [], outputs = [], output, autodisplay, autoview, automutable} = definition;
+  const {id, body, shadow = {}, inputs = [], outputs = [], output, autodisplay, autoview, automutable} = definition;
   const variables = state.variables;
-  const v = main.variable(observer(state, definition), {shadow: {}});
+  const v = main.variable(observer(state, definition), {shadow});
   const vid = output ?? (outputs.length ? `cell ${id}` : null);
   state.autoclear = true;
   if (inputs.includes("display") || inputs.includes("view")) {

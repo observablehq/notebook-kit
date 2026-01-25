@@ -1,5 +1,4 @@
 import type {Expression, Identifier, Node, Pattern, VariableDeclaration} from "acorn";
-import {defaultGlobals} from "./globals.js";
 import {syntaxError} from "./syntaxError.js";
 import {ancestor} from "./walk.js";
 
@@ -11,12 +10,12 @@ export function checkAssignments(
     input,
     locals,
     references,
-    globals = defaultGlobals
+    globals
   }: {
     input: string;
     locals: Map<Node, Set<string>>;
-    globals?: Set<string>;
     references: Identifier[];
+    globals: Set<string>;
   }
 ): void {
   function isLocal({name}: Identifier, parents: Node[]): boolean {

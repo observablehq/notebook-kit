@@ -1,10 +1,8 @@
 import {assert, test} from "vitest";
 import {parseJavaScript} from "./parse.js";
-import {findReferences} from "./references.js";
 
-function check(input: string) {
-  const cell = parseJavaScript(input);
-  findReferences(cell.body, {input});
+function check(input: string): void {
+  parseJavaScript(input);
 }
 
 test("allows non-external assignments", () => {
