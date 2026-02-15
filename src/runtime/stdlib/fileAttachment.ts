@@ -65,7 +65,7 @@ export interface FileInfo {
   size?: number;
 }
 
-export function registerFile(name: string, info: FileInfo, base: string | URL = location.href) {
+export function registerFile(name: string, info: FileInfo | null, base: string | URL = location.href) {
   const href = new URL(name, base).href;
   if (info == null) {
     files.delete(href);
