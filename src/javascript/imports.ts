@@ -37,7 +37,7 @@ export function hasImportDeclaration(body: Node): boolean {
   return has;
 }
 
-/** Returns true if the given node is a import.meta.resolve(…) call. */
+/** Returns true if the given node is an import.meta.resolve(…) call. */
 export function isImportMetaResolve(node: CallExpression): boolean {
   return (
     node.callee.type === "MemberExpression" &&
@@ -50,7 +50,7 @@ export function isImportMetaResolve(node: CallExpression): boolean {
   );
 }
 
-/** Returns true if the given node is a import.meta.url expression. */
+/** Returns true if the given node is an import.meta.url expression. */
 export function isImportMetaUrl(node: MemberExpression): boolean {
   return (
     node.object.type === "MetaProperty" &&
