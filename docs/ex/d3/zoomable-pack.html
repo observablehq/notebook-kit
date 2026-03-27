@@ -58,7 +58,7 @@
         .style("display", (d) => d.parent === root ? "inline" : "none")
         .text((d) => d.data.name);
 
-    // Create the zoom behavior and zoom immediately in to the initial focus node.
+    // Create the zoom behavior and immediately zoom in to the initial focus node.
     svg.on("click", (event) => zoom(event, root));
     let focus = root;
     let view;
