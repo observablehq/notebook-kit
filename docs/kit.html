@@ -267,6 +267,12 @@
     ```html
     <notebook theme="air near-midnight">
     ```
+
+    To react to the current color scheme in code, use the `dark` generator from the standard library. It yields `true` when dark mode is active and updates when the system preference (or page theme) changes.
+
+    ```js
+    const isDark = Generators.dark();
+    ```
   </script>
   <script id="56" type="text/markdown">
     See [`notebook.ts`](https://github.com/observablehq/notebook-kit/blob/main/src/lib/notebook.ts) for TypeScript types representing notebooks and cells.
