@@ -15,13 +15,60 @@ export type NotebookTheme =
   | "stark"
   | "sun-faded";
 
+/**
+ * Whether each theme renders in a light or dark color scheme. Themes not
+ * listed here are treated as modifiers and applied regardless of scheme.
+ */
+export const themeScheme: Partial<Record<NotebookTheme, "light" | "dark">> = {
+  "air": "light",
+  "coffee": "dark",
+  "cotton": "light",
+  "deep-space": "dark",
+  "glacier": "light",
+  "ink": "dark",
+  "midnight": "dark",
+  "near-midnight": "dark",
+  "ocean-floor": "dark",
+  "parchment": "light",
+  "slate": "dark",
+  "stark": "dark",
+  "sun-faded": "dark"
+};
+
+/**
+ * Returns the CSS `@import` rules for the given theme(s). When a light theme
+ * and a dark theme are combined, each is wrapped in a `prefers-color-scheme`
+ * media query so that the appropriate one is applied automatically.
+ */
+export function themeImports(theme: NotebookTheme | NotebookTheme[]): string {
+  const themes = Array.isArray(theme) ? theme : [theme];
+  const hasLight = themes.some((t) => themeScheme[t] === "light");
+  const hasDark = themes.some((t) => themeScheme[t] === "dark");
+  return themes
+    .map((t) => {
+      const scheme = themeScheme[t];
+      const media =
+        scheme === "dark" && hasLight
+          ? " (prefers-color-scheme: dark)"
+          : scheme === "light" && hasDark
+            ? " (prefers-color-scheme: light)"
+            : "";
+      return `@import url("observable:styles/theme-${t}.css")${media};`;
+    })
+    .join("\n");
+}
+
 export interface NotebookSpec {
   /** the notebook’s cells, in top-to-bottom document order */
   cells?: CellSpec[];
   /** the notebook title, if any; extracted from the first h1 */
   title?: string;
-  /** the notebook theme; defaults to "air" */
-  theme?: NotebookTheme;
+  /**
+   * the notebook theme; defaults to "air". Passing multiple themes enables
+   * automatic dark mode: when a light theme and a dark theme are combined,
+   * each is applied selectively based on the user’s `prefers-color-scheme`.
+   */
+  theme?: NotebookTheme | NotebookTheme[];
   /** if true, don’t allow editing */
   readOnly?: boolean;
 }

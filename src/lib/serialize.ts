@@ -4,7 +4,7 @@ import {isEmpty} from "./text.js";
 
 export function serialize(notebook: Notebook, {document = globalThis.document} = {}): string {
   const _notebook = document.createElement("notebook");
-  _notebook.setAttribute("theme", notebook.theme);
+  _notebook.setAttribute("theme", Array.isArray(notebook.theme) ? notebook.theme.join(" ") : notebook.theme);
   if (notebook.readOnly) _notebook.setAttribute("readonly", "");
   _notebook.appendChild(document.createTextNode("\n  "));
   const _title = document.createElement("title");
@@ -129,7 +129,9 @@ function deserializeFormat(format: string | null): Cell["format"] {
 }
 
 function deserializeTheme(theme: string | null | undefined): Notebook["theme"] {
-  return (theme as NotebookTheme) ?? "air";
+  if (theme == null) return "air";
+  const themes = theme.trim().split(/\s+/) as NotebookTheme[];
+  return themes.length > 1 ? themes : themes[0];
 }
 
 function dedent(text: string): string {

@@ -124,6 +124,23 @@ test("serialization enforces unique ids", () => {
   assert.deepStrictEqual(deserialize(serialize(notebook1)), notebook2);
 });
 
+test("serializes a theme array as a space-separated attribute", () => {
+  const notebook = toNotebook({theme: ["air", "near-midnight"]});
+  const html = serialize(notebook);
+  assert.match(html, /<notebook theme="air near-midnight">/);
+  assert.deepStrictEqual(deserialize(html), notebook);
+});
+
+test("deserializes a single theme as a string", () => {
+  const notebook = deserialize(`<!doctype html><notebook theme="slate"></notebook>`);
+  assert.strictEqual(notebook.theme, "slate");
+});
+
+test("deserializes a space-separated theme attribute as an array", () => {
+  const notebook = deserialize(`<!doctype html><notebook theme="air near-midnight"></notebook>`);
+  assert.deepStrictEqual(notebook.theme, ["air", "near-midnight"]);
+});
+
 test("deserialization populates missing ids", () => {
   const notebook1 = toNotebook({
     cells: [

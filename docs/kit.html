@@ -261,6 +261,12 @@
     - `sun-faded`
 
     See [Observable Framework](https://observablehq.com/framework/themes) for theme previews. More themes may be added in the future. Built-in themes can be augmented using standard stylesheets.
+
+    To support automatic dark mode, pass light and dark themes separated by spaces. Each theme is applied selectively based on the current [`prefers-color-scheme`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme).
+
+    ```html
+    <notebook theme="air near-midnight">
+    ```
   </script>
   <script id="56" type="text/markdown">
     See [`notebook.ts`](https://github.com/observablehq/notebook-kit/blob/main/src/lib/notebook.ts) for TypeScript types representing notebooks and cells.
