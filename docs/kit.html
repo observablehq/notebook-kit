@@ -1,5 +1,5 @@
 <!doctype html>
-<notebook theme="slate">
+<notebook theme="cotton slate">
   <title>Observable Notebook Kit</title>
   <script id="1" type="text/markdown">
     # Observable Notebook Kit
@@ -244,35 +244,41 @@
     - `readonly` - if present, disallow editing
   </script>
   <script id="57" type="text/markdown">
-    The `theme` attribute may have one of the following values:
+    The `theme` attribute may have one of the following values.
+
+    Light mode:
 
     - `air` (default)
-    - `coffee`
     - `cotton`
-    - `deep-space`
     - `glacier`
+    - `parchment`
+
+    Dark mode:
+
+    - `coffee`
+    - `deep-space`
     - `ink`
     - `midnight`
     - `near-midnight`
     - `ocean-floor`
-    - `parchment`
     - `slate`
     - `stark`
     - `sun-faded`
 
     See [Observable Framework](https://observablehq.com/framework/themes) for theme previews. More themes may be added in the future. Built-in themes can be augmented using standard stylesheets.
 
-    To support automatic dark mode, pass light and dark themes separated by spaces. Each theme is applied selectively based on the current [`prefers-color-scheme`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme).
+    To support responsive dark mode, pass both a light theme and a dark theme, separated by a space. Each theme is applied selectively based on the current [`prefers-color-scheme`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme).
 
     ```html
-    <notebook theme="air near-midnight">
+    <notebook theme="cotton slate">
     ```
 
-    To react to the current color scheme in code, use the `dark` generator from the standard library. It yields `true` when dark mode is active and updates when the system preference (or page theme) changes.
+    To react to the current color scheme in code, reference the `dark` symbol from the standard library. It is `true` when the current theme is dark. (Bonus: `dark` is a generator that updates live when, in responsive dark mode, the page theme changes with the `prefers-color-scheme`, for example at dawn or dusk.)
 
-    ```js
-    const isDark = Generators.dark();
-    ```
+    Below is a live demo: switch your system color scheme to see the value update.
+  </script>
+  <script id="92" type="module" pinned>
+    dark ? "dark" : "light"
   </script>
   <script id="56" type="text/markdown">
     See [`notebook.ts`](https://github.com/observablehq/notebook-kit/blob/main/src/lib/notebook.ts) for TypeScript types representing notebooks and cells.
