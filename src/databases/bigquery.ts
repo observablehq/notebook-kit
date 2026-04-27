@@ -10,14 +10,19 @@ export type BigQueryConfig = {
   keyFilename?: string;
   keyFile?: string;
   projectId?: string;
+  dataset?: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function bigquery({type, ...options}: BigQueryConfig): QueryTemplateFunction {
+export default function bigquery({type, dataset, ...options}: BigQueryConfig): QueryTemplateFunction {
   return async (strings, ...params) => {
     const bigquery = new BigQuery(options);
     const date = new Date();
-    const [job] = await bigquery.createQueryJob({query: strings.join("?"), params});
+    const [job] = await bigquery.createQueryJob({
+      query: strings.join("?"),
+      params,
+      ...(dataset && {defaultDataset: {datasetId: dataset}}),
+    });
     const [rows, , response] = await job.getQueryResults();
     return {rows, schema: getTableSchema(response!.schema!), duration: Date.now() - +date, date};
   };
