@@ -17,12 +17,15 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: yarn
-      - run: yarn --frozen-lockfile
-      - run: yarn docs:build
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm docs:build
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
