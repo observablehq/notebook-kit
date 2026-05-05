@@ -12,7 +12,8 @@ const tokenizerOptions = {
 const compilerOptions = {
   target: ScriptTarget.ESNext,
   module: ModuleKind.Preserve,
-  verbatimModuleSyntax: true
+  verbatimModuleSyntax: true,
+  alwaysStrict: false
 } as const;
 
 export function transpileTypeScript(input: string): string {

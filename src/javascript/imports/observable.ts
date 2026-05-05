@@ -61,6 +61,7 @@ export function dedollar(input: string): string {
   }
   if (dollars > 0) {
     input = `${input.slice(0, end - 1)}${dollars === 1 ? " " : ""}`;
+    // eslint-disable-next-line no-useless-assignment
     dollars = 0;
   }
   return input;
