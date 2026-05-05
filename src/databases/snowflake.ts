@@ -82,7 +82,7 @@ async function execute(
 }
 
 function getStatementSchema(statement: RowStatement): ColumnSchema[] {
-  return statement.getColumns().map(getColumnSchema);
+  return statement.getColumns()?.map(getColumnSchema) ?? [];
 }
 
 function getColumnSchema(column: Column): ColumnSchema {
