@@ -1,6 +1,6 @@
 import type {DuckDBResult, DuckDBType, Json} from "@duckdb/node-api";
 import {DuckDBConnection, DuckDBInstance} from "@duckdb/node-api";
-import {BIGINT, BIT, BLOB, BOOLEAN, DATE, DOUBLE, FLOAT, HUGEINT, INTEGER, INTERVAL, SMALLINT, TIME, TIMESTAMP, TIMESTAMP_MS, TIMESTAMP_NS, TIMESTAMP_S, TIMESTAMPTZ, TINYINT, UBIGINT, UHUGEINT, UINTEGER, USMALLINT, UTINYINT, UUID, VARCHAR, VARINT} from "@duckdb/node-api"; // prettier-ignore
+import {BIGINT, BIGNUM, BIT, BLOB, BOOLEAN, DATE, DOUBLE, FLOAT, HUGEINT, INTEGER, INTERVAL, SMALLINT, TIME, TIMESTAMP, TIMESTAMP_MS, TIMESTAMP_NS, TIMESTAMP_S, TIMESTAMPTZ, TINYINT, UBIGINT, UHUGEINT, UINTEGER, USMALLINT, UTINYINT, UUID, VARCHAR} from "@duckdb/node-api"; // prettier-ignore
 import type {QueryTemplateFunction} from "./index.js";
 import type {ColumnSchema} from "../runtime/index.js";
 
@@ -51,9 +51,9 @@ function getColumnType(type: DuckDBType): ColumnSchema["type"] {
     case UTINYINT:
     case USMALLINT:
     case UINTEGER:
-    case VARINT:
       return "integer";
     case BIGINT:
+    case BIGNUM:
     case UBIGINT:
     case HUGEINT:
     case UHUGEINT:
