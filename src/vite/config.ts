@@ -1,6 +1,6 @@
 import {dirname, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
-import type {UserConfig} from "vite";
+import type {Plugin, UserConfig} from "vite";
 import {resolveNpmImport} from "../javascript/imports/npm.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,13 +15,9 @@ export function config(): UserConfig {
         "top-level-await": true
       }
     },
+    plugins: [npmResolver()],
     resolve: {
       alias: [
-        {
-          find: /^(npm:.*)$/,
-          replacement: "$1",
-          customResolver: (source) => ({id: resolveNpmImport(source), external: true})
-        },
         {
           find: /^jsr:(.*)$/,
           replacement: "https://esm.sh/jsr/$1"
@@ -31,6 +27,18 @@ export function config(): UserConfig {
           replacement: resolve(__dirname, "../$1")
         }
       ]
+    }
+  };
+}
+
+function npmResolver(): Plugin {
+  return {
+    name: "notebook-kit:npm-resolver",
+    enforce: "pre",
+    resolveId(source) {
+      if (source.startsWith("npm:")) {
+        return {id: resolveNpmImport(source), external: true};
+      }
     }
   };
 }

@@ -62,11 +62,11 @@ export default async function run(args?: string[]): Promise<void> {
     root: values.root,
     base: values.base,
     build: {
-      minify: values.minify ? "esbuild" : false,
-      cssMinify: values.minify ? "esbuild" : false,
+      minify: values.minify,
+      cssMinify: values.minify,
       outDir: values.out,
       emptyOutDir: values.empty,
-      rollupOptions: {
+      rolldownOptions: {
         input: positionals
       }
     }
