@@ -3,13 +3,12 @@
   <title>Flight delays</title>
   <script id="12" type="text/markdown">
     # Flight delays
-
   </script>
   <script id="1" type="text/markdown">
-    ${flights.numRows.toLocaleString("en-US")} domestic flights, loaded from an [Apache Arrow IPC](https://arrow.apache.org/blog/2025/01/10/arrow-result-transfer/) file. Columns are ${flights.schema.fields.map(f => f.name).join(", ")}.
+    ${flights.numRows.toLocaleString("en-US")} domestic flights, loaded from an [Apache Arrow IPC](https://arrow.apache.org/blog/2025/01/10/arrow-result-transfer/) file. Columns are ${flights.schema.fields.map((f) => f.name).join(", ")}.
   </script>
   <script id="2" type="text/x-typescript" pinned="">
-    const flights = await FileAttachment("data/flights-200k.arrow").arrow();
+    const flights = FileAttachment("data/flights-200k.arrow").arrow();
   </script>
   <script id="3" type="text/markdown">
     Most flights arrive within 20 minutes of schedule; a long tail extends into hours of delay.
@@ -30,7 +29,7 @@
     We’ll process the arrow table in DuckDB to extract the average delay, as well as the 10th- and 90th-percentiles by hour (filtering out the hours in the night when there are few flights still landing).
   </script>
   <script id="8" type="text/x-typescript" pinned="">
-    const db = await DuckDBClient.of({flights});
+    const db = DuckDBClient.of({flights});
   </script>
   <script id="9" type="application/sql" pinned="" database="var:db" output="quantiles">
     SELECT
