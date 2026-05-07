@@ -129,7 +129,7 @@ function deserializeFormat(format: string | null): Cell["format"] {
 }
 
 function deserializeTheme(theme: string | null | undefined): Notebook["theme"] {
-  return (theme || "air") as Notebook["theme"];
+  return (theme as Notebook["theme"] ?? "air");
 }
 
 function dedent(text: string): string {
