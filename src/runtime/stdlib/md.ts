@@ -22,18 +22,18 @@ export function MarkdownRenderer({
     let partIndex = -1;
     const parts: Node[] = [];
 
-    // Concatenate the text using comments as placeholders.
+    // Concatenate the text using anchors as placeholders.
     for (let i = 0, n = values.length; i < n; ++i) {
       const value = values[i];
       if (value instanceof Node) {
         parts[++partIndex] = value;
-        source += `<!--o:${partIndex}-->`;
+        source += `<a id=o:${partIndex}></a>`;
       } else if (Array.isArray(value)) {
         for (const node of value) {
           if (node instanceof Node) {
             if (fragment === null) {
               parts[++partIndex] = fragment = document.createDocumentFragment();
-              source += `<!--o:${partIndex}-->`;
+              source += `<a id=o:${partIndex}></a>`;
             }
             fragment.appendChild(node);
           } else {
@@ -52,14 +52,12 @@ export function MarkdownRenderer({
     const root = document.createElement("div");
     root.innerHTML = mi.render(source);
 
-    // Walk the rendered content to replace comment placeholders.
+    // Walk the rendered content to replace anchor placeholders.
     if (++partIndex > 0) {
-      const nodes = new Array<Comment>(partIndex);
-      const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT, null);
-      while (walker.nextNode()) {
-        const node = walker.currentNode as Comment;
-        if (/^o:\d+$/.test(node.nodeValue!)) {
-          nodes[+node.nodeValue!.slice(2)] = node;
+      const nodes = new Array<Element>(partIndex);
+      for (const node of root.querySelectorAll("a[id^='o:']")) {
+        if (/^o:\d+$/.test(node.id!)) {
+          nodes[+node.id!.slice(2)] = node;
         }
       }
       for (let i = 0; i < partIndex; ++i) {
