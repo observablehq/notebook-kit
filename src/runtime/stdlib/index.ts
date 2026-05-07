@@ -12,6 +12,7 @@ import * as sampleDatasets from "./sampleDatasets.js";
 export const root = document.querySelector("main") ?? document.body;
 
 export const library = {
+  dark: () => Generators.dark(),
   now: () => Generators.now(),
   width: () => Generators.width(root),
   DatabaseClient: () => DatabaseClient,
