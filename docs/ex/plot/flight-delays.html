@@ -1,0 +1,91 @@
+<!doctype html>
+<notebook theme="air">
+  <title>Flight delays</title>
+  <script id="12" type="text/markdown">
+    # Flight delays
+  </script>
+  <script id="1" type="text/markdown">
+    ${flights.numRows.toLocaleString("en-US")} domestic flights, loaded from an [Apache Arrow IPC](https://arrow.apache.org/blog/2025/01/10/arrow-result-transfer/) file. Columns are ${flights.schema.fields.map((f) => f.name).join(", ")}.
+  </script>
+  <script id="2" type="text/x-typescript" pinned="">
+    const flights = FileAttachment("data/flights-200k.arrow").arrow();
+  </script>
+  <script id="3" type="text/markdown">
+    Most flights arrive within 20 minutes of schedule; a long tail extends into hours of delay.
+  </script>
+  <script id="4" type="text/x-typescript" pinned="">
+    Plot.plot({
+      width,
+      height: 220,
+      x: {label: "delay (min)", tickSpacing: 50},
+      y: {grid: true, label: "flights", tickFormat: "s"},
+      marks: [
+        Plot.rectY(flights, Plot.binX({y: "count"}, {x: "delay", thresholds: width/5})),
+        Plot.ruleX([0], {stroke: "red", insetTop: -15})
+      ]
+    })
+  </script>
+  <script id="7" type="text/markdown">
+    We’ll process the arrow table in DuckDB to extract the average delay, as well as the 10th- and 90th-percentiles by hour (filtering out the hours in the night when there are few flights still landing).
+  </script>
+  <script id="8" type="text/x-typescript" pinned="">
+    const db = DuckDBClient.of({flights});
+  </script>
+  <script id="9" type="application/sql" pinned="" database="var:db" output="quantiles">
+    SELECT
+      FLOOR((time - delay / 60 + 19) % 24 + 5) AS hour,
+      COUNT(*) AS flights,
+      AVG(delay) AS avg_delay,
+      QUANTILE_CONT(delay, 0.1) AS p10_delay,
+      QUANTILE_CONT(delay, 0.9) AS p90_delay
+    FROM flights
+    GROUP BY hour
+    HAVING COUNT(*) >= 1000
+    ORDER BY hour
+  </script>
+  <script id="10" type="text/markdown">
+    The chart below shows how delays accumulate over the day as schedules cascade.
+  </script>
+  <script id="11" type="text/x-typescript" pinned="">
+    Plot.plot({
+      width,
+      height: 320,
+      x: {tickFormat: (h) => `${h % 12 || 12}${h % 24 < 12 ? "AM":"PM"}`},
+      y: {grid: true, nice: true, label: "delay (min)"},
+      marks: [
+        Plot.areaY(quantiles, {
+          x: "hour",
+          y1: "avg_delay",
+          y2: "p10_delay",
+          fillOpacity: 0.1,
+          curve: "monotone-x"
+        }),
+        Plot.areaY(quantiles, {
+          x: "hour",
+          y1: "avg_delay",
+          y2: "p90_delay",
+          fillOpacity: 0.2,
+          curve: "monotone-x"
+        }),
+        Plot.lineY(quantiles, {
+          x: "hour",
+          y: "avg_delay",
+          curve: "monotone-x"
+        }),
+        Plot.lineY(quantiles, {
+          x: "hour",
+          y: "p10_delay",
+          strokeDasharray: "2",
+          curve: "monotone-x"
+        }),
+        Plot.lineY(quantiles, {
+          x: "hour",
+          y: "p90_delay",
+          strokeDasharray: "2",
+          curve: "monotone-x"
+        }),
+        Plot.ruleY([0])
+      ]
+    })
+  </script>
+</notebook>
