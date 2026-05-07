@@ -1,6 +1,6 @@
 import {isInterpreter} from "./interpreters.js";
 
-export type NotebookTheme =
+type NotebookTheme =
   | "air"
   | "coffee"
   | "cotton"
@@ -16,46 +16,20 @@ export type NotebookTheme =
   | "sun-faded";
 
 /**
- * Whether each theme renders in a light or dark color scheme. Themes not
- * listed here are treated as modifiers and applied regardless of scheme.
+ * Returns the CSS `@import` rules for the given theme. When a `light-dark()`
+ * pair is specified, each theme is wrapped in a `prefers-color-scheme` media
+ * query so that the appropriate one is applied automatically.
  */
-export const themeScheme: Partial<Record<NotebookTheme, "light" | "dark">> = {
-  "air": "light",
-  "coffee": "dark",
-  "cotton": "light",
-  "deep-space": "dark",
-  "glacier": "light",
-  "ink": "dark",
-  "midnight": "dark",
-  "near-midnight": "dark",
-  "ocean-floor": "dark",
-  "parchment": "light",
-  "slate": "dark",
-  "stark": "dark",
-  "sun-faded": "dark"
-};
-
-/**
- * Returns the CSS `@import` rules for the given theme(s). When a light theme
- * and a dark theme are combined, each is wrapped in a `prefers-color-scheme`
- * media query so that the appropriate one is applied automatically.
- */
-export function themeImports(theme: NotebookTheme | NotebookTheme[]): string {
-  const themes = Array.isArray(theme) ? theme : [theme];
-  const hasLight = themes.some((t) => themeScheme[t] === "light");
-  const hasDark = themes.some((t) => themeScheme[t] === "dark");
-  return themes
-    .map((t) => {
-      const scheme = themeScheme[t];
-      const media =
-        scheme === "dark" && hasLight
-          ? " (prefers-color-scheme: dark)"
-          : scheme === "light" && hasDark
-            ? " (prefers-color-scheme: light)"
-            : "";
-      return `@import url("observable:styles/theme-${t}.css")${media};`;
-    })
-    .join("\n");
+export function themeImports(theme: Notebook["theme"]): string {
+  const match = /^light-dark\(([\w-]+),\s*([\w-]+)\)$/.exec(theme);
+  if (match) {
+    const [, light, dark] = match;
+    return [
+      `@import url("observable:styles/theme-${light}.css") (prefers-color-scheme: light);`,
+      `@import url("observable:styles/theme-${dark}.css") (prefers-color-scheme: dark);`
+    ].join("\n");
+  }
+  return `@import url("observable:styles/theme-${theme}.css");`;
 }
 
 export interface NotebookSpec {
@@ -63,12 +37,8 @@ export interface NotebookSpec {
   cells?: CellSpec[];
   /** the notebook title, if any; extracted from the first h1 */
   title?: string;
-  /**
-   * the notebook theme; defaults to "air". Passing multiple themes enables
-   * automatic dark mode: when a light theme and a dark theme are combined,
-   * each is applied selectively based on the user’s `prefers-color-scheme`.
-   */
-  theme?: NotebookTheme | NotebookTheme[];
+  /** the notebook theme; defaults to "air"; use `light-dark(light, dark)` for responsive dark mode */
+  theme?: NotebookTheme | `light-dark(${NotebookTheme}, ${NotebookTheme})`;
   /** if true, don’t allow editing */
   readOnly?: boolean;
 }
