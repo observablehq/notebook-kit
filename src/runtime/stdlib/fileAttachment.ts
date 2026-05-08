@@ -47,13 +47,18 @@ export interface FileAttachment {
   html(): Promise<Document>;
 }
 
-// TODO Enforce that files have been registered; throw error if not found.
+let strict = false;
+
 export const FileAttachment = (name: string, base = document.baseURI): FileAttachment => {
   const href = new URL(name, base).href;
   let file = files.get(href);
   if (!file) {
-    file = new FileAttachmentImpl(href, name.split("/").pop()!);
-    files.set(href, file);
+    if (strict) {
+      throw new Error(`File not found: ${name}`);
+    } else {
+      file = new FileAttachmentImpl(href, name.split("/").pop()!);
+      files.set(href, file);
+    }
   }
   return file;
 };
@@ -65,7 +70,15 @@ export interface FileInfo {
   size?: number;
 }
 
-export function registerFile(name: string, info: FileInfo | null, base: string | URL = location.href) {
+export function requireFileRegistration(value: boolean) {
+  strict = value;
+}
+
+export function registerFile(
+  name: string,
+  info: FileInfo | null,
+  base: string | URL = location.href
+) {
   const href = new URL(name, base).href;
   if (info == null) {
     files.delete(href);
