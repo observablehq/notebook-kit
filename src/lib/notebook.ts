@@ -21,7 +21,7 @@ type NotebookTheme =
  * query so that the appropriate one is applied automatically.
  */
 export function themeImports(theme: Notebook["theme"]): string {
-  const match = /^light-dark\(([\w-]+),\s*([\w-]+)\)$/.exec(theme);
+  const match = /^light-dark\(([\w-]+),\s*([\w-]+)\)$/.exec(theme.trim().toLowerCase());
   if (match) {
     const [, light, dark] = match;
     return [
