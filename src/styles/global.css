@@ -1,11 +1,7 @@
 :root {
-  --serif:
-    "Source Serif 4", "Iowan Old Style", "Apple Garamond", "Palatino Linotype", "Times New Roman",
-    "Droid Serif", Times, serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --sans-serif:
-    "Inter", -apple-system, BlinkMacSystemFont, "avenir next", avenir, helvetica, "helvetica neue",
-    ubuntu, roboto, noto, "segoe ui", arial, sans-serif;
-  --monospace: "Spline Sans Mono", Menlo, Consolas, monospace;
+  --serif: "Source Serif 4 Variable", ui-serif, serif;
+  --sans-serif: "Inter Variable", ui-sans-serif, sans-serif;
+  --monospace: "Spline Sans Mono Variable", Menlo, Consolas, monospace;
   --monospace-font: 14px/1.5 var(--monospace);
   --max-width: calc(1024px - 4 * 16px); /* max-w-5xl p-4 */
 }
