@@ -30,7 +30,7 @@
     // Expose the current selection as a mutable.
     const selection = Mutable([]);
 
-    // Create an horizontal (x) scale for each key.
+    // Create a horizontal (x) scale for each key.
     const x = new Map(Array.from(keys, (k) => [k, d3.scaleLinear(d3.extent(data, (d) => d[k]), [marginLeft, width - marginRight])]));
 
     // Create the vertical (y) scale.

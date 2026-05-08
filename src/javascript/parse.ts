@@ -12,7 +12,7 @@ export const acornOptions: Options = {
 // TODO files
 export interface JavaScriptCell {
   body: Program | Expression;
-  declarations: Identifier[] | null; // null for expressions that can’t declare top-level variables, a.k.a outputs
+  declarations: Identifier[] | null; // null for expressions that can’t declare top-level variables, a.k.a. outputs
   references: Identifier[]; // the unbound references, a.k.a. inputs
   expression: boolean; // is this an expression or a program cell?
   async: boolean; // does this use top-level await?
