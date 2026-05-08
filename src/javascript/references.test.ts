@@ -26,7 +26,7 @@ test("local variables can mask references", () => {
   expect(find(`{ let foo; foo + bar; }`)).toMatchSnapshot();
 });
 
-test("local variables can not mask references", () => {
+test("local variables cannot mask references", () => {
   expect(find(`{ foo + bar; { let foo; } }`)).toMatchSnapshot();
 });
 

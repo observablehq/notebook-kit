@@ -280,8 +280,11 @@
       keyFilename?: string;
       keyFile?: string;
       projectId?: string;
+      dataset?: string;
     }
     ```
+
+    Setting `dataset` makes unqualified table references in SQL cells resolve against that dataset, mirroring the `bq` CLI's `--dataset_id`.
 
     See the [Google Cloud SDK documentation](https://cloud.google.com/docs/authentication/set-up-adc-local-dev-environment) for details.
   </script>

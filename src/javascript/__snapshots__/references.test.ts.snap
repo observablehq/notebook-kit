@@ -140,7 +140,7 @@ exports[`local variables can mask references 1`] = `
 ]
 `;
 
-exports[`local variables can not mask references 1`] = `
+exports[`local variables cannot mask references 1`] = `
 [
   Node {
     "end": 5,
