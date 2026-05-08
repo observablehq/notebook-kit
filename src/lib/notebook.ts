@@ -1,6 +1,6 @@
 import {isInterpreter} from "./interpreters.js";
 
-type NotebookTheme =
+export type NotebookTheme =
   | "air"
   | "coffee"
   | "cotton"
@@ -15,7 +15,7 @@ type NotebookTheme =
   | "stark"
   | "sun-faded";
 
-type LightDarkNotebookTheme = {
+export type LightDarkNotebookTheme = {
   light: NotebookTheme;
   dark: NotebookTheme;
 };
