@@ -8,15 +8,15 @@ importers:
 
   .:
     dependencies:
-      '@fontsource/inter':
-        specifier: ^5.2.6
-        version: 5.2.6
-      '@fontsource/source-serif-4':
+      '@fontsource-variable/inter':
         specifier: ^5.2.8
         version: 5.2.8
-      '@fontsource/spline-sans-mono':
-        specifier: ^5.2.6
-        version: 5.2.6
+      '@fontsource-variable/source-serif-4':
+        specifier: ^5.2.9
+        version: 5.2.9
+      '@fontsource-variable/spline-sans-mono':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@lezer/common':
         specifier: ^1.2.3
         version: 1.2.3
@@ -620,14 +620,14 @@ packages:
     resolution: {integrity: sha512-1+WqvgNMhmlAambTvT3KPtCl/Ibr68VldY2XY40SL1CE0ZXiakFR/cbTspaF5HsnpDMvcYYoJHfl4980NBjGag==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fontsource/inter@5.2.6':
-    resolution: {integrity: sha512-CZs9S1CrjD0jPwsNy9W6j0BhsmRSQrgwlTNkgQXTsAeDRM42LBRLo3eo9gCzfH4GvV7zpyf78Ozfl773826csw==}
+  '@fontsource-variable/inter@5.2.8':
+    resolution: {integrity: sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==}
 
-  '@fontsource/source-serif-4@5.2.8':
-    resolution: {integrity: sha512-Z8/igNA8UJ+QrFEaR2mk7oywizPSUuKhEurKpKpPnquKDOmCNAwBHYkIAyDtA91ZluiWf7jRcBl22d8pVagO6A==}
+  '@fontsource-variable/source-serif-4@5.2.9':
+    resolution: {integrity: sha512-PPcxjLFk/fS0WHg79pDM2YNvz61kC+oYZ5cWZZyCS0DHpJncmuYOuiZAsvj4tDxlWPBEvxxcRLQQNmSaRbPkqw==}
 
-  '@fontsource/spline-sans-mono@5.2.6':
-    resolution: {integrity: sha512-TPAQoRX/UH6qqd38stFqJvBcDw/E6Nqnm/b5qxr/fV7jhvsRjIxcC0GR7EdVqPOELVAy1HtmQtO/bDz5S9VbPw==}
+  '@fontsource-variable/spline-sans-mono@5.2.8':
+    resolution: {integrity: sha512-Z1yYiEtP+8Gll5BJaR9dICK/ZTxoTWH+ZBH6rOTMWajPSOxwl7IZplkwX2J1QhMxqulhhdMrkRx6SkkLM+jLQw==}
 
   '@google-cloud/bigquery@8.3.0':
     resolution: {integrity: sha512-aAOWE/tGQkcnbsmglMW4fz7wpT0PnD3kTcBp7C8KPhLgYKjtVn/i0Ya/mHzfdRQdeMGQO4ApzQBiW24ZBa49Xw==}
@@ -3514,11 +3514,11 @@ snapshots:
       '@eslint/core': 0.15.1
       levn: 0.4.1
 
-  '@fontsource/inter@5.2.6': {}
+  '@fontsource-variable/inter@5.2.8': {}
 
-  '@fontsource/source-serif-4@5.2.8': {}
+  '@fontsource-variable/source-serif-4@5.2.9': {}
 
-  '@fontsource/spline-sans-mono@5.2.6': {}
+  '@fontsource-variable/spline-sans-mono@5.2.8': {}
 
   '@google-cloud/bigquery@8.3.0':
     dependencies:

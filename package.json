@@ -42,9 +42,9 @@
     "./*.css": "./dist/src/styles/*.css"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.2.6",
-    "@fontsource/source-serif-4": "^5.2.8",
-    "@fontsource/spline-sans-mono": "^5.2.6",
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/source-serif-4": "^5.2.9",
+    "@fontsource-variable/spline-sans-mono": "^5.2.8",
     "@lezer/common": "^1.2.3",
     "@lezer/css": "^1.2.1",
     "@lezer/highlight": "^1.2.1",
