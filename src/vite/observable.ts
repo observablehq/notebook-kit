@@ -173,8 +173,14 @@ export function observable({
         return (
           `<!doctype html>` +
           output.slice(0, i) +
-          `<style type="text/css">
-@import url("observable:styles/theme-${notebook.theme}.css");
+          `<style type="text/css">${
+            typeof notebook.theme === "string"
+              ? `
+@import url("observable:styles/theme-${notebook.theme}.css");`
+              : `
+@import url("observable:styles/theme-${notebook.theme.light}.css") (prefers-color-scheme: light);
+@import url("observable:styles/theme-${notebook.theme.dark}.css") (prefers-color-scheme: dark);`
+          }
 </style><script type="module">
 import {define} from "observable:runtime";${Array.from(assets)
             .map(

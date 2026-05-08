@@ -15,13 +15,18 @@ export type NotebookTheme =
   | "stark"
   | "sun-faded";
 
+export type LightDarkNotebookTheme = {
+  light: NotebookTheme;
+  dark: NotebookTheme;
+};
+
 export interface NotebookSpec {
   /** the notebook’s cells, in top-to-bottom document order */
   cells?: CellSpec[];
   /** the notebook title, if any; extracted from the first h1 */
   title?: string;
-  /** the notebook theme; defaults to "air" */
-  theme?: NotebookTheme;
+  /** the notebook theme(s); defaults to "air" */
+  theme?: NotebookTheme | LightDarkNotebookTheme;
   /** if true, don’t allow editing */
   readOnly?: boolean;
 }

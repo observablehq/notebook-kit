@@ -1,10 +1,12 @@
-import type {CellSpec, Cell, Notebook, NotebookTheme} from "./notebook.js";
+import type {CellSpec, Cell, Notebook} from "./notebook.js";
 import {toNotebook} from "./notebook.js";
 import {isEmpty} from "./text.js";
 
+const DEFAULT_THEME = "air" satisfies Notebook["theme"];
+
 export function serialize(notebook: Notebook, {document = globalThis.document} = {}): string {
   const _notebook = document.createElement("notebook");
-  _notebook.setAttribute("theme", notebook.theme);
+  _notebook.setAttribute("theme", serializeTheme(notebook.theme));
   if (notebook.readOnly) _notebook.setAttribute("readonly", "");
   _notebook.appendChild(document.createTextNode("\n  "));
   const _title = document.createElement("title");
@@ -128,8 +130,18 @@ function deserializeFormat(format: string | null): Cell["format"] {
   }
 }
 
+function serializeTheme(theme: Notebook["theme"]): string {
+  return typeof theme === "string" ? theme : `light-dark(${theme.light}, ${theme.dark})`;
+}
+
 function deserializeTheme(theme: string | null | undefined): Notebook["theme"] {
-  return (theme as NotebookTheme) ?? "air";
+  theme = theme?.trim().toLowerCase() ?? DEFAULT_THEME;
+  const match = /^light-dark\(([\w-]+),\s*([\w-]+)\)$/.exec(theme);
+  if (match) {
+    const [, light, dark] = match;
+    return {light, dark} as Notebook["theme"];
+  }
+  return theme as Notebook["theme"];
 }
 
 function dedent(text: string): string {
