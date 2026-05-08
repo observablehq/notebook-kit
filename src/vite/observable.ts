@@ -1,5 +1,5 @@
 import {fork, spawn} from "node:child_process";
-import {createWriteStream, existsSync} from "node:fs";
+import {createWriteStream, existsSync, unlinkSync} from "node:fs";
 import {mkdir, readFile} from "node:fs/promises";
 import {dirname, join, resolve} from "node:path";
 import {relative} from "node:path/posix";
@@ -122,9 +122,13 @@ export function observable({
               if (!existsSync(cachePath)) {
                 const args = ["--root", dir, "--database", cell.database, value];
                 const child = fork(fileURLToPath(import.meta.resolve("../../bin/query.js")), args);
-                await new Promise((resolve, reject) => {
+                await new Promise<void>((resolve, reject) => {
                   child.on("error", reject);
-                  child.on("exit", resolve); // TODO check exit code
+                  child.on("exit", (code) => {
+                    if (code === 0) return resolve();
+                    unlinkSync(cachePath); // don’t pollute cache with failure
+                    reject(new Error(`${cell.database} query exited with ${code}`));
+                  });
                 });
               }
               cell.mode = "js";
@@ -141,9 +145,13 @@ export function observable({
               child.stdin.end(value);
               child.stderr.pipe(process.stderr);
               child.stdout.pipe(createWriteStream(cachePath));
-              await new Promise((resolve, reject) => {
+              await new Promise<void>((resolve, reject) => {
                 child.on("error", reject);
-                child.on("exit", resolve); // TODO check exit code
+                child.on("exit", (code) => {
+                  if (code === 0) return resolve();
+                  unlinkSync(cachePath); // don’t pollute cache with failure
+                  reject(new Error(`${mode} interpreter exited with ${code}`));
+                });
               });
             }
             if (format === "html" && !hidden) {
