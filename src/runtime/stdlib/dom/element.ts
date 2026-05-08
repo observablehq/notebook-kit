@@ -8,7 +8,7 @@ const namespaces = {
 };
 
 function isNamespace(prefix: string): prefix is keyof typeof namespaces {
-  return prefix in namespaces;
+  return Object.prototype.hasOwnProperty.call(namespaces, prefix);
 }
 
 /** @deprecated */
