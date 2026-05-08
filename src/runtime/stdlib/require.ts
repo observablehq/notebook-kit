@@ -1,9 +1,11 @@
 require.resolve = resolve;
 
+const cache = new WeakMap<object, object>();
+
 export function require(...specifiers: unknown[]): unknown {
   return specifiers.length === 1
-    ? import(/* @vite-ignore */ resolve(specifiers[0]))
-    : Promise.all(specifiers.map((s) => require(s))).then((modules) => Object.assign({}, ...modules));
+    ? import(/* @vite-ignore */ resolve(specifiers[0])).then(objectify)
+    : Promise.all(specifiers.map((s) => require(s))).then((modules) => Object.assign({}, ...modules)); // prettier-ignore
 }
 
 interface NpmSpecifier {
@@ -32,6 +34,13 @@ function resolve(_specifier: unknown): string {
   if (isProtocol(specifier) || isLocal(specifier)) return specifier;
   const {name, range, path} = parseNpmSpecifier(specifier);
   return `https://cdn.jsdelivr.net/npm/${name}${range}${path + (isFile(path) || isDirectory(path) ? "" : "/+esm")}`;
+}
+
+/** Allow mutation of required modules while maintaining a canonical instance; ugly! */
+function objectify(module: object): object {
+  let object = cache.get(module);
+  if (!object) cache.set(module, (object = {...module}));
+  return object;
 }
 
 /** Returns true for e.g. https://example.com/ */
