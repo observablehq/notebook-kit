@@ -9,8 +9,13 @@ vi.stubGlobal("matchMedia", () => ({
   removeEventListener() {}
 }));
 
-afterAll(() => vi.unstubAllGlobals());
-afterEach(() => { document.body.style.colorScheme = ""; });
+afterAll(() => {
+  vi.unstubAllGlobals();
+});
+
+afterEach(() => {
+  document.body.style.colorScheme = "";
+});
 
 test("dark yields true when color-scheme is dark", async () => {
   document.body.style.colorScheme = "dark";
