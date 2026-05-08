@@ -26,10 +26,11 @@
       @import url("@fontsource/inter/700-italic.css");
     </style>
     <style type="text/css">
-      #header,
-      #navigation {
+      #header {
         background: var(--theme-foreground);
         color: var(--theme-background);
+      }
+      :root.loaded #header {
         transition: box-shadow ease 250ms,
           background-color linear 250ms,
           color linear 250ms;
@@ -38,6 +39,10 @@
         box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
       }
       :root.scrolled2 #header {
+        background: var(--theme-background);
+        color: var(--theme-foreground);
+      }
+      #navigation {
         background: var(--theme-background);
         color: var(--theme-foreground);
       }
@@ -147,6 +152,7 @@
       }
       onscroll();
       document.addEventListener("scroll", onscroll);
+      setTimeout(() => document.documentElement.classList.add("loaded"), 250);
     </script>
     <script type="module">
       let side;
