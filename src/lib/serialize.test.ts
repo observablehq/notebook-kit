@@ -125,7 +125,7 @@ test("serialization enforces unique ids", () => {
 });
 
 test("serializes a light-dark theme as a light-dark() attribute", () => {
-  const notebook = toNotebook({theme: "light-dark(air, near-midnight)"});
+  const notebook = toNotebook({theme: {light: "air", dark: "near-midnight"}});
   const html = serialize(notebook);
   assert.ok(html.includes(`<notebook theme="light-dark(air, near-midnight)">`));
   assert.deepStrictEqual(deserialize(html), notebook);
@@ -136,9 +136,24 @@ test("deserializes a single theme as a string", () => {
   assert.strictEqual(notebook.theme, "slate");
 });
 
+test("deserializes a single theme, lower-casing and ignoring whitespace", () => {
+  const notebook = deserialize(`<!doctype html><notebook theme=" sLAtE "></notebook>`);
+  assert.strictEqual(notebook.theme, "slate");
+});
+
 test("deserializes a light-dark() theme attribute", () => {
-  const notebook = deserialize(`<!doctype html><notebook theme="light-dark(cotton, slate)"></notebook>`);
-  assert.strictEqual(notebook.theme, "light-dark(cotton, slate)");
+  const notebook = deserialize(`<!doctype html><notebook theme="light-dark(cotton, slate)"></notebook>`); // prettier-ignore
+  assert.deepStrictEqual(notebook.theme, {light: "cotton", dark: "slate"});
+});
+
+test("deserializes a light-dark() theme attribute, lower-casing and ignoring whitespace", () => {
+  const notebook = deserialize(`<!doctype html><notebook theme=" lIGHt-DaRk(AIR,near-MiDnigHT) "></notebook>`); // prettier-ignore
+  assert.deepStrictEqual(notebook.theme, {light: "air", dark: "near-midnight"});
+});
+
+test("deserializes a light-dark() theme attribute with inverted preference", () => {
+  const notebook = deserialize(`<!doctype html><notebook theme=" lIGHt-DaRk(near-MiDnigHT,AIR) "></notebook>`); // prettier-ignore
+  assert.deepStrictEqual(notebook.theme, {dark: "air", light: "near-midnight"});
 });
 
 test("deserialization populates missing ids", () => {

@@ -11,7 +11,6 @@ import {getQueryCachePath} from "../databases/index.js";
 import {getInterpreterCachePath, getInterpreterCommand} from "../interpreters/index.js";
 import {getInterpreterMethod, isInterpreter} from "../lib/interpreters.js";
 import type {Cell, Notebook} from "../lib/notebook.js";
-import {themeImports} from "../lib/notebook.js";
 import {deserialize} from "../lib/serialize.js";
 import {Sourcemap} from "../javascript/sourcemap.js";
 import {transpile} from "../javascript/transpile.js";
@@ -174,8 +173,14 @@ export function observable({
         return (
           `<!doctype html>` +
           output.slice(0, i) +
-          `<style type="text/css">
-${themeImports(notebook.theme)}
+          `<style type="text/css">${
+            typeof notebook.theme === "string"
+              ? `
+@import url("observable:styles/theme-${notebook.theme}.css");`
+              : `
+@import url("observable:styles/theme-${notebook.theme.light}.css") (prefers-color-scheme: light);
+@import url("observable:styles/theme-${notebook.theme.dark}.css") (prefers-color-scheme: dark);`
+          }
 </style><script type="module">
 import {define} from "observable:runtime";${Array.from(assets)
             .map(

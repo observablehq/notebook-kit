@@ -15,30 +15,18 @@ type NotebookTheme =
   | "stark"
   | "sun-faded";
 
-/**
- * Returns the CSS `@import` rules for the given theme. When a `light-dark()`
- * pair is specified, each theme is wrapped in a `prefers-color-scheme` media
- * query so that the appropriate one is applied automatically.
- */
-export function themeImports(theme: Notebook["theme"]): string {
-  const match = /^light-dark\(([\w-]+),\s*([\w-]+)\)$/.exec(theme.trim().toLowerCase());
-  if (match) {
-    const [, light, dark] = match;
-    return [
-      `@import url("observable:styles/theme-${light}.css") (prefers-color-scheme: light);`,
-      `@import url("observable:styles/theme-${dark}.css") (prefers-color-scheme: dark);`
-    ].join("\n");
-  }
-  return `@import url("observable:styles/theme-${theme}.css");`;
-}
+type LightDarkNotebookTheme = {
+  light: NotebookTheme;
+  dark: NotebookTheme;
+};
 
 export interface NotebookSpec {
   /** the notebook’s cells, in top-to-bottom document order */
   cells?: CellSpec[];
   /** the notebook title, if any; extracted from the first h1 */
   title?: string;
-  /** the notebook theme; defaults to "air"; use `light-dark(light, dark)` for responsive dark mode */
-  theme?: NotebookTheme | `light-dark(${NotebookTheme}, ${NotebookTheme})`;
+  /** the notebook theme(s); defaults to "air" */
+  theme?: NotebookTheme | LightDarkNotebookTheme;
   /** if true, don’t allow editing */
   readOnly?: boolean;
 }
