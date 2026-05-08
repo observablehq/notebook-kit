@@ -13,13 +13,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
-          registry-url: 'https://registry.npmjs.org'
-          cache: yarn
-      - run: yarn --frozen-lockfile
-      - run: yarn test
-      - run: yarn lint
-      - run: npm publish --access public
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm run test
+      - run: npm publish
