@@ -77,7 +77,7 @@ export function requireFileRegistration(value: boolean) {
 export function registerFile(
   name: string,
   info: FileInfo | null,
-  base: string | URL = location.href
+  base: string | URL = document.baseURI
 ) {
   const href = new URL(name, base).href;
   if (info == null) {
