@@ -25,7 +25,7 @@ class ZipArchiveEntry extends AbstractFile {
   declare private readonly _: JSZip.JSZipObject;
   declare private _url: Promise<string>;
   constructor(object: JSZip.JSZipObject) {
-    super(undefined!, object.name);
+    super(object.name);
     Object.defineProperties(this, {
       _: {value: object},
       _url: {writable: true}
