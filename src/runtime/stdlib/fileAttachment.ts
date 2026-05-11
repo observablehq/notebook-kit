@@ -198,6 +198,10 @@ export abstract class AbstractFile implements FileAttachment {
     const [Arrow, Parquet, buffer] = await Promise.all([import("https://cdn.jsdelivr.net/npm/apache-arrow@17.0.0/+esm"), import("https://cdn.jsdelivr.net/npm/parquet-wasm/+esm").then(async (Parquet) => (await Parquet.default("https://cdn.jsdelivr.net/npm/parquet-wasm/esm/parquet_wasm_bg.wasm"), Parquet)), this.arrayBuffer()]); // prettier-ignore
     return Arrow.tableFromIPC(Parquet.readParquet(new Uint8Array(buffer)).intoIPCStream());
   }
+  async zip() {
+    const [{ZipArchive}, buffer] = await Promise.all([import("./zip.js"), this.arrayBuffer()]);
+    return ZipArchive.from(buffer);
+  }
   async xml(mimeType: DOMParserSupportedType = "application/xml"): Promise<Document> {
     return new DOMParser().parseFromString(await this.text(), mimeType);
   }
