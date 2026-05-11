@@ -1,19 +1,9 @@
 import ExcelJS from "exceljs";
 import {assert, describe, expect, test, vi} from "vitest";
+import {Workbook} from "./xlsx.js";
 
 // Route exceljs to the version from devDependencies
 vi.mock("https://cdn.jsdelivr.net/npm/exceljs/+esm", async () => await import("exceljs"));
-
-const {Workbook} = await import("./xlsx.js");
-
-function createWorkbook(sheets: Record<string, ExcelJS.CellValue[][]>) {
-  const workbook = new ExcelJS.Workbook();
-  for (const [sheet, rows] of Object.entries(sheets)) {
-    const ws = workbook.addWorksheet(sheet);
-    for (const row of rows) ws.addRow(row);
-  }
-  return new Workbook(workbook);
-}
 
 declare module "vitest" {
   interface Matchers {
@@ -32,6 +22,15 @@ expect.extend({
     };
   }
 });
+
+function createWorkbook(sheets: Record<string, ExcelJS.CellValue[][]>) {
+  const workbook = new ExcelJS.Workbook();
+  for (const [sheet, rows] of Object.entries(sheets)) {
+    const ws = workbook.addWorksheet(sheet);
+    for (const row of rows) ws.addRow(row);
+  }
+  return new Workbook(workbook);
+}
 
 describe("FileAttachment.xlsx", () => {
   test("reads sheet names", () => {
@@ -54,7 +53,7 @@ describe("FileAttachment.xlsx", () => {
     expect(workbook.sheet(0)).toBeSheet(
       Object.assign(
         [
-          {A: "one!", B: "two", C: "three"},
+          {A: "one", B: "two", C: "three"},
           {A: 1, B: 2, C: 3}
         ],
         {columns: [..."#ABC"]}
