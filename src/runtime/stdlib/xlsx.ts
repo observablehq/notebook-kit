@@ -31,6 +31,8 @@ export class Workbook {
   }
 }
 
+Object.defineProperty(Workbook, "name", {value: "Workbook"}); // prevent mangling
+
 export interface ExtractOptions {
   range?: string;
   headers?: boolean;

@@ -47,3 +47,6 @@ class ZipArchiveEntry extends AbstractFile {
     return JSON.parse(await this.text());
   }
 }
+
+Object.defineProperty(ZipArchive, "name", {value: "ZipArchive"}); // prevent mangling
+Object.defineProperty(ZipArchiveEntry, "name", {value: "ZipArchiveEntry"}); // prevent mangling
