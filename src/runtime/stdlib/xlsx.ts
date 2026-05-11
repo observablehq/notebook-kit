@@ -1,7 +1,7 @@
 import Excel from "https://cdn.jsdelivr.net/npm/exceljs/+esm";
 
 export class Workbook {
-  declare readonly _: Excel.Workbook;
+  declare private readonly _: Excel.Workbook;
   declare readonly sheetNames: string[];
 
   constructor(workbook: Excel.Workbook) {
