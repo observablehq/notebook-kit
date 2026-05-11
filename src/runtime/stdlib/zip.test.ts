@@ -53,6 +53,28 @@ describe("FileAttachment.zip", () => {
     assert.throws(() => zip.file("dir/"), /file not found/);
   });
 
+  test("file(path).name returns the entry path", () => {
+    assert.strictEqual(zip.file("a.txt").name, "a.txt");
+  });
+
+  test("file(path).mimeType is guessed from the entry path", () => {
+    assert.strictEqual(zip.file("data.json").mimeType, "application/json");
+  });
+
+  test("file(path).href is undefined for zip entries", () => {
+    assert.strictEqual(zip.file("a.txt").href, undefined);
+  });
+
+  test("file(path).stream returns a ReadableStream", async () => {
+    const stream = await zip.file("a.txt").stream();
+    assert.ok(stream instanceof ReadableStream);
+  });
+
+  test("file(path).url() [deprecated] returns a blob URL", async () => {
+    const url = await zip.file("a.txt").url();
+    assert.match(url, /^blob:/);
+  });
+
   test("file(path).xlsx() parses an embedded workbook", async () => {
     const workbook = await zip.file("test.xlsx").xlsx();
     assert.deepStrictEqual(workbook.sheetNames, ["Sheet1"]);
