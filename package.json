@@ -73,6 +73,7 @@
     "@types/markdown-it": "^14.1.2",
     "bun-types": "^1.2.20",
     "eslint": "^9.29.0",
+    "exceljs": "^4.4.0",
     "globals": "^16.2.0",
     "htl": "^0.3.1",
     "postgres": "^3.4.9",
