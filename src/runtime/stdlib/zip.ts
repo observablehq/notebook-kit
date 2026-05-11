@@ -46,6 +46,9 @@ class ZipArchiveEntry extends AbstractFile {
   async json() {
     return JSON.parse(await this.text());
   }
+  async stream(): Promise<ReadableStream<Uint8Array>> {
+    return (await this.blob()).stream(); // since href is unavailable
+  }
 }
 
 Object.defineProperty(ZipArchive, "name", {value: "ZipArchive"}); // prevent mangling
