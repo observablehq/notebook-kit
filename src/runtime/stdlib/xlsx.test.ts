@@ -3,7 +3,7 @@ import {assert, describe, expect, test, vi} from "vitest";
 import {Workbook} from "./xlsx.js";
 
 // Route exceljs to the version from devDependencies
-vi.mock("https://cdn.jsdelivr.net/npm/exceljs/+esm", async () => await import("exceljs"));
+vi.mock("https://cdn.jsdelivr.net/npm/exceljs/+esm", async () => import("exceljs"));
 
 declare module "vitest" {
   interface Matchers {
