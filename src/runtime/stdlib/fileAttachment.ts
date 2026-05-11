@@ -204,6 +204,10 @@ export abstract class AbstractFile implements FileAttachment {
   async html(): Promise<Document> {
     return this.xml("text/html");
   }
+  async xlsx() {
+    const [{Workbook}, buffer] = await Promise.all([import("./xlsx.js"), this.arrayBuffer()]);
+    return Workbook.load(buffer);
+  }
 }
 
 // TODO Replace this with static analysis of files.
