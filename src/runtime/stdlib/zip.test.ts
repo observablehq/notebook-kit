@@ -1,6 +1,6 @@
 import {readFile} from "node:fs/promises";
 import {fileURLToPath} from "node:url";
-import { assert, beforeAll, describe, test, vi } from "vitest";
+import {assert, beforeAll, describe, test, vi} from "vitest";
 
 // Route jszip and exceljs to the versions from devDependencies
 vi.mock("https://cdn.jsdelivr.net/npm/jszip/+esm", async () => await import("jszip"));
