@@ -1,50 +1,48 @@
 import ExcelJS from "exceljs";
-import {assert, describe, test, vi} from "vitest";
+import {assert, describe, expect, test, vi} from "vitest";
 
 // Route exceljs to the version from devDependencies
 vi.mock("https://cdn.jsdelivr.net/npm/exceljs/+esm", async () => await import("exceljs"));
 
 const {Workbook} = await import("./xlsx.js");
 
-function exceljs(contents: Record<string, ExcelJS.CellValue[][]>): ExcelJS.Workbook {
+function createWorkbook(sheets: Record<string, ExcelJS.CellValue[][]>) {
   const workbook = new ExcelJS.Workbook();
-  for (const [sheet, rows] of Object.entries(contents)) {
+  for (const [sheet, rows] of Object.entries(sheets)) {
     const ws = workbook.addWorksheet(sheet);
     for (const row of rows) ws.addRow(row);
   }
-  return workbook;
+  return new Workbook(workbook);
 }
 
-function sheetEquals(
-  actual: object[] & {columns: string[]},
-  expected: object[] & {columns: string[]}
-): void {
-  assert.deepEqual([...actual], [...expected]);
-  assert.deepStrictEqual(actual.columns, expected.columns);
-}
+// Sheets are decorated with a `.columns` property
+expect.addEqualityTesters([
+  function (a, b) {
+    return !Array.isArray(a) || !Array.isArray(b)
+      ? undefined // pass
+      : this.equals(a, b) && this.equals(Reflect.get(a, "columns"), Reflect.get(b, "columns")); // test all arrays
+  }
+]);
 
 describe("FileAttachment.xlsx", () => {
   test("reads sheet names", () => {
-    const workbook = new Workbook(exceljs({Sheet1: []}));
+    const workbook = createWorkbook({Sheet1: []});
     assert.deepStrictEqual(workbook.sheetNames, ["Sheet1"]);
   });
 
   test("sheet(name) throws on unknown sheet name", () => {
-    const workbook = new Workbook(exceljs({Sheet1: []}));
+    const workbook = createWorkbook({Sheet1: []});
     assert.throws(() => workbook.sheet("bad"));
   });
 
   test("reads sheets", () => {
-    const workbook = new Workbook(
-      exceljs({
-        Sheet1: [
-          ["one", "two", "three"],
-          [1, 2, 3]
-        ]
-      })
-    );
-    sheetEquals(
-      workbook.sheet(0),
+    const workbook = createWorkbook({
+      Sheet1: [
+        ["one", "two", "three"],
+        [1, 2, 3]
+      ]
+    });
+    expect(workbook.sheet(0)).toEqual(
       Object.assign(
         [
           {A: "one", B: "two", C: "three"},
@@ -53,8 +51,7 @@ describe("FileAttachment.xlsx", () => {
         {columns: [..."#ABC"]}
       )
     );
-    sheetEquals(
-      workbook.sheet("Sheet1"),
+    expect(workbook.sheet("Sheet1")).toEqual(
       Object.assign(
         [
           {A: "one", B: "two", C: "three"},
@@ -68,19 +65,17 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("reads sheets with primitive types", () => {
-    sheetEquals(
-      new Workbook(
-        exceljs({
-          Sheet1: [
-            [],
-            [null, undefined],
-            ["hello", "", "0", "1"],
-            [1, 1.2],
-            [true, false],
-            [new Date(Date.UTC(2020, 0, 1)), {} as unknown as ExcelJS.CellValue]
-          ]
-        })
-      ).sheet(0),
+    const workbook = createWorkbook({
+      Sheet1: [
+        [],
+        [null, undefined],
+        ["hello", "", "0", "1"],
+        [1, 1.2],
+        [true, false],
+        [new Date(Date.UTC(2020, 0, 1)), {} as unknown as ExcelJS.CellValue]
+      ]
+    });
+    expect(workbook.sheet(0)).toEqual(
       Object.assign(
         [
           {},
@@ -96,18 +91,16 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("reads rich text and hyperlinks", () => {
-    sheetEquals(
-      new Workbook(
-        exceljs({
-          Sheet1: [
-            [
-              {richText: [{text: "two"}, {text: "three"}]}, // A
-              {text: `link&</a>"'?`, hyperlink: 'https://example.com?q="'}, // B
-              {text: "https://example.com", hyperlink: "https://example.com"} // C, text===hyperlink
-            ]
-          ]
-        })
-      ).sheet(0),
+    const workbook = createWorkbook({
+      Sheet1: [
+        [
+          {richText: [{text: "two"}, {text: "three"}]}, // A
+          {text: `link&</a>"'?`, hyperlink: 'https://example.com?q="'}, // B
+          {text: "https://example.com", hyperlink: "https://example.com"} // C, text===hyperlink
+        ]
+      ]
+    });
+    expect(workbook.sheet(0)).toEqual(
       Object.assign(
         [
           {
@@ -122,37 +115,33 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("fails on malformed hyperlinks", () => {
-    sheetEquals(
-      new Workbook(
-        exceljs({
-          Sheet1: [
-            [
-              {text: "plain text"} as unknown as ExcelJS.CellValue, // A (drop)
-              {
-                text: {richText: [{text: "https://example.com"}]},
-                hyperlink: "https://example.com"
-              } as unknown as ExcelJS.CellValue // B
-            ]
-          ]
-        })
-      ).sheet(0),
+    const workbook = createWorkbook({
+      Sheet1: [
+        [
+          {text: "plain text"} as unknown as ExcelJS.CellValue, // A (drop)
+          {
+            text: {richText: [{text: "https://example.com"}]},
+            hyperlink: "https://example.com"
+          } as unknown as ExcelJS.CellValue // B
+        ]
+      ]
+    });
+    expect(workbook.sheet(0)).toEqual(
       Object.assign([{B: "https://example.com [object Object]"}], {columns: [..."#AB"]})
     );
   });
 
   test("reads formulas", () => {
-    sheetEquals(
-      new Workbook(
-        exceljs({
-          Sheet1: [
-            [
-              {formula: "=B2*5", result: 10},
-              {sharedFormula: "=B2*6", result: 12},
-              {sharedFormula: "=Z2*6", result: {error: "#REF!"}}
-            ]
-          ]
-        })
-      ).sheet(0),
+    const workbook = createWorkbook({
+      Sheet1: [
+        [
+          {formula: "=B2*5", result: 10},
+          {sharedFormula: "=B2*6", result: 12},
+          {sharedFormula: "=Z2*6", result: {error: "#REF!"}}
+        ]
+      ]
+    });
+    expect(workbook.sheet(0)).toEqual(
       Object.assign([{A: 10, B: 12, C: NaN}], {
         columns: [..."#ABC"]
       })
@@ -160,17 +149,14 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("reads sheets with headers", () => {
-    const workbook = new Workbook(
-      exceljs({
-        Sheet1: [
-          [null, "one", "one", "two", "A", "0"],
-          [1, null, 3, 4, 5, "zero"],
-          [6, 7, 8, 9, 10]
-        ]
-      })
-    );
-    sheetEquals(
-      workbook.sheet(0, {headers: true}),
+    const workbook = createWorkbook({
+      Sheet1: [
+        [null, "one", "one", "two", "A", "0"],
+        [1, null, 3, 4, 5, "zero"],
+        [6, 7, 8, 9, 10]
+      ]
+    });
+    expect(workbook.sheet(0, {headers: true})).toEqual(
       Object.assign(
         [
           {A: 1, one_: 3, two: 4, A_: 5, 0: "zero"},
@@ -182,7 +168,7 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("throws on invalid ranges", () => {
-    const workbook = new Workbook(exceljs({Sheet1: []}));
+    const workbook = createWorkbook({Sheet1: []});
     const malformed = /Malformed range specifier/;
     assert.throws(() => workbook.sheet(0, {range: 0 as unknown as string}), malformed);
     assert.throws(() => workbook.sheet(0, {range: ""}), malformed);
@@ -193,16 +179,14 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("reads sheet ranges", () => {
-    const workbook = new Workbook(
-      exceljs({
-        Sheet1: [
-          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-          [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-          [20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
-          [30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
-        ]
-      })
-    );
+    const workbook = createWorkbook({
+      Sheet1: [
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        [20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+        [30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+      ]
+    });
 
     // undefined / ":"
     const entireSheet = Object.assign(
@@ -214,12 +198,11 @@ describe("FileAttachment.xlsx", () => {
       ],
       {columns: [..."#ABCDEFGHIJ"]}
     );
-    sheetEquals(workbook.sheet(0), entireSheet);
-    sheetEquals(workbook.sheet(0, {range: ":"}), entireSheet);
+    expect(workbook.sheet(0)).toEqual(entireSheet);
+    expect(workbook.sheet(0, {range: ":"})).toEqual(entireSheet);
 
     // "B2:C3"
-    sheetEquals(
-      workbook.sheet(0, {range: "B2:C3"}),
+    expect(workbook.sheet(0, {range: "B2:C3"})).toEqual(
       Object.assign(
         [
           {B: 11, C: 12},
@@ -230,8 +213,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // ":C3"
-    sheetEquals(
-      workbook.sheet(0, {range: ":C3"}),
+    expect(workbook.sheet(0, {range: ":C3"})).toEqual(
       Object.assign(
         [
           {A: 0, B: 1, C: 2},
@@ -243,8 +225,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // "B2:"
-    sheetEquals(
-      workbook.sheet(0, {range: "B2:"}),
+    expect(workbook.sheet(0, {range: "B2:"})).toEqual(
       Object.assign(
         [
           {B: 11, C: 12, D: 13, E: 14, F: 15, G: 16, H: 17, I: 18, J: 19},
@@ -256,8 +237,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // "H:"
-    sheetEquals(
-      workbook.sheet(0, {range: "H:"}),
+    expect(workbook.sheet(0, {range: "H:"})).toEqual(
       Object.assign(
         [
           {H: 7, I: 8, J: 9},
@@ -270,8 +250,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // ":C"
-    sheetEquals(
-      workbook.sheet(0, {range: ":C"}),
+    expect(workbook.sheet(0, {range: ":C"})).toEqual(
       Object.assign(
         [
           {A: 0, B: 1, C: 2},
@@ -284,29 +263,26 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // ":Z"
-    sheetEquals(
-      workbook.sheet(0, {range: ":Z"}),
+    expect(workbook.sheet(0, {range: ":Z"})).toEqual(
       Object.assign(entireSheet.slice(), {
         columns: [..."#ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
       })
     );
 
     // "2:"
-    sheetEquals(
-      workbook.sheet(0, {range: "2:"}),
+    expect(workbook.sheet(0, {range: "2:"})).toEqual(
       Object.assign(entireSheet.slice(1), {columns: entireSheet.columns})
     );
 
     // ":2"
-    sheetEquals(
-      workbook.sheet(0, {range: ":2"}),
+    expect(workbook.sheet(0, {range: ":2"})).toEqual(
       Object.assign(entireSheet.slice(0, 2), {columns: entireSheet.columns})
     );
   });
 
   test("derives column names such as A AA AAA…", () => {
     const l0 = 26 * 26 * 23;
-    const workbook = new Workbook(exceljs({Sheet1: [Array.from<number>({length: l0}).fill(1)]}));
+    const workbook = createWorkbook({Sheet1: [Array.from<number>({length: l0}).fill(1)]});
     assert.deepStrictEqual(
       workbook.sheet(0).columns.filter((d: string) => d.match(/^A+$/)),
       ["A", "AA", "AAA"]
@@ -314,9 +290,9 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("headers protects __proto__ of row objects", () => {
-    const workbook = new Workbook(
-      exceljs({Sheet1: [["__proto__"], [{a: 1} as unknown as ExcelJS.CellValue]]})
-    );
+    const workbook = createWorkbook({
+      Sheet1: [["__proto__"], [{a: 1} as unknown as ExcelJS.CellValue]]
+    });
     assert.notStrictEqual(workbook.sheet(0, {headers: true})[0].a, 1);
   });
 });
