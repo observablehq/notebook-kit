@@ -1,6 +1,6 @@
 require.resolve = resolve;
 
-const cache = new WeakMap<object, object>();
+const cache = new WeakMap<object, unknown>();
 
 export function require(...specifiers: unknown[]): unknown {
   return specifiers.length === 1
@@ -36,10 +36,16 @@ function resolve(_specifier: unknown): string {
   return `https://cdn.jsdelivr.net/npm/${name}${range}${path + (isFile(path) || isDirectory(path) ? "" : "/+esm")}`;
 }
 
+/** Promote exclusive default export to module. */
+function defaultify(module: object): unknown {
+  for (const key in module) if (key !== "default") return {...module}; // any named export
+  return "default" in module ? module.default : {...module}; // promote exclusive default export
+}
+
 /** Allow mutation of required modules while maintaining a canonical instance; ugly! */
-function objectify(module: object): object {
+function objectify(module: object): unknown {
   let object = cache.get(module);
-  if (!object) cache.set(module, (object = {...module}));
+  if (!object) cache.set(module, (object = defaultify(module)));
   return object;
 }
 
