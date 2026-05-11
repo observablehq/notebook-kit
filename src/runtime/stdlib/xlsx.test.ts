@@ -6,7 +6,7 @@ vi.mock("https://cdn.jsdelivr.net/npm/exceljs/+esm", async () => await import("e
 
 const {Workbook} = await import("./xlsx.js");
 
-function exceljs(contents: Record<string, unknown[][]>): ExcelJS.Workbook {
+function exceljs(contents: Record<string, ExcelJS.CellValue[][]>): ExcelJS.Workbook {
   const workbook = new ExcelJS.Workbook();
   for (const [sheet, rows] of Object.entries(contents)) {
     const ws = workbook.addWorksheet(sheet);
@@ -69,7 +69,7 @@ describe("FileAttachment.xlsx", () => {
             ["hello", "", "0", "1"],
             [1, 1.2],
             [true, false],
-            [new Date(Date.UTC(2020, 0, 1)), {}]
+            [new Date(Date.UTC(2020, 0, 1)), {} as unknown as ExcelJS.CellValue]
           ]
         })
       ).sheet(0),
@@ -94,17 +94,8 @@ describe("FileAttachment.xlsx", () => {
           Sheet1: [
             [
               {richText: [{text: "two"}, {text: "three"}]}, // A
-              {text: "plain text"}, // B
-              {text: "https://example.com", hyperlink: "https://example.com"}, // C
-              {
-                text: {richText: [{text: "https://example.com"}]},
-                hyperlink: "https://example.com"
-              }, // D
-              {text: `link&</a>"'?`, hyperlink: 'https://example.com?q="'}, // E
-              {
-                text: {richText: [{text: "first"}, {text: "second"}]},
-                hyperlink: "https://example.com"
-              } // F
+              {text: `link&</a>"'?`, hyperlink: 'https://example.com?q="'}, // B
+              {text: "https://example.com", hyperlink: "https://example.com"} // C, text===hyperlink
             ]
           ]
         })
@@ -113,15 +104,31 @@ describe("FileAttachment.xlsx", () => {
         [
           {
             A: "twothree",
-            B: "plain text",
-            C: "https://example.com",
-            D: "https://example.com",
-            E: `https://example.com?q=" link&</a>"'?`,
-            F: "https://example.com firstsecond"
+            B: `https://example.com?q=" link&</a>"'?`,
+            C: "https://example.com"
           }
         ],
-        {columns: [..."#ABCDEF"]}
+        {columns: [..."#ABC"]}
       )
+    );
+  });
+
+  test("fails on malformed hyperlinks", () => {
+    assert.deepEqual(
+      new Workbook(
+        exceljs({
+          Sheet1: [
+            [
+              {text: "plain text"} as unknown as ExcelJS.CellValue, // A (drop)
+              {
+                text: {richText: [{text: "https://example.com"}]},
+                hyperlink: "https://example.com"
+              } as unknown as ExcelJS.CellValue // B
+            ]
+          ]
+        })
+      ).sheet(0),
+      Object.assign([{B: "https://example.com [object Object]"}], {columns: [..."#AB"]})
     );
   });
 
@@ -291,11 +298,7 @@ describe("FileAttachment.xlsx", () => {
 
   test("derives column names such as A AA AAA…", () => {
     const l0 = 26 * 26 * 23;
-    const workbook = new Workbook(
-      exceljs({
-        Sheet1: [Array.from({length: l0}).fill(1)]
-      })
-    );
+    const workbook = new Workbook(exceljs({Sheet1: [Array.from<number>({length: l0}).fill(1)]}));
     assert.deepStrictEqual(
       workbook.sheet(0).columns.filter((d: string) => d.match(/^A+$/)),
       ["A", "AA", "AAA"]
@@ -303,7 +306,9 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("headers protects __proto__ of row objects", () => {
-    const workbook = new Workbook(exceljs({Sheet1: [["__proto__"], [{a: 1}]]}));
+    const workbook = new Workbook(
+      exceljs({Sheet1: [["__proto__"], [{a: 1} as unknown as ExcelJS.CellValue]]})
+    );
     assert.notStrictEqual(workbook.sheet(0, {headers: true})[0].a, 1);
   });
 });
