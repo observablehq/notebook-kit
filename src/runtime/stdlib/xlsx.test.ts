@@ -15,6 +15,14 @@ function exceljs(contents: Record<string, ExcelJS.CellValue[][]>): ExcelJS.Workb
   return workbook;
 }
 
+function sheetEquals(
+  actual: object[] & {columns: string[]},
+  expected: object[] & {columns: string[]}
+): void {
+  assert.deepEqual([...actual], [...expected]);
+  assert.deepStrictEqual(actual.columns, expected.columns);
+}
+
 describe("FileAttachment.xlsx", () => {
   test("reads sheet names", () => {
     const workbook = new Workbook(exceljs({Sheet1: []}));
@@ -35,7 +43,7 @@ describe("FileAttachment.xlsx", () => {
         ]
       })
     );
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0),
       Object.assign(
         [
@@ -45,7 +53,7 @@ describe("FileAttachment.xlsx", () => {
         {columns: [..."#ABC"]}
       )
     );
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet("Sheet1"),
       Object.assign(
         [
@@ -60,7 +68,7 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("reads sheets with primitive types", () => {
-    assert.deepEqual(
+    sheetEquals(
       new Workbook(
         exceljs({
           Sheet1: [
@@ -88,7 +96,7 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("reads rich text and hyperlinks", () => {
-    assert.deepEqual(
+    sheetEquals(
       new Workbook(
         exceljs({
           Sheet1: [
@@ -114,7 +122,7 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("fails on malformed hyperlinks", () => {
-    assert.deepEqual(
+    sheetEquals(
       new Workbook(
         exceljs({
           Sheet1: [
@@ -133,7 +141,7 @@ describe("FileAttachment.xlsx", () => {
   });
 
   test("reads formulas", () => {
-    assert.deepEqual(
+    sheetEquals(
       new Workbook(
         exceljs({
           Sheet1: [
@@ -161,7 +169,7 @@ describe("FileAttachment.xlsx", () => {
         ]
       })
     );
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0, {headers: true}),
       Object.assign(
         [
@@ -206,11 +214,11 @@ describe("FileAttachment.xlsx", () => {
       ],
       {columns: [..."#ABCDEFGHIJ"]}
     );
-    assert.deepEqual(workbook.sheet(0), entireSheet);
-    assert.deepEqual(workbook.sheet(0, {range: ":"}), entireSheet);
+    sheetEquals(workbook.sheet(0), entireSheet);
+    sheetEquals(workbook.sheet(0, {range: ":"}), entireSheet);
 
     // "B2:C3"
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0, {range: "B2:C3"}),
       Object.assign(
         [
@@ -222,7 +230,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // ":C3"
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0, {range: ":C3"}),
       Object.assign(
         [
@@ -235,7 +243,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // "B2:"
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0, {range: "B2:"}),
       Object.assign(
         [
@@ -248,7 +256,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // "H:"
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0, {range: "H:"}),
       Object.assign(
         [
@@ -262,7 +270,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // ":C"
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0, {range: ":C"}),
       Object.assign(
         [
@@ -276,7 +284,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // ":Z"
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0, {range: ":Z"}),
       Object.assign(entireSheet.slice(), {
         columns: [..."#ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
@@ -284,13 +292,13 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // "2:"
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0, {range: "2:"}),
       Object.assign(entireSheet.slice(1), {columns: entireSheet.columns})
     );
 
     // ":2"
-    assert.deepEqual(
+    sheetEquals(
       workbook.sheet(0, {range: ":2"}),
       Object.assign(entireSheet.slice(0, 2), {columns: entireSheet.columns})
     );
