@@ -15,14 +15,23 @@ function createWorkbook(sheets: Record<string, ExcelJS.CellValue[][]>) {
   return new Workbook(workbook);
 }
 
-// Sheets are decorated with a `.columns` property
-expect.addEqualityTesters([
-  function (a, b) {
-    return !Array.isArray(a) || !Array.isArray(b)
-      ? undefined // pass
-      : this.equals(a, b) && this.equals(Reflect.get(a, "columns"), Reflect.get(b, "columns")); // test all arrays
+declare module "vitest" {
+  interface Matchers {
+    toBeSheet: (sheet: Record<string, ExcelJS.CellValue>[] & {columns: string[]}) => unknown;
   }
-]);
+}
+
+// Sheets are decorated with a `.columns` property
+expect.extend({
+  toBeSheet(a, b) {
+    return {
+      pass: this.equals(a, b) && this.equals(Reflect.get(a, "columns"), Reflect.get(b, "columns")),
+      message: () => `expected sheet to${this.isNot ? " not" : ""} be`,
+      actual: a,
+      expected: b
+    };
+  }
+});
 
 describe("FileAttachment.xlsx", () => {
   test("reads sheet names", () => {
@@ -42,16 +51,16 @@ describe("FileAttachment.xlsx", () => {
         [1, 2, 3]
       ]
     });
-    expect(workbook.sheet(0)).toEqual(
+    expect(workbook.sheet(0)).toBeSheet(
       Object.assign(
         [
-          {A: "one", B: "two", C: "three"},
+          {A: "one!", B: "two", C: "three"},
           {A: 1, B: 2, C: 3}
         ],
         {columns: [..."#ABC"]}
       )
     );
-    expect(workbook.sheet("Sheet1")).toEqual(
+    expect(workbook.sheet("Sheet1")).toBeSheet(
       Object.assign(
         [
           {A: "one", B: "two", C: "three"},
@@ -75,7 +84,7 @@ describe("FileAttachment.xlsx", () => {
         [new Date(Date.UTC(2020, 0, 1)), {} as unknown as ExcelJS.CellValue]
       ]
     });
-    expect(workbook.sheet(0)).toEqual(
+    expect(workbook.sheet(0)).toBeSheet(
       Object.assign(
         [
           {},
@@ -100,7 +109,7 @@ describe("FileAttachment.xlsx", () => {
         ]
       ]
     });
-    expect(workbook.sheet(0)).toEqual(
+    expect(workbook.sheet(0)).toBeSheet(
       Object.assign(
         [
           {
@@ -126,7 +135,7 @@ describe("FileAttachment.xlsx", () => {
         ]
       ]
     });
-    expect(workbook.sheet(0)).toEqual(
+    expect(workbook.sheet(0)).toBeSheet(
       Object.assign([{B: "https://example.com [object Object]"}], {columns: [..."#AB"]})
     );
   });
@@ -141,7 +150,7 @@ describe("FileAttachment.xlsx", () => {
         ]
       ]
     });
-    expect(workbook.sheet(0)).toEqual(
+    expect(workbook.sheet(0)).toBeSheet(
       Object.assign([{A: 10, B: 12, C: NaN}], {
         columns: [..."#ABC"]
       })
@@ -156,7 +165,7 @@ describe("FileAttachment.xlsx", () => {
         [6, 7, 8, 9, 10]
       ]
     });
-    expect(workbook.sheet(0, {headers: true})).toEqual(
+    expect(workbook.sheet(0, {headers: true})).toBeSheet(
       Object.assign(
         [
           {A: 1, one_: 3, two: 4, A_: 5, 0: "zero"},
@@ -198,11 +207,11 @@ describe("FileAttachment.xlsx", () => {
       ],
       {columns: [..."#ABCDEFGHIJ"]}
     );
-    expect(workbook.sheet(0)).toEqual(entireSheet);
-    expect(workbook.sheet(0, {range: ":"})).toEqual(entireSheet);
+    expect(workbook.sheet(0)).toBeSheet(entireSheet);
+    expect(workbook.sheet(0, {range: ":"})).toBeSheet(entireSheet);
 
     // "B2:C3"
-    expect(workbook.sheet(0, {range: "B2:C3"})).toEqual(
+    expect(workbook.sheet(0, {range: "B2:C3"})).toBeSheet(
       Object.assign(
         [
           {B: 11, C: 12},
@@ -213,7 +222,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // ":C3"
-    expect(workbook.sheet(0, {range: ":C3"})).toEqual(
+    expect(workbook.sheet(0, {range: ":C3"})).toBeSheet(
       Object.assign(
         [
           {A: 0, B: 1, C: 2},
@@ -225,7 +234,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // "B2:"
-    expect(workbook.sheet(0, {range: "B2:"})).toEqual(
+    expect(workbook.sheet(0, {range: "B2:"})).toBeSheet(
       Object.assign(
         [
           {B: 11, C: 12, D: 13, E: 14, F: 15, G: 16, H: 17, I: 18, J: 19},
@@ -237,7 +246,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // "H:"
-    expect(workbook.sheet(0, {range: "H:"})).toEqual(
+    expect(workbook.sheet(0, {range: "H:"})).toBeSheet(
       Object.assign(
         [
           {H: 7, I: 8, J: 9},
@@ -250,7 +259,7 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // ":C"
-    expect(workbook.sheet(0, {range: ":C"})).toEqual(
+    expect(workbook.sheet(0, {range: ":C"})).toBeSheet(
       Object.assign(
         [
           {A: 0, B: 1, C: 2},
@@ -263,19 +272,19 @@ describe("FileAttachment.xlsx", () => {
     );
 
     // ":Z"
-    expect(workbook.sheet(0, {range: ":Z"})).toEqual(
+    expect(workbook.sheet(0, {range: ":Z"})).toBeSheet(
       Object.assign(entireSheet.slice(), {
         columns: [..."#ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
       })
     );
 
     // "2:"
-    expect(workbook.sheet(0, {range: "2:"})).toEqual(
+    expect(workbook.sheet(0, {range: "2:"})).toBeSheet(
       Object.assign(entireSheet.slice(1), {columns: entireSheet.columns})
     );
 
     // ":2"
-    expect(workbook.sheet(0, {range: ":2"})).toEqual(
+    expect(workbook.sheet(0, {range: ":2"})).toBeSheet(
       Object.assign(entireSheet.slice(0, 2), {columns: entireSheet.columns})
     );
   });
