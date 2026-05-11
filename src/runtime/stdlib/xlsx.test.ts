@@ -127,20 +127,17 @@ describe("FileAttachment.xlsx", () => {
     );
   });
 
-  test("fails on malformed hyperlinks", () => {
+  test("handles empty hyperlinks", () => {
     const workbook = createWorkbook({
       Sheet1: [
         [
-          {text: "plain text"} as unknown as ExcelJS.CellValue, // A (drop)
-          {
-            text: {richText: [{text: "https://example.com"}]},
-            hyperlink: "https://example.com"
-          } as unknown as ExcelJS.CellValue // B
+          {text: "", hyperlink: ""},
+          {text: "text", hyperlink: ""}
         ]
       ]
     });
     expect(workbook.sheet(0)).toBeSheet(
-      Object.assign([{"#": 1, B: "https://example.com [object Object]"}], {columns: [..."#AB"]})
+      Object.assign([{"#": 1, A: "", B: "text"}], {columns: [..."#AB"]})
     );
   });
 
@@ -307,11 +304,12 @@ describe("FileAttachment.xlsx", () => {
     const workbook = createWorkbook({
       Sheet1: [
         ["foo", "__proto__"],
-        [1, {a: 2} as unknown as ExcelJS.CellValue]
+        [1, new Date("2024-01-01")]
       ]
     });
     const [row] = workbook.sheet(0, {headers: true});
     expect(row.foo).toBe(1);
-    expect(row.a).not.toBe(2);
+    expect(row.__proto__).toStrictEqual(new Date("2024-01-01"));
+    expect(row.getTime).toBe(undefined);
   });
 });
