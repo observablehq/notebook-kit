@@ -42,6 +42,11 @@ const bundles = {
 const bundle = duckdb.selectBundle(bundles);
 const logger = new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING);
 
+const mainWorkerUrl = bundle.then(({mainWorker}) => {
+  const source = `importScripts(${JSON.stringify(mainWorker)});`;
+  return URL.createObjectURL(new Blob([source], {type: "text/javascript"}));
+});
+
 // let db;
 // let inserts = [];
 // const sources = new Map();
@@ -335,10 +340,9 @@ async function insertArray(database, name, array, options) {
 }
 
 async function createDuckDB() {
-  const {mainWorker, mainModule} = await bundle;
-  const worker = await duckdb.createWorker(mainWorker);
+  const worker = new Worker(await mainWorkerUrl);
   const db = new duckdb.AsyncDuckDB(logger, worker);
-  await db.instantiate(mainModule);
+  await db.instantiate((await bundle).mainModule);
   return db;
 }
 
