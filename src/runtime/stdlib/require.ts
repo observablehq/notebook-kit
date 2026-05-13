@@ -61,15 +61,15 @@ function isLocal(specifier: string): boolean {
 
 /** Returns true for e.g. foo/bar.js */
 function isJavaScript(specifier: string): boolean {
-  return /(\.js)$/i.test(specifier);
+  return /\.js$/i.test(specifier);
 }
 
 /** Returns true for e.g. foo/bar.txt */
 function isFile(specifier: string): boolean {
-  return /(\.\w*)$/.test(specifier);
+  return /\.\w*$/.test(specifier);
 }
 
 /** Returns true for e.g. foo/bar/ */
 function isDirectory(specifier: string): boolean {
-  return /(\/)$/.test(specifier);
+  return /\/$/.test(specifier);
 }
