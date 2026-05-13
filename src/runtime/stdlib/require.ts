@@ -33,7 +33,7 @@ function resolve(_specifier: unknown): string {
   const specifier = String(_specifier);
   if (isProtocol(specifier) || isLocal(specifier)) return specifier;
   const {name, range, path} = parseNpmSpecifier(specifier);
-  return `https://cdn.jsdelivr.net/npm/${name}${range}${path + (isFile(path) || isDirectory(path) ? "" : "/+esm")}`;
+  return `https://cdn.jsdelivr.net/npm/${name}${range}${path + ((isFile(path) && !isJavaScript(path)) || isDirectory(path) ? "" : "/+esm")}`;
 }
 
 /** Promote exclusive default export to module. */
@@ -60,6 +60,11 @@ function isLocal(specifier: string): boolean {
 }
 
 /** Returns true for e.g. foo/bar.js */
+function isJavaScript(specifier: string): boolean {
+  return /(\.js)$/i.test(specifier);
+}
+
+/** Returns true for e.g. foo/bar.txt */
 function isFile(specifier: string): boolean {
   return /(\.\w*)$/.test(specifier);
 }
