@@ -63,7 +63,10 @@ describe("require.alias", () => {
     expect(mod).toEqual({a: 1, b: 2, shared: "b"});
   });
   test("defines aliases for the returned require.resolve", async () => {
-    expect(require.alias({foo: "merge-a"}).resolve("foo")).toBe("https://cdn.jsdelivr.net/npm/merge-a/+esm"); // prettier-ignore
+    expect(require.alias({foo: "bar"}).resolve("foo")).toBe("https://cdn.jsdelivr.net/npm/bar/+esm"); // prettier-ignore
+  });
+  test("ignores specifiers not given in aliases", async () => {
+    expect(require.alias({foo: "bar"}).resolve("baz")).toBe("https://cdn.jsdelivr.net/npm/baz/+esm"); // prettier-ignore
   });
 });
 
