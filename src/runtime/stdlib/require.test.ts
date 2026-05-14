@@ -46,7 +46,7 @@ describe("require", () => {
   });
 
   test("merges multiple specifiers in order", async () => {
-    const mod = (await require("merge-a", "merge-b")) as Record<string, unknown>;
+    const mod = await require("merge-a", "merge-b");
     expect(mod).toEqual({a: 1, b: 2, shared: "b"});
   });
 
@@ -55,27 +55,39 @@ describe("require", () => {
     expect(mod.default).toBe("passthrough");
     expect(mod.named).toBe(42);
   });
+});
 
-  test("require.resolve maps npm specifiers to jsdelivr +esm URLs", () => {
+describe("require.alias", () => {
+  test("defines aliases for the returned require", async () => {
+    const mod = await require.alias({foo: "merge-a", bar: "merge-b"})("foo", "bar");
+    expect(mod).toEqual({a: 1, b: 2, shared: "b"});
+  });
+  test("defines aliases for the returned require.resolve", async () => {
+    expect(require.alias({foo: "merge-a"}).resolve("foo")).toBe("https://cdn.jsdelivr.net/npm/merge-a/+esm"); // prettier-ignore
+  });
+});
+
+describe("require.resolve", () => {
+  test("maps npm specifiers to jsdelivr +esm URLs", () => {
     expect(require.resolve("d3")).toBe("https://cdn.jsdelivr.net/npm/d3/+esm");
     expect(require.resolve("d3@^7.1")).toBe("https://cdn.jsdelivr.net/npm/d3@^7.1/+esm");
   });
 
   // prettier-ignore
-  test("require.resolve maps js file specifiers to jsdelivr +esm URLs", () => {
+  test("maps js file specifiers to jsdelivr +esm URLs", () => {
     expect(require.resolve("d3/dist/d3.js")).toBe("https://cdn.jsdelivr.net/npm/d3/dist/d3.js/+esm");
   });
 
   // prettier-ignore
-  test("require.resolve maps file specifiers to jsdelivr URLs", () => {
+  test("maps file specifiers to jsdelivr URLs", () => {
     expect(require.resolve("d3/dist/d3.min.css")).toBe("https://cdn.jsdelivr.net/npm/d3/dist/d3.min.css");
   });
 
-  test("require.resolve preserves local file specifiers", () => {
+  test("preserves local file specifiers", () => {
     expect(require.resolve("./local.js")).toBe("./local.js");
   });
 
-  test("require.resolve preserves absolute specifiers", () => {
+  test("preserves absolute specifiers", () => {
     expect(require.resolve("https://example.com/mod.js")).toBe("https://example.com/mod.js");
   });
 });
