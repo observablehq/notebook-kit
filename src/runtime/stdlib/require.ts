@@ -1,11 +1,15 @@
-require.resolve = resolve;
-
 const cache = new WeakMap<object, unknown>();
 
-export function require(...specifiers: unknown[]): unknown {
-  return specifiers.length === 1
-    ? import(/* @vite-ignore */ resolve(specifiers[0])).then(objectify)
-    : Promise.all(specifiers.map((s) => require(s))).then((modules) => Object.assign({}, ...modules)); // prettier-ignore
+export const require = Object.assign(Requirer(resolve), {alias});
+
+function Requirer(resolve: (specifier: unknown) => string) {
+  async function require(...specifiers: unknown[]): Promise<unknown> {
+    return specifiers.length === 1
+      ? import(/* @vite-ignore */ resolve(specifiers[0])).then(objectify)
+      : Promise.all(specifiers.map((s) => require(s))).then(merge);
+  }
+  require.resolve = resolve;
+  return require;
 }
 
 interface NpmSpecifier {
@@ -29,6 +33,13 @@ function parseNpmSpecifier(specifier: string): NpmSpecifier {
   return {name, range, path};
 }
 
+function alias(aliases: Record<string, string>) {
+  return Requirer((specifier) => {
+    if ((specifier as string) in aliases) specifier = aliases[specifier as string];
+    return resolve(specifier);
+  });
+}
+
 function resolve(_specifier: unknown): string {
   const specifier = String(_specifier);
   if (isProtocol(specifier) || isLocal(specifier)) return specifier;
@@ -47,6 +58,10 @@ function objectify(module: object): unknown {
   let object = cache.get(module);
   if (!object) cache.set(module, (object = defaultify(module)));
   return object;
+}
+
+function merge(modules: unknown[]): unknown {
+  return Object.assign({}, ...modules);
 }
 
 /** Returns true for e.g. https://example.com/ */
