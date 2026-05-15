@@ -6,11 +6,14 @@
   --max-width: calc(1024px - 4 * 16px); /* max-w-5xl p-4 */
 }
 
-body {
+html {
   font: 17px/1.5 var(--serif);
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body {
   background: var(--theme-background);
   color: var(--theme-foreground);
   margin: 16px 0;
