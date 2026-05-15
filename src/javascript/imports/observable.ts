@@ -6,7 +6,9 @@ const CODE_DOLLAR = 36;
 /** If specifier is an observable: protocol import, resolves it. */
 export function resolveObservableImport(specifier: string): string {
   if (!specifier.startsWith("observable:")) return specifier;
-  return `https://api.observablehq.com/${specifier.slice("observable:".length)}.js?v=4`;
+  let path = specifier.slice("observable:".length);
+  if (/^[0-9a-f]{16}(@|$)/.test(path)) path = `d/${path}`;
+  return `https://api.observablehq.com/${path}.js?v=4`;
 }
 
 export function isObservableImport(node: ImportDeclaration, specifier: string): boolean {

@@ -112,6 +112,58 @@ exports[`transpiles Observable JavaScript imports 1`] = `
 {
   "autodisplay": false,
   "body": "async (__ojs_runtime,__ojs_observer) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const observers = {};
+  const module = __ojs_runtime.module(_.default);
+  const main = __ojs_runtime.module();
+  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
+  main.variable(observers.color = __ojs_observer()).import("color", module);
+  return observers;
+}));
+
+return {color};
+}",
+  "inputs": [
+    "__ojs_runtime",
+    "__ojs_observer",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+}
+`;
+
+exports[`transpiles Observable JavaScript imports 2`] = `
+{
+  "autodisplay": false,
+  "body": "async (__ojs_runtime,__ojs_observer) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4").then((_) => {
+  const observers = {};
+  const module = __ojs_runtime.module(_.default);
+  const main = __ojs_runtime.module();
+  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
+  main.variable(observers.color = __ojs_observer()).import("color", module);
+  return observers;
+}));
+
+return {color};
+}",
+  "inputs": [
+    "__ojs_runtime",
+    "__ojs_observer",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+}
+`;
+
+exports[`transpiles Observable JavaScript imports 3`] = `
+{
+  "autodisplay": false,
+  "body": "async (__ojs_runtime,__ojs_observer) => {
 const {figure, rotation, viewof$rotation} = await (import("https://api.observablehq.com/@rreusser/drawing-3d-objects-with-svg.js?v=4").then((_) => {
   const observers = {};
   const module = __ojs_runtime.module(_.default);
@@ -140,7 +192,7 @@ return {figure,rotation,viewof$rotation};
 }
 `;
 
-exports[`transpiles Observable JavaScript imports 2`] = `
+exports[`transpiles Observable JavaScript imports 4`] = `
 {
   "autodisplay": false,
   "body": "async (__ojs_runtime,__ojs_observer) => {
@@ -382,6 +434,58 @@ exports[`transpiles static imports with {type: 'observable'} 1`] = `
 {
   "autodisplay": false,
   "body": "async (__ojs_runtime,__ojs_observer) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const observers = {};
+  const module = __ojs_runtime.module(_.default);
+  const main = __ojs_runtime.module();
+  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
+  main.variable(observers.color = __ojs_observer()).import("color", module);
+  return observers;
+}));
+
+return {color};
+}",
+  "inputs": [
+    "__ojs_runtime",
+    "__ojs_observer",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+}
+`;
+
+exports[`transpiles static imports with {type: 'observable'} 2`] = `
+{
+  "autodisplay": false,
+  "body": "async (__ojs_runtime,__ojs_observer) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4").then((_) => {
+  const observers = {};
+  const module = __ojs_runtime.module(_.default);
+  const main = __ojs_runtime.module();
+  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
+  main.variable(observers.color = __ojs_observer()).import("color", module);
+  return observers;
+}));
+
+return {color};
+}",
+  "inputs": [
+    "__ojs_runtime",
+    "__ojs_observer",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+}
+`;
+
+exports[`transpiles static imports with {type: 'observable'} 3`] = `
+{
+  "autodisplay": false,
+  "body": "async (__ojs_runtime,__ojs_observer) => {
 const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubber.js?v=4").then((_) => {
   const observers = {};
   const module = __ojs_runtime.module(_.default);
@@ -404,7 +508,33 @@ return {Scrubber};
 }
 `;
 
-exports[`transpiles static imports with {type: 'observable'} 2`] = `
+exports[`transpiles static imports with {type: 'observable'} 4`] = `
+{
+  "autodisplay": false,
+  "body": "async (__ojs_runtime,__ojs_observer) => {
+const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubber@255.js?v=4").then((_) => {
+  const observers = {};
+  const module = __ojs_runtime.module(_.default);
+  const main = __ojs_runtime.module();
+  if (!module.defines("Scrubber")) throw new SyntaxError(\`export 'Scrubber' not found\`);
+  main.variable(observers.Scrubber = __ojs_observer()).import("Scrubber", module);
+  return observers;
+}));
+
+return {Scrubber};
+}",
+  "inputs": [
+    "__ojs_runtime",
+    "__ojs_observer",
+  ],
+  "output": undefined,
+  "outputs": [
+    "Scrubber",
+  ],
+}
+`;
+
+exports[`transpiles static imports with {type: 'observable'} 5`] = `
 {
   "autodisplay": false,
   "body": "async (__ojs_runtime,__ojs_observer) => {
@@ -482,6 +612,58 @@ exports[`transpiles static observable: imports 1`] = `
 {
   "autodisplay": false,
   "body": "async (__ojs_runtime,__ojs_observer) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const observers = {};
+  const module = __ojs_runtime.module(_.default);
+  const main = __ojs_runtime.module();
+  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
+  main.variable(observers.color = __ojs_observer()).import("color", module);
+  return observers;
+}));
+
+return {color};
+}",
+  "inputs": [
+    "__ojs_runtime",
+    "__ojs_observer",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+}
+`;
+
+exports[`transpiles static observable: imports 2`] = `
+{
+  "autodisplay": false,
+  "body": "async (__ojs_runtime,__ojs_observer) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4").then((_) => {
+  const observers = {};
+  const module = __ojs_runtime.module(_.default);
+  const main = __ojs_runtime.module();
+  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
+  main.variable(observers.color = __ojs_observer()).import("color", module);
+  return observers;
+}));
+
+return {color};
+}",
+  "inputs": [
+    "__ojs_runtime",
+    "__ojs_observer",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+}
+`;
+
+exports[`transpiles static observable: imports 3`] = `
+{
+  "autodisplay": false,
+  "body": "async (__ojs_runtime,__ojs_observer) => {
 const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubber.js?v=4").then((_) => {
   const observers = {};
   const module = __ojs_runtime.module(_.default);
@@ -504,7 +686,33 @@ return {Scrubber};
 }
 `;
 
-exports[`transpiles static observable: imports 2`] = `
+exports[`transpiles static observable: imports 4`] = `
+{
+  "autodisplay": false,
+  "body": "async (__ojs_runtime,__ojs_observer) => {
+const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubber@255.js?v=4").then((_) => {
+  const observers = {};
+  const module = __ojs_runtime.module(_.default);
+  const main = __ojs_runtime.module();
+  if (!module.defines("Scrubber")) throw new SyntaxError(\`export 'Scrubber' not found\`);
+  main.variable(observers.Scrubber = __ojs_observer()).import("Scrubber", module);
+  return observers;
+}));
+
+return {Scrubber};
+}",
+  "inputs": [
+    "__ojs_runtime",
+    "__ojs_observer",
+  ],
+  "output": undefined,
+  "outputs": [
+    "Scrubber",
+  ],
+}
+`;
+
+exports[`transpiles static observable: imports 5`] = `
 {
   "autodisplay": false,
   "body": "async (__ojs_runtime,__ojs_observer) => {

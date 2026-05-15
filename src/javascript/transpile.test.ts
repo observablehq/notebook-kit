@@ -33,16 +33,24 @@ it("transpiles dynamic npm: imports", () => {
 });
 
 it("transpiles static observable: imports", () => {
+  expect(transpile('import {color} from "observable:2d6bf7be248d66f3";', "js")).toMatchSnapshot();
+  expect(transpile('import {color} from "observable:2d6bf7be248d66f3@173";', "js")).toMatchSnapshot();
   expect(transpile('import {Scrubber} from "observable:@mbostock/scrubber";', "js")).toMatchSnapshot();
+  expect(transpile('import {Scrubber} from "observable:@mbostock/scrubber@255";', "js")).toMatchSnapshot();
   expect(transpile('import {viewof$rotation} from "observable:@rreusser/drawing-3d-objects-with-svg";', "js")).toMatchSnapshot();
 });
 
 it("transpiles static imports with {type: 'observable'}", () => {
+  expect(transpile('import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
+  expect(transpile('import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
   expect(transpile('import {Scrubber} from "https://api.observablehq.com/@mbostock/scrubber.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
+  expect(transpile('import {Scrubber} from "https://api.observablehq.com/@mbostock/scrubber@255.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
   expect(transpile('import {viewof$rotation} from "https://api.observablehq.com/@rreusser/drawing-3d-objects-with-svg.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
 });
 
 it("transpiles Observable JavaScript imports", () => {
+  expect(transpile('import {color} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} from "2d6bf7be248d66f3@173"', "ojs")).toMatchSnapshot();
   expect(transpile('import {figure, viewof rotation} from "@rreusser/drawing-3d-objects-with-svg"', "ojs")).toMatchSnapshot();
   expect(transpile('import {figure, viewof rotation as rot} from "@rreusser/drawing-3d-objects-with-svg"', "ojs")).toMatchSnapshot();
 });
