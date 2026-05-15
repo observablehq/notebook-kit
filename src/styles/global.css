@@ -6,7 +6,7 @@
   --max-width: calc(1024px - 4 * 16px); /* max-w-5xl p-4 */
 }
 
-html {
+body {
   font: 17px/1.5 var(--serif);
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
@@ -17,7 +17,7 @@ html {
   padding: 16px 24px;
 }
 
-body {
+main {
   margin: auto;
   max-width: var(--max-width);
 }
