@@ -126,7 +126,7 @@ export function observable({
                   child.on("error", reject);
                   child.on("exit", (code) => {
                     if (code === 0) return resolve();
-                    unlinkSync(cachePath); // don’t pollute cache with failure
+                    unlinkSyncIfExists(cachePath); // don’t pollute cache with failure
                     reject(new Error(`${cell.database} query exited with ${code}`));
                   });
                 });
@@ -149,7 +149,7 @@ export function observable({
                 child.on("error", reject);
                 child.on("exit", (code) => {
                   if (code === 0) return resolve();
-                  unlinkSync(cachePath); // don’t pollute cache with failure
+                  unlinkSyncIfExists(cachePath); // don’t pollute cache with failure
                   reject(new Error(`${mode} interpreter exited with ${code}`));
                 });
               });
@@ -302,4 +302,13 @@ function isSpaceCode(code: number): boolean {
 /** Note: only suitable for use in a script element. */
 function escapeScript(script: string): string {
   return script.replace(/<\/script>/g, "<\\/script>"); // TODO handle other contexts
+}
+
+function unlinkSyncIfExists(path: string): void {
+  try {
+    unlinkSync(path);
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") return;
+    throw error;
+  }
 }
