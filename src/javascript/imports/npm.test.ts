@@ -43,15 +43,15 @@ test("adds /+esm as expected", () => {
 test("sets the default version of @duckdb/duckdb-wasm", () => {
   assert.strictEqual(
     resolveNpmImport("npm:@duckdb/duckdb-wasm"),
-    "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm"
+    "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm"
   );
   assert.strictEqual(
     resolveNpmImport("npm:@duckdb/duckdb-wasm/+esm"),
-    "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm"
+    "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm"
   );
   assert.strictEqual(
     resolveNpmImport("npm:@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm"),
-    "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-mvp.wasm"
+    "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-mvp.wasm"
   );
 });
 

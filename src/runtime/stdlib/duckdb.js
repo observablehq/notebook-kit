@@ -1,4 +1,4 @@
-import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm";
+import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm";
 
 // Adapted from https://observablehq.com/@cmudig/duckdb-client
 // Copyright 2021 CMU Data Interaction Group
@@ -31,12 +31,12 @@ import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0
 
 const bundles = {
   mvp: {
-    mainModule: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-mvp.wasm",
-    mainWorker: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-browser-mvp.worker.js" // prettier-ignore
+    mainModule: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-mvp.wasm",
+    mainWorker: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-mvp.worker.js" // prettier-ignore
   },
   eh: {
-    mainModule: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-eh.wasm",
-    mainWorker: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-browser-eh.worker.js" // prettier-ignore
+    mainModule: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-eh.wasm",
+    mainWorker: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-eh.worker.js" // prettier-ignore
   }
 };
 const bundle = duckdb.selectBundle(bundles);
@@ -175,6 +175,9 @@ export class DuckDBClient {
     }
     if (config.query?.castBigIntToDouble === undefined) {
       config = {...config, query: {...config.query, castBigIntToDouble: true}};
+    }
+    if (config.filesystem?.forceFullHTTPReads === undefined) {
+      config = {...config, filesystem: {...config.filesystem, forceFullHTTPReads: true}};
     }
     await db.open(config);
     // await registerExtensions(db, config.extensions);

@@ -3,7 +3,7 @@ export const aq = () => import("https://cdn.jsdelivr.net/npm/arquero/+esm");
 export const Arrow = () => import("https://cdn.jsdelivr.net/npm/apache-arrow@17.0.0/+esm");
 export const d3 = () => import("https://cdn.jsdelivr.net/npm/d3/+esm");
 export const dot = () => import("./dot.js").then((_) => _.dot);
-export const duckdb = () => import("https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm");
+export const duckdb = () => import("https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm");
 export const DuckDBClient = () => import("./duckdb.js").then((_) => _.DuckDBClient);
 export const echarts = () => import("https://cdn.jsdelivr.net/npm/echarts/+esm");
 export const htl = () => import("https://cdn.jsdelivr.net/npm/htl/+esm");
