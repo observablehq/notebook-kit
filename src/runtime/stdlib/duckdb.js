@@ -189,6 +189,7 @@ export class DuckDBClient {
   }
 }
 
+Object.defineProperty(DuckDBClient, "name", {value: "DuckDBClient"}); // prevent mangling
 Object.defineProperty(DuckDBClient.prototype, "dialect", {value: "duckdb"});
 
 // async function registerExtensions(db, extensions) {
