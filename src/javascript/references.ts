@@ -3,9 +3,6 @@ import type {BlockStatement, CatchClause, Class} from "acorn";
 import type {ForInStatement, ForOfStatement, ForStatement} from "acorn";
 import type {FunctionDeclaration, FunctionExpression} from "acorn";
 import type {Identifier, Node, Pattern, Program} from "acorn";
-import {checkAssignments} from "./assignments.js";
-import {defaultGlobals} from "./globals.js";
-import {checkExports} from "./imports.js";
 import {ancestor} from "./walk.js";
 
 // Based on https://github.com/ForbesLindesay/acorn-globals
@@ -42,17 +39,16 @@ function isBlockScope(node: Node): node is FunctionNode | Program | BlockStateme
 export function findReferences(
   node: Node,
   {
-    input,
-    globals = defaultGlobals,
-    filterReference = (identifier: Identifier) => !globals.has(identifier.name),
+    filterReference = () => true,
     filterDeclaration = () => true
   }: {
-    input?: string;
-    globals?: Set<string>;
     filterReference?: (identifier: Identifier) => boolean;
     filterDeclaration?: (identifier: {name: string}) => boolean;
   } = {}
-): Identifier[] {
+): {
+  locals: Map<Node, Set<string>>;
+  references: Identifier[];
+} {
   const locals = new Map<Node, Set<string>>();
   const references: Identifier[] = [];
 
@@ -163,10 +159,5 @@ export function findReferences(
     Identifier: identifier
   });
 
-  if (input !== undefined) {
-    checkAssignments(node, {locals, references, globals, input});
-    checkExports(node, {input});
-  }
-
-  return references;
+  return {locals, references};
 }

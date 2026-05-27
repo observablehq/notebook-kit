@@ -4,6 +4,7 @@ import {rewriteFileExpressions} from "./files.js";
 import {hasImportDeclaration} from "./imports.js";
 import {rewriteImportDeclarations, rewriteImportExpressions} from "./imports.js";
 import {transpileObservable} from "./observable.js";
+import type {ParseOptions} from "./parse.js";
 import {parseJavaScript} from "./parse.js";
 import {Sourcemap} from "./sourcemap.js";
 import {transpileTemplate} from "./template.js";
@@ -26,7 +27,7 @@ export type TranspiledJavaScript = {
   automutable?: boolean;
 };
 
-export type TranspileOptions = {
+export type TranspileOptions = ParseOptions & {
   /** If true, resolve local imports paths relative to document.baseURI. */
   resolveLocalImports?: boolean;
   /** If true, resolve file using import.meta.url (so Vite treats it as an asset). */
@@ -77,7 +78,7 @@ export function transpileJavaScript(
   input: string,
   options?: TranspileOptions
 ): TranspiledJavaScript {
-  const cell = parseJavaScript(input);
+  const cell = parseJavaScript(input, options);
   let async = cell.async;
   const inputs = Array.from(new Set(cell.references.map((r) => r.name)));
   if (hasImportDeclaration(cell.body)) async = true;

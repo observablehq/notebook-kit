@@ -1,3 +1,4 @@
+export * from "./javascript/globals.js";
 export * from "./javascript/parse.js";
 export * from "./javascript/template.js";
 export * from "./javascript/transpile.js";
