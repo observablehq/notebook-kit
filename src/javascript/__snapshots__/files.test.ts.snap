@@ -1,0 +1,311 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`allows some simple static expressions 1`] = `
+[
+  Node {
+    "argument": "foo.csv",
+    "arguments": [
+      Node {
+        "end": 29,
+        "left": Node {
+          "end": 20,
+          "raw": ""foo"",
+          "start": 15,
+          "type": "Literal",
+          "value": "foo",
+        },
+        "operator": "+",
+        "right": Node {
+          "end": 29,
+          "raw": "".csv"",
+          "start": 23,
+          "type": "Literal",
+          "value": ".csv",
+        },
+        "start": 15,
+        "type": "BinaryExpression",
+      },
+    ],
+    "callee": Node {
+      "end": 14,
+      "name": "FileAttachment",
+      "start": 0,
+      "type": "Identifier",
+    },
+    "end": 30,
+    "optional": false,
+    "start": 0,
+    "type": "CallExpression",
+  },
+]
+`;
+
+exports[`allows some simple static expressions 2`] = `
+[
+  Node {
+    "argument": "foo1.csv",
+    "arguments": [
+      Node {
+        "end": 35,
+        "left": Node {
+          "end": 26,
+          "left": Node {
+            "end": 20,
+            "raw": ""foo"",
+            "start": 15,
+            "type": "Literal",
+            "value": "foo",
+          },
+          "operator": "+",
+          "right": Node {
+            "end": 26,
+            "raw": ""1"",
+            "start": 23,
+            "type": "Literal",
+            "value": "1",
+          },
+          "start": 15,
+          "type": "BinaryExpression",
+        },
+        "operator": "+",
+        "right": Node {
+          "end": 35,
+          "raw": "".csv"",
+          "start": 29,
+          "type": "Literal",
+          "value": ".csv",
+        },
+        "start": 15,
+        "type": "BinaryExpression",
+      },
+    ],
+    "callee": Node {
+      "end": 14,
+      "name": "FileAttachment",
+      "start": 0,
+      "type": "Identifier",
+    },
+    "end": 36,
+    "optional": false,
+    "start": 0,
+    "type": "CallExpression",
+  },
+]
+`;
+
+exports[`allows some simple static expressions 3`] = `
+[
+  Node {
+    "argument": "foo.csv",
+    "arguments": [
+      Node {
+        "end": 29,
+        "expressions": [
+          Node {
+            "end": 23,
+            "raw": ""foo"",
+            "start": 18,
+            "type": "Literal",
+            "value": "foo",
+          },
+        ],
+        "quasis": [
+          Node {
+            "end": 16,
+            "start": 16,
+            "tail": false,
+            "type": "TemplateElement",
+            "value": {
+              "cooked": "",
+              "raw": "",
+            },
+          },
+          Node {
+            "end": 28,
+            "start": 24,
+            "tail": true,
+            "type": "TemplateElement",
+            "value": {
+              "cooked": ".csv",
+              "raw": ".csv",
+            },
+          },
+        ],
+        "start": 15,
+        "type": "TemplateLiteral",
+      },
+    ],
+    "callee": Node {
+      "end": 14,
+      "name": "FileAttachment",
+      "start": 0,
+      "type": "Identifier",
+    },
+    "end": 30,
+    "optional": false,
+    "start": 0,
+    "type": "CallExpression",
+  },
+]
+`;
+
+exports[`allows some simple static expressions 4`] = `
+[
+  Node {
+    "argument": "foo1.csv",
+    "arguments": [
+      Node {
+        "end": 35,
+        "expressions": [
+          Node {
+            "end": 29,
+            "left": Node {
+              "end": 23,
+              "raw": ""foo"",
+              "start": 18,
+              "type": "Literal",
+              "value": "foo",
+            },
+            "operator": "+",
+            "right": Node {
+              "end": 29,
+              "raw": ""1"",
+              "start": 26,
+              "type": "Literal",
+              "value": "1",
+            },
+            "start": 18,
+            "type": "BinaryExpression",
+          },
+        ],
+        "quasis": [
+          Node {
+            "end": 16,
+            "start": 16,
+            "tail": false,
+            "type": "TemplateElement",
+            "value": {
+              "cooked": "",
+              "raw": "",
+            },
+          },
+          Node {
+            "end": 34,
+            "start": 30,
+            "tail": true,
+            "type": "TemplateElement",
+            "value": {
+              "cooked": ".csv",
+              "raw": ".csv",
+            },
+          },
+        ],
+        "start": 15,
+        "type": "TemplateLiteral",
+      },
+    ],
+    "callee": Node {
+      "end": 14,
+      "name": "FileAttachment",
+      "start": 0,
+      "type": "Identifier",
+    },
+    "end": 36,
+    "optional": false,
+    "start": 0,
+    "type": "CallExpression",
+  },
+]
+`;
+
+exports[`finds files 1`] = `
+[
+  Node {
+    "argument": "foo.csv",
+    "arguments": [
+      Node {
+        "end": 24,
+        "raw": ""foo.csv"",
+        "start": 15,
+        "type": "Literal",
+        "value": "foo.csv",
+      },
+    ],
+    "callee": Node {
+      "end": 14,
+      "name": "FileAttachment",
+      "start": 0,
+      "type": "Identifier",
+    },
+    "end": 25,
+    "optional": false,
+    "start": 0,
+    "type": "CallExpression",
+  },
+]
+`;
+
+exports[`finds files 2`] = `
+[
+  Node {
+    "argument": "foo.csv",
+    "arguments": [
+      Node {
+        "end": 24,
+        "raw": "'foo.csv'",
+        "start": 15,
+        "type": "Literal",
+        "value": "foo.csv",
+      },
+    ],
+    "callee": Node {
+      "end": 14,
+      "name": "FileAttachment",
+      "start": 0,
+      "type": "Identifier",
+    },
+    "end": 25,
+    "optional": false,
+    "start": 0,
+    "type": "CallExpression",
+  },
+]
+`;
+
+exports[`finds files 3`] = `
+[
+  Node {
+    "argument": "foo.csv",
+    "arguments": [
+      Node {
+        "end": 24,
+        "expressions": [],
+        "quasis": [
+          Node {
+            "end": 23,
+            "start": 16,
+            "tail": true,
+            "type": "TemplateElement",
+            "value": {
+              "cooked": "foo.csv",
+              "raw": "foo.csv",
+            },
+          },
+        ],
+        "start": 15,
+        "type": "TemplateLiteral",
+      },
+    ],
+    "callee": Node {
+      "end": 14,
+      "name": "FileAttachment",
+      "start": 0,
+      "type": "Identifier",
+    },
+    "end": 25,
+    "optional": false,
+    "start": 0,
+    "type": "CallExpression",
+  },
+]
+`;

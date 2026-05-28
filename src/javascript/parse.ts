@@ -1,19 +1,23 @@
 import {Parser, tokTypes} from "acorn";
 import type {Expression, Identifier, Options, Program} from "acorn";
-import {findReferences} from "./references.js";
-import {findDeclarations} from "./declarations.js";
 import {findAwaits} from "./awaits.js";
+import {findDeclarations} from "./declarations.js";
+import type {FeatureExpression} from "./features.js";
+import {findFeatures} from "./features.js";
+import {findReferences} from "./references.js";
 
 export const acornOptions: Options = {
   ecmaVersion: "latest",
   sourceType: "module"
 };
 
-// TODO files
 export interface JavaScriptCell {
   body: Program | Expression;
   declarations: Identifier[] | null; // null for expressions that can’t declare top-level variables, a.k.a. outputs
   references: Identifier[]; // the unbound references, a.k.a. inputs
+  files: FeatureExpression[]; // any calls to FileAttachment
+  databases: FeatureExpression[]; // any calls to DatabaseClient
+  secrets: FeatureExpression[]; // any calls to Secret
   expression: boolean; // is this an expression or a program cell?
   async: boolean; // does this use top-level await?
 }
@@ -36,6 +40,9 @@ export function parseJavaScript(input: string): JavaScriptCell {
     body,
     declarations: expression ? null : findDeclarations(body as Program, input),
     references: findReferences(body, {input}),
+    files: findFeatures("FileAttachment", body, input),
+    databases: findFeatures("DatabaseClient", body, input),
+    secrets: findFeatures("Secret", body, input),
     expression: !!expression,
     async: findAwaits(body).length > 0
   };
