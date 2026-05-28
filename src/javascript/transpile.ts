@@ -24,6 +24,12 @@ export type TranspiledJavaScript = {
   autoview?: boolean;
   /** whether to implicitly derive a mutable; requires mutable output */
   automutable?: boolean;
+  /** the names of any referenced files */
+  files?: Set<string>;
+  /** the names of any referenced databases */
+  databases?: Set<string>;
+  /** the names of any referenced secrets */
+  secrets?: Set<string>;
 };
 
 export type TranspileOptions = {
@@ -93,5 +99,8 @@ export function transpileJavaScript(
   output.insertRight(input.length, "\n}");
   const body = String(output);
   const autodisplay = cell.expression && !(inputs.includes("display") || inputs.includes("view"));
-  return {body, inputs, outputs, autodisplay};
+  const files = new Set(cell.files.map((f) => f.argument));
+  const databases = new Set(cell.databases.map((f) => f.argument));
+  const secrets = new Set(cell.secrets.map((f) => f.argument));
+  return {body, inputs, outputs, autodisplay, files, databases, secrets};
 }
