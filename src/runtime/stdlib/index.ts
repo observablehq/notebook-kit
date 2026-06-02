@@ -8,7 +8,6 @@ import {Mutable} from "./mutable.js";
 import {Observer} from "./observer.js";
 import * as Promises from "./promises/index.js";
 import * as recommendedLibraries from "./recommendedLibraries.js";
-import {require} from "./require.js";
 import * as sampleDatasets from "./sampleDatasets.js";
 
 export const root = document.querySelector("main") ?? document.body;
@@ -25,7 +24,6 @@ export const library = {
   Promises: () => Promises, // deprecated!
   Files: () => Files, // deprecated!
   DOM: () => DOM, // deprecated!
-  require: () => require, // deprecated!
   __ojs_observer: () => () => new Observer(),
   ...recommendedLibraries,
   ...sampleDatasets
