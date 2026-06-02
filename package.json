@@ -5,7 +5,7 @@
     "type": "git",
     "url": "git+https://github.com/observablehq/notebook-kit.git"
   },
-  "version": "1.9.2",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "test": "vitest",
