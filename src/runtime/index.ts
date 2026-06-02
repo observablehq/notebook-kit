@@ -21,7 +21,7 @@ export class NotebookRuntime {
   readonly runtime: Runtime & {fileAttachments: typeof fileAttachments};
   readonly main: Module;
 
-  constructor(builtins = library) {
+  constructor(builtins: Record<string, () => unknown> = library) {
     const runtime = new Runtime({...builtins, __ojs_runtime: () => runtime});
     this.runtime = Object.assign(runtime, {fileAttachments});
     this.main = runtime.module();
