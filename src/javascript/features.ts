@@ -20,10 +20,8 @@ export function findFeatures(name: string, body: Node, input: string): FeatureEx
     CallExpression(node) {
       const {callee} = node;
       if (callee.type !== "Identifier" || !references.has(callee)) return;
-      const args = node.arguments;
-      if (args.length !== 1) throw syntaxError(`${name} requires a single literal string argument`, node, input); // prettier-ignore
-      const [arg] = args;
-      if (!isStringLiteral(arg)) throw syntaxError(`${name} requires a single literal string argument`, node, input); // prettier-ignore
+      const [arg] = node.arguments;
+      if (!arg || !isStringLiteral(arg)) throw syntaxError(`${name} requires a literal string argument`, node, input); // prettier-ignore
       calls.push(Object.assign(node, {argument: getStringLiteralValue(arg)}));
     }
   });

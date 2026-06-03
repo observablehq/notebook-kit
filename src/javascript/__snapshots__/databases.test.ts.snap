@@ -1,0 +1,84 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`allows additional arguments 1`] = `
+[
+  Node {
+    "argument": "foo",
+    "arguments": [
+      Node {
+        "end": 20,
+        "raw": ""foo"",
+        "start": 15,
+        "type": "Literal",
+        "value": "foo",
+      },
+      Node {
+        "end": 57,
+        "properties": [
+          Node {
+            "computed": false,
+            "end": 56,
+            "key": Node {
+              "end": 28,
+              "name": "since",
+              "start": 23,
+              "type": "Identifier",
+            },
+            "kind": "init",
+            "method": false,
+            "shorthand": false,
+            "start": 23,
+            "type": "Property",
+            "value": Node {
+              "end": 56,
+              "raw": ""2021-01-01T12:34:56.789Z"",
+              "start": 30,
+              "type": "Literal",
+              "value": "2021-01-01T12:34:56.789Z",
+            },
+          },
+        ],
+        "start": 22,
+        "type": "ObjectExpression",
+      },
+    ],
+    "callee": Node {
+      "end": 14,
+      "name": "DatabaseClient",
+      "start": 0,
+      "type": "Identifier",
+    },
+    "end": 58,
+    "optional": false,
+    "start": 0,
+    "type": "CallExpression",
+  },
+]
+`;
+
+exports[`finds databases 1`] = `
+[
+  Node {
+    "argument": "foo",
+    "arguments": [
+      Node {
+        "end": 20,
+        "raw": ""foo"",
+        "start": 15,
+        "type": "Literal",
+        "value": "foo",
+      },
+    ],
+    "callee": Node {
+      "end": 14,
+      "name": "DatabaseClient",
+      "start": 0,
+      "type": "Identifier",
+    },
+    "end": 21,
+    "optional": false,
+    "start": 0,
+    "type": "CallExpression",
+  },
+]
+`;
