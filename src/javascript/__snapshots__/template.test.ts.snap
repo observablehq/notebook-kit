@@ -123,11 +123,11 @@ Node {
 }
 `;
 
-exports[`transpiles a html template with an interpolated expression 1`] = `"html\`Hello, \${"world"}!\`"`;
+exports[`transpiles a html template with an interpolated expression 1`] = `"htl.html\`Hello, \${"world"}!\`"`;
 
-exports[`transpiles a html template with backquotes 1`] = `"html\`Hello, \\\`world\\\`!\`"`;
+exports[`transpiles a html template with backquotes 1`] = `"htl.html\`Hello, \\\`world\\\`!\`"`;
 
-exports[`transpiles a html template with backslashes 1`] = `"html\`Hello, \\world\\!\`"`;
+exports[`transpiles a html template with backslashes 1`] = `"htl.html\`Hello, \\world\\!\`"`;
 
 exports[`transpiles a markdown template with an interpolated expression 1`] = `"md\`Hello, \${"world"}!\`"`;
 
@@ -137,7 +137,7 @@ exports[`transpiles a markdown template with backslashes 1`] = `"md\`Hello, \\\\
 
 exports[`transpiles a node template with backslashes 1`] = `"Interpreter("node", {id: 1, format: "buffer"}).run(\`Hello, \\\\world\\\\!\`).then((file) => file.arrayBuffer())"`;
 
-exports[`transpiles a simple html template 1`] = `"html\`Hello, world!\`"`;
+exports[`transpiles a simple html template 1`] = `"htl.html\`Hello, world!\`"`;
 
 exports[`transpiles a simple markdown template 1`] = `"md\`Hello, world!\`"`;
 

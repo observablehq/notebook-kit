@@ -122,7 +122,9 @@ function getPrefix(cell: Cell): string {
       ? getSqlPrefix(cell)
       : isInterpreter(cell.mode)
         ? getInterpreterPrefix(cell)
-        : cell.mode;
+        : cell.mode === "html"
+          ? "htl.html"
+          : cell.mode;
 }
 
 function getSqlPrefix(cell: Cell): string {
