@@ -144,10 +144,7 @@ export function rewriteImportDeclarations(
     );
   }
   if (declarations.length > 1) {
-    output.insertLeft(
-      0,
-      `const [${specifiers.join(", ")}] = await Promise.all([${imports.join(", ")}]);\n`
-    );
+    output.insertLeft(0, `const [${specifiers.join(", ")}] = await Promise.all([${imports.join(", ")}]);\n`); // prettier-ignore
   } else if (declarations.length === 1) {
     output.insertLeft(0, `const ${specifiers[0]} = await ${imports[0]};\n`);
   }
@@ -176,7 +173,7 @@ function renderImport(source: string, node: ImportDeclaration, input: string): s
   }`;
 }
 
-function getLocalName(node: NamedImportSpecifier): string {
+export function getLocalName(node: NamedImportSpecifier): string {
   return node.local.name;
 }
 

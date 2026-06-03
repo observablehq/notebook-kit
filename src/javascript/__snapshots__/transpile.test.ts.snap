@@ -132,14 +132,12 @@ await z;
 exports[`transpiles Observable JavaScript imports 1`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
-  main.variable(observers.color = __ojs_observer()).import("color", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
 }));
 
 return {color};
@@ -147,8 +145,7 @@ return {color};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -161,14 +158,12 @@ return {color};
 exports[`transpiles Observable JavaScript imports 2`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
-  main.variable(observers.color = __ojs_observer()).import("color", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
 }));
 
 return {color};
@@ -176,8 +171,7 @@ return {color};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -190,18 +184,14 @@ return {color};
 exports[`transpiles Observable JavaScript imports 3`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {figure, rotation, viewof$rotation} = await (import("https://api.observablehq.com/@rreusser/drawing-3d-objects-with-svg.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("figure")) throw new SyntaxError(\`export 'figure' not found\`);
-  main.variable(observers.figure = __ojs_observer()).import("figure", module);
-  if (!module.defines("rotation")) throw new SyntaxError(\`export 'rotation' not found\`);
-  main.variable(observers.rotation = __ojs_observer()).import("rotation", module);
-  if (!module.defines("viewof rotation")) throw new SyntaxError(\`export 'viewof rotation' not found\`);
-  main.variable(observers.viewof$rotation = __ojs_observer()).import("viewof rotation", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("figure")?.import("figure", module);
+  outputs.get("rotation")?.import("rotation", module);
+  outputs.get("viewof$rotation")?.import("viewof rotation", "viewof$rotation", module);
+  return {};
 }));
 
 return {figure,rotation,viewof$rotation};
@@ -209,8 +199,7 @@ return {figure,rotation,viewof$rotation};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -225,18 +214,14 @@ return {figure,rotation,viewof$rotation};
 exports[`transpiles Observable JavaScript imports 4`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {figure, rotation: rot, viewof$rotation: viewof$rot} = await (import("https://api.observablehq.com/@rreusser/drawing-3d-objects-with-svg.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("figure")) throw new SyntaxError(\`export 'figure' not found\`);
-  main.variable(observers.figure = __ojs_observer()).import("figure", module);
-  if (!module.defines("rotation")) throw new SyntaxError(\`export 'rotation' not found\`);
-  main.variable(observers.rotation = __ojs_observer()).import("rotation", module);
-  if (!module.defines("viewof rotation")) throw new SyntaxError(\`export 'viewof rotation' not found\`);
-  main.variable(observers.viewof$rotation = __ojs_observer()).import("viewof rotation", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("figure")?.import("figure", module);
+  outputs.get("rot")?.import("rotation", "rot", module);
+  outputs.get("viewof$rot")?.import("viewof rotation", "viewof$rot", module);
+  return {};
 }));
 
 return {figure,rot,viewof$rot};
@@ -244,8 +229,7 @@ return {figure,rot,viewof$rot};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -508,14 +492,12 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles static imports with {type: 'observable'} 1`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
-  main.variable(observers.color = __ojs_observer()).import("color", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
 }));
 
 return {color};
@@ -523,8 +505,7 @@ return {color};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -537,14 +518,12 @@ return {color};
 exports[`transpiles static imports with {type: 'observable'} 2`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
-  main.variable(observers.color = __ojs_observer()).import("color", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
 }));
 
 return {color};
@@ -552,8 +531,7 @@ return {color};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -566,14 +544,12 @@ return {color};
 exports[`transpiles static imports with {type: 'observable'} 3`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubber.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("Scrubber")) throw new SyntaxError(\`export 'Scrubber' not found\`);
-  main.variable(observers.Scrubber = __ojs_observer()).import("Scrubber", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("Scrubber")?.import("Scrubber", module);
+  return {};
 }));
 
 return {Scrubber};
@@ -581,8 +557,7 @@ return {Scrubber};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -595,14 +570,12 @@ return {Scrubber};
 exports[`transpiles static imports with {type: 'observable'} 4`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubber@255.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("Scrubber")) throw new SyntaxError(\`export 'Scrubber' not found\`);
-  main.variable(observers.Scrubber = __ojs_observer()).import("Scrubber", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("Scrubber")?.import("Scrubber", module);
+  return {};
 }));
 
 return {Scrubber};
@@ -610,8 +583,7 @@ return {Scrubber};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -624,14 +596,12 @@ return {Scrubber};
 exports[`transpiles static imports with {type: 'observable'} 5`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {viewof$rotation} = await (import("https://api.observablehq.com/@rreusser/drawing-3d-objects-with-svg.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("viewof rotation")) throw new SyntaxError(\`export 'viewof rotation' not found\`);
-  main.variable(observers.viewof$rotation = __ojs_observer()).import("viewof rotation", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("viewof$rotation")?.import("viewof rotation", "viewof$rotation", module);
+  return {};
 }));
 
 return {viewof$rotation};
@@ -639,8 +609,7 @@ return {viewof$rotation};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -710,14 +679,12 @@ const [{}, {}] = await Promise.all([import("https://cdn.jsdelivr.net/npm/d3/+esm
 exports[`transpiles static observable: imports 1`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
-  main.variable(observers.color = __ojs_observer()).import("color", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
 }));
 
 return {color};
@@ -725,8 +692,7 @@ return {color};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -739,14 +705,12 @@ return {color};
 exports[`transpiles static observable: imports 2`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("color")) throw new SyntaxError(\`export 'color' not found\`);
-  main.variable(observers.color = __ojs_observer()).import("color", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
 }));
 
 return {color};
@@ -754,8 +718,7 @@ return {color};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -768,14 +731,12 @@ return {color};
 exports[`transpiles static observable: imports 3`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubber.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("Scrubber")) throw new SyntaxError(\`export 'Scrubber' not found\`);
-  main.variable(observers.Scrubber = __ojs_observer()).import("Scrubber", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("Scrubber")?.import("Scrubber", module);
+  return {};
 }));
 
 return {Scrubber};
@@ -783,8 +744,7 @@ return {Scrubber};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -797,14 +757,12 @@ return {Scrubber};
 exports[`transpiles static observable: imports 4`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubber@255.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("Scrubber")) throw new SyntaxError(\`export 'Scrubber' not found\`);
-  main.variable(observers.Scrubber = __ojs_observer()).import("Scrubber", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("Scrubber")?.import("Scrubber", module);
+  return {};
 }));
 
 return {Scrubber};
@@ -812,8 +770,7 @@ return {Scrubber};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [
@@ -826,14 +783,12 @@ return {Scrubber};
 exports[`transpiles static observable: imports 5`] = `
 {
   "autodisplay": false,
-  "body": "async (__ojs_runtime,__ojs_observer) => {
+  "body": "async (__variable) => {
 const {viewof$rotation} = await (import("https://api.observablehq.com/@rreusser/drawing-3d-objects-with-svg.js?v=4").then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();
-  if (!module.defines("viewof rotation")) throw new SyntaxError(\`export 'viewof rotation' not found\`);
-  main.variable(observers.viewof$rotation = __ojs_observer()).import("viewof rotation", module);
-  return observers;
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("viewof$rotation")?.import("viewof rotation", "viewof$rotation", module);
+  return {};
 }));
 
 return {viewof$rotation};
@@ -841,8 +796,7 @@ return {viewof$rotation};
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "__ojs_runtime",
-    "__ojs_observer",
+    "@variable",
   ],
   "output": undefined,
   "outputs": [

@@ -93,7 +93,7 @@ export function transpileJavaScript(
   rewriteImportExpressions(output, cell.body, options);
   if (options?.resolveFiles) rewriteFileExpressions(output, cell.body);
   if (cell.expression) output.insertLeft(0, `return (\n`);
-  output.insertLeft(0, `${async ? "async " : ""}(${inputs}) => {\n`);
+  output.insertLeft(0, `${async ? "async " : ""}(${inputs.map(deat)}) => {\n`);
   if (outputs.length > 0) output.insertRight(input.length, `\nreturn {${outputs}};`);
   if (cell.expression) output.insertRight(input.length, `\n)`);
   output.insertRight(input.length, "\n}");
@@ -103,4 +103,8 @@ export function transpileJavaScript(
   const databases = new Set(cell.databases.map((f) => f.argument));
   const secrets = new Set(cell.secrets.map((f) => f.argument));
   return {body, inputs, outputs, autodisplay, files, databases, secrets};
+}
+
+function deat(input: string): string {
+  return input.replace(/^@/, "__"); // @variable to __variable
 }

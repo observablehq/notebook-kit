@@ -1,5 +1,5 @@
 import type {ImportAttribute, ImportDeclaration} from "acorn";
-import {getImportedName} from "../imports.js";
+import {getImportedName, getLocalName} from "../imports.js";
 
 const CODE_DOLLAR = 36;
 
@@ -22,22 +22,19 @@ function getImportAttributeKey(node: ImportAttribute): string {
 
 /** Note: mutates inputs! */
 export function renderObservableImport(source: string, node: ImportDeclaration, inputs: string[]): string {
-  if (!inputs.includes("__ojs_runtime")) inputs.push("__ojs_runtime");
-  if (!inputs.includes("__ojs_observer")) inputs.push("__ojs_observer");
+  if (!inputs.includes("@variable")) inputs.push("@variable");
   return `(import(${JSON.stringify(source)}).then((_) => {
-  const observers = {};
-  const module = __ojs_runtime.module(_.default);
-  const main = __ojs_runtime.module();${node.specifiers
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));${node.specifiers
     .map((specifier) => {
       if (specifier.type === "ImportNamespaceSpecifier") throw new SyntaxError("observable namespace imports are not supported");
-      const iname = getImportedName(specifier);
-      const vname = dedollar(iname);
+      const iname = dedollar(getImportedName(specifier));
+      const lname = getLocalName(specifier);
       return `
-  if (!module.defines("${vname}")) throw new SyntaxError(\`export '${vname}' not found\`);
-  main.variable(observers.${iname} = __ojs_observer()).import("${vname}", module);`;
+  outputs.get(${JSON.stringify(lname)})?.import(${JSON.stringify(iname)}${iname === lname ? "" : `, ${JSON.stringify(lname)}`}, module);`;
     })
     .join("")}
-  return observers;
+  return {};
 }))`;
 }
 

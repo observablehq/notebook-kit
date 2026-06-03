@@ -22,7 +22,7 @@ export class NotebookRuntime {
   readonly main: Module;
 
   constructor(builtins: Record<string, () => unknown> = library) {
-    const runtime = new Runtime({...builtins, __ojs_runtime: () => runtime});
+    const runtime = new Runtime(builtins);
     this.runtime = Object.assign(runtime, {fileAttachments});
     this.main = runtime.module();
   }
@@ -40,7 +40,7 @@ export const define = defaultNotebook.define.bind(defaultNotebook);
 
 main.constructor.prototype.defines = function (this: Module, name: string): boolean {
   return (
-    this._scope.has(name) ||
+    this._scope.has(name) || // prettier
     this._builtins.has(name) ||
     this._runtime._builtin._scope.has(name)
   );
