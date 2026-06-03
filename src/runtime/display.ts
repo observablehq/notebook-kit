@@ -11,9 +11,9 @@ export type DisplayState = {
   expanded: (number[][] | undefined)[];
 };
 
-export function display(state: DisplayState, value: unknown): void {
+export function display(state: DisplayState, value: unknown, name?: string): void {
   const {root, expanded} = state;
-  const node = isDisplayable(value, root) ? value : inspect(value, expanded[root.childNodes.length]); // prettier-ignore
+  const node = isDisplayable(value, root) ? value : inspect(value, expanded[root.childNodes.length], name); // prettier-ignore
   displayNode(state, node);
 }
 
@@ -28,8 +28,8 @@ function displayNode(state: DisplayState, node: Node): void {
   }
 }
 
-function displayError(state: DisplayState, value: unknown): void {
-  displayNode(state, inspectError(value));
+function displayError(state: DisplayState, value: unknown, name?: string): void {
+  displayNode(state, inspectError(value, name));
 }
 
 // Note: Element.prototype is instanceof Node, but cannot be inserted! This
@@ -49,7 +49,7 @@ export function clear(state: DisplayState): void {
   while (state.root.lastChild) state.root.lastChild.remove();
 }
 
-export function observe(state: DisplayState, {autodisplay, assets}: Definition) {
+export function observe(state: DisplayState, {autodisplay, assets, output}: Definition) {
   return {
     _error: false,
     _node: state.root, // _node for visibility promise
@@ -63,7 +63,7 @@ export function observe(state: DisplayState, {autodisplay, assets}: Definition) 
       if (autodisplay) {
         if (assets && value instanceof Element) mapAssets(value, assets);
         clear(state);
-        display(state, value);
+        display(state, value, output);
       } else if (state.autoclear) {
         clear(state);
       }
@@ -72,7 +72,7 @@ export function observe(state: DisplayState, {autodisplay, assets}: Definition) 
       console.error(error);
       this._error = true;
       clear(state);
-      displayError(state, error);
+      displayError(state, error, output);
     }
   };
 }

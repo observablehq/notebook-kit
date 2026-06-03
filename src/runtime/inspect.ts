@@ -1,8 +1,8 @@
 import {Inspector} from "@observablehq/inspector";
 
-export function inspect(value: unknown, expanded?: number[][]): HTMLDivElement {
+export function inspect(value: unknown, expanded?: number[][], name?: string): HTMLDivElement {
   const node = document.createElement("div");
-  new Inspector(node).fulfilled(value); // TODO name?
+  new Inspector(node).fulfilled(value, name);
   if (expanded) {
     for (const path of expanded) {
       let child: ChildNode = node;
@@ -13,9 +13,9 @@ export function inspect(value: unknown, expanded?: number[][]): HTMLDivElement {
   return node;
 }
 
-export function inspectError(value: unknown): HTMLDivElement {
+export function inspectError(value: unknown, name?: string): HTMLDivElement {
   const node = document.createElement("div");
-  new Inspector(node).rejected(value);
+  new Inspector(node).rejected(value, name);
   return node;
 }
 

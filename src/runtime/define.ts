@@ -48,7 +48,7 @@ export function define(main: Module, state: DefineState, definition: Definition,
           else if (state.variables[0] !== v) throw new Error("stale display");
           else if (version > displayVersion) clear(state);
           displayVersion = version;
-          display(state, value);
+          display(state, value, output);
           return value;
         };
       }
