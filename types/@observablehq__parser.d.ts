@@ -9,6 +9,9 @@ declare module "@observablehq/parser" {
     async: boolean;
     generator: boolean;
     references: (Identifier | ViewExpression | MutableExpression)[];
+    fileAttachments: Map<string, {start: number; end: number}[]>;
+    databaseClients: Map<string, {start: number; end: number}[]>;
+    secrets: Map<string, {start: number; end: number}[]>;
   }
   export interface TemplateCell extends BaseCell {
     tag: Node;

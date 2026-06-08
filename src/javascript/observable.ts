@@ -39,7 +39,10 @@ export function transpileObservable(
     output: cell.id ? asDeclaration(cell.id) : undefined,
     autodisplay: true,
     automutable: cell.id?.type === "MutableExpression",
-    autoview: cell.id?.type === "ViewExpression"
+    autoview: cell.id?.type === "ViewExpression",
+    files: new Set(cell.fileAttachments.keys()),
+    databases: new Set(cell.databaseClients.keys()),
+    secrets: new Set(cell.secrets.keys())
   };
 }
 
