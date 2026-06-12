@@ -55,6 +55,7 @@
       marks: [
         Plot.areaY(quantiles, {
           x: "hour",
+          sort: "hour",
           y1: "avg_delay",
           y2: "p10_delay",
           fillOpacity: 0.1,
@@ -62,6 +63,7 @@
         }),
         Plot.areaY(quantiles, {
           x: "hour",
+          sort: "hour",
           y1: "avg_delay",
           y2: "p90_delay",
           fillOpacity: 0.2,
@@ -69,17 +71,20 @@
         }),
         Plot.lineY(quantiles, {
           x: "hour",
+          sort: "hour",
           y: "avg_delay",
           curve: "monotone-x"
         }),
         Plot.lineY(quantiles, {
           x: "hour",
+          sort: "hour",
           y: "p10_delay",
           strokeDasharray: "2",
           curve: "monotone-x"
         }),
         Plot.lineY(quantiles, {
           x: "hour",
+          sort: "hour",
           y: "p90_delay",
           strokeDasharray: "2",
           curve: "monotone-x"

@@ -141,7 +141,9 @@ function getInterpreterPrefix(cell: Cell): string {
 
 function getSuffix(cell: Cell): string {
   return cell.mode === "sql" && !cell.hidden
-    ? ".then(Inputs.table)"
+    ? cell.output // selecting rows is only useful if the output names the selection
+      ? ".then(Inputs.table)"
+      : ".then((data) => Inputs.table(data, {select: false}))"
     : isInterpreter(cell.mode)
       ? getInterpreterSuffix(cell)
       : "";

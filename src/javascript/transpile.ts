@@ -22,6 +22,8 @@ export type TranspiledJavaScript = {
   autodisplay?: boolean;
   /** whether to implicitly derive a view; requires viewof output */
   autoview?: boolean;
+  /** whether the output names the value of the displayed view (e.g., sql cells) */
+  autovalue?: boolean;
   /** whether to implicitly derive a mutable; requires mutable output */
   automutable?: boolean;
   /** the names of any referenced files */
@@ -73,8 +75,7 @@ export function transpile(
   if (cell.hidden) transpiled.autodisplay = false;
   else if (mode !== "js" && mode !== "ts" && mode !== "ojs") {
     transpiled.autodisplay = !!input;
-    transpiled.autoview = mode === "sql" && transpiled.autodisplay && !!transpiled.output;
-    if (transpiled.autoview) transpiled.output = `viewof$${transpiled.output}`;
+    transpiled.autovalue = mode === "sql" && transpiled.autodisplay && !!transpiled.output;
   }
   return transpiled;
 }

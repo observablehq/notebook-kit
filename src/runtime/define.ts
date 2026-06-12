@@ -24,6 +24,8 @@ export type Definition = {
   autodisplay?: boolean;
   /** whether this cell’s singular output is a view */
   autoview?: boolean;
+  /** whether this cell’s singular output names the value of the displayed view (e.g., sql cells) */
+  autovalue?: boolean;
   /** whether this cell’s singular output is a mutable */
   automutable?: boolean;
   /** an asset mapping to apply to any autodisplayed assets (e.g., images and videos) */
@@ -31,10 +33,9 @@ export type Definition = {
 };
 
 export function define(main: Module, state: DefineState, definition: Definition, observer = observe): void {
-  const {id, body, inputs = [], outputs = [], output, autodisplay, autoview, automutable} = definition;
+  const {id, body, inputs = [], outputs = [], output, autodisplay, autoview, autovalue, automutable} = definition;
   const variables = state.variables;
   const v = main.variable(observer(state, definition), {shadow: {}});
-  const vid = output ?? (outputs.length ? `cell ${id}` : null);
   state.autoclear = true;
   if (inputs.includes("display") || inputs.includes("view")) {
     let displayVersion = -1; // the variable._version of currently-displayed values
@@ -63,9 +64,13 @@ export function define(main: Module, state: DefineState, definition: Definition,
   } else if (!autodisplay) {
     clear(state);
   }
-  variables.push(v.define(vid, inputs, body));
+  // With autovalue, the displayed view (e.g., a sql cell’s table) is anonymous
+  // and the output names its value; with autoview, the output names the view.
+  variables.push(v.define(autovalue ? `cell ${id}` : output ?? (outputs.length ? `cell ${id}` : null), inputs, body)); // prettier-ignore
   if (output != null) {
-    if (autoview) {
+    if (autovalue) {
+      variables.push(main.define(output, [`cell ${id}`], input));
+    } else if (autoview) {
       const o = unprefix(output, "viewof$");
       variables.push(main.define(o, [output], input));
     } else if (automutable) {
@@ -80,7 +85,7 @@ export function define(main: Module, state: DefineState, definition: Definition,
     }
   } else {
     for (const o of outputs) {
-      variables.push(main.variable(true).define(o, [vid!], (exports) => exports[o]));
+      variables.push(main.variable(true).define(o, [`cell ${id}`], (exports) => exports[o]));
     }
   }
 }

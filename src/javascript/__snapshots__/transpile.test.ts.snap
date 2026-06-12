@@ -277,7 +277,7 @@ exports[`transpiles empty cells 1`] = `
 exports[`transpiles empty cells 2`] = `
 {
   "autodisplay": false,
-  "autoview": false,
+  "autovalue": false,
   "body": "() => {
 
 }",
@@ -293,7 +293,7 @@ exports[`transpiles empty cells 2`] = `
 exports[`transpiles empty cells 3`] = `
 {
   "autodisplay": false,
-  "autoview": false,
+  "autovalue": false,
   "body": "() => {
 
 }",
@@ -309,7 +309,7 @@ exports[`transpiles empty cells 3`] = `
 exports[`transpiles empty cells 4`] = `
 {
   "autodisplay": false,
-  "autoview": false,
+  "autovalue": false,
   "body": "() => {
 
 }",
@@ -325,7 +325,7 @@ exports[`transpiles empty cells 4`] = `
 exports[`transpiles empty cells 5`] = `
 {
   "autodisplay": false,
-  "autoview": false,
+  "autovalue": false,
   "body": "() => {
 
 }",
@@ -392,7 +392,7 @@ return (
 exports[`transpiles node cells 1`] = `
 {
   "autodisplay": true,
-  "autoview": false,
+  "autovalue": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node $\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -412,7 +412,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 2`] = `
 {
   "autodisplay": true,
-  "autoview": false,
+  "autovalue": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node \\\\$\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -432,7 +432,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 3`] = `
 {
   "autodisplay": true,
-  "autoview": false,
+  "autovalue": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node \\\\\\\\$\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -452,7 +452,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 4`] = `
 {
   "autodisplay": true,
-  "autoview": false,
+  "autovalue": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node $\\\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -472,7 +472,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 5`] = `
 {
   "autodisplay": true,
-  "autoview": false,
+  "autovalue": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node \\\\$\\\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())

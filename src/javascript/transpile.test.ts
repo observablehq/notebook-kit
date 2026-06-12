@@ -61,6 +61,29 @@ it("transpiles import.meta.resolve", () => {
   expect(transpile('import.meta.resolve("./test")', "js", {resolveLocalImports: false})).toMatchSnapshot();
 });
 
+it("gives a visible sql cell with an output the value of the displayed table, keeping the output name as-is", () => {
+  const {autovalue, autodisplay, output, body} = transpile({id: 1, mode: "sql", value: "SELECT 1", output: "result"});
+  expect(autodisplay).toBe(true);
+  expect(autovalue).toBe(true);
+  expect(output).toBe("result"); // not renamed to viewof$result
+  expect(body).toContain(".then(Inputs.table)"); // selectable; the output names the selection
+});
+
+it("does not set autovalue on a sql cell without an output, and disables row selection", () => {
+  const {autovalue, autodisplay, body} = transpile({id: 1, mode: "sql", value: "SELECT 1"});
+  expect(autodisplay).toBe(true);
+  expect(autovalue).toBe(false);
+  expect(body).toContain("Inputs.table(data, {select: false})"); // nothing reads the selection
+});
+
+it("does not set autovalue on a hidden sql cell, since it displays no table", () => {
+  const {autovalue, autodisplay, output, body} = transpile({id: 1, mode: "sql", value: "SELECT 1", output: "result", hidden: true});
+  expect(autodisplay).toBe(false);
+  expect(autovalue).toBeFalsy();
+  expect(output).toBe("result");
+  expect(body).not.toContain("Inputs.table");
+});
+
 it("transpiles node cells", () => {
   expect(transpile("process.stdout.write(`Node ${process.version}`);", "node")).toMatchSnapshot();
   expect(transpile("process.stdout.write(`Node \\${process.version}`);", "node")).toMatchSnapshot();
