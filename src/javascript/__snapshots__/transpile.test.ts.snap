@@ -287,6 +287,110 @@ return {color};
 }
 `;
 
+exports[`transpiles Observable JavaScript import-withs 7`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive([{name: "foo", alias: "bar"}, {name: "viewof foo", alias: "viewof bar"}], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
+}));
+
+return {color};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript import-withs 8`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive(["foo", "mutable foo"], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
+}));
+
+return {color};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript import-withs 9`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive([{name: "foo", alias: "bar"}, {name: "mutable foo", alias: "mutable bar"}], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
+}));
+
+return {color};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript import-withs 10`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive(["foo", "bar", "viewof bar", {name: "baz", alias: "qux"}, {name: "mutable baz", alias: "mutable qux"}], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
+}));
+
+return {color};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+  "secrets": Set {},
+}
+`;
+
 exports[`transpiles Observable JavaScript imports 1`] = `
 {
   "autodisplay": false,

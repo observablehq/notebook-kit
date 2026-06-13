@@ -62,6 +62,10 @@ it("transpiles Observable JavaScript import-withs", () => {
   expect(transpile('import {color as red} with {foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
   expect(transpile('import {viewof color} with {foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
   expect(transpile('import {color} with {viewof foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {viewof foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {mutable foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {mutable foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {foo, viewof bar, mutable baz as qux} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
 });
 
 it("transpiles import.meta.resolve", () => {
