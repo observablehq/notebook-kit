@@ -32,7 +32,7 @@ export function renderObservableImport(
   if (!inputs.includes("@variable")) inputs.push("@variable");
   return `(import(${JSON.stringify(source)}).then((_) => {
   const module = __variable._module._runtime.module(_.default)${
-    "injections" in node ? `.derive([${renderObservableInjections(node)}])` : ""
+    "injections" in node ? `.derive([${renderObservableInjections(node)}], __variable._module)` : ""
   };
   const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));${node.specifiers
     .filter((specifier) => specifier.type !== "ImportNamespaceSpecifier")

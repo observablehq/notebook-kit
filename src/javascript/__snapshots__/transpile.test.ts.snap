@@ -129,6 +129,164 @@ await z;
 }
 `;
 
+exports[`transpiles Observable JavaScript import-withs 1`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive([], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
+}));
+
+return {color};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript import-withs 2`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive(["foo"], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
+}));
+
+return {color};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript import-withs 3`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive([{name: "foo", alias: "bar"}], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
+}));
+
+return {color};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript import-withs 4`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color: red} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive(["foo"], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("red")?.import("color", "red", module);
+  return {};
+}));
+
+return {red};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "red",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript import-withs 5`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color, viewof$color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive([{name: "foo", alias: "bar"}], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  outputs.get("viewof$color")?.import("viewof color", "viewof$color", module);
+  return {};
+}));
+
+return {color,viewof$color};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+    "viewof$color",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript import-withs 6`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default).derive(["foo", "viewof foo"], __variable._module);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("color")?.import("color", module);
+  return {};
+}));
+
+return {color};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "color",
+  ],
+  "secrets": Set {},
+}
+`;
+
 exports[`transpiles Observable JavaScript imports 1`] = `
 {
   "autodisplay": false,

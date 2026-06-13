@@ -55,6 +55,15 @@ it("transpiles Observable JavaScript imports", () => {
   expect(transpile('import {figure, viewof rotation as rot} from "@rreusser/drawing-3d-objects-with-svg"', "ojs")).toMatchSnapshot();
 });
 
+it("transpiles Observable JavaScript import-withs", () => {
+  expect(transpile('import {color} with {} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color as red} with {foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {viewof color} with {foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {viewof foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+});
+
 it("transpiles import.meta.resolve", () => {
   expect(transpile('import.meta.resolve("npm:d3")', "js")).toMatchSnapshot();
   expect(transpile('import.meta.resolve("./test")', "js", {resolveLocalImports: true})).toMatchSnapshot();
