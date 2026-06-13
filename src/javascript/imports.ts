@@ -2,7 +2,7 @@ import type {CallExpression, ImportDeclaration, MemberExpression, Node} from "ac
 import type {ImportDefaultSpecifier, ImportNamespaceSpecifier, ImportSpecifier} from "acorn";
 import {resolveJsrImport} from "./imports/jsr.js";
 import {resolveNpmImport} from "./imports/npm.js";
-import {resolveObservableImport} from "./imports/observable.js";
+import {flattenObservableImportSpecifier, resolveObservableImport} from "./imports/observable.js";
 import {isObservableImport, renderObservableImport} from "./imports/observable.js";
 import type {Sourcemap} from "./sourcemap.js";
 import type {StringLiteral} from "./strings.js";
@@ -10,8 +10,8 @@ import {getStringLiteralValue, isStringLiteral} from "./strings.js";
 import {syntaxError} from "./syntaxError.js";
 import {simple} from "./walk.js";
 
-type NamedImportSpecifier = ImportSpecifier | ImportDefaultSpecifier;
-type AnyImportSpecifier = ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier;
+export type NamedImportSpecifier = ImportSpecifier | ImportDefaultSpecifier;
+export type AnyImportSpecifier = ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier;
 
 /** Throws a syntax error if any export declarations are found. */
 export function checkExports(body: Node, {input}: {input: string}): void {
@@ -199,7 +199,7 @@ function isNamedSpecifier(node: AnyImportSpecifier): node is NamedImportSpecifie
 
 function rewriteImportSpecifiers(node: ImportDeclaration): string {
   return node.specifiers.some(isNamedSpecifier)
-    ? `{${node.specifiers.filter(isNamedSpecifier).map(rewriteImportSpecifier).join(", ")}}`
+    ? `{${node.specifiers.filter(isNamedSpecifier).flatMap(flattenObservableImportSpecifier).map(rewriteImportSpecifier).join(", ")}}`
     : (node.specifiers.find(isNamespaceSpecifier)?.local.name ?? "{}");
 }
 

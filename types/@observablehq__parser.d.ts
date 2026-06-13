@@ -1,5 +1,6 @@
 declare module "@observablehq/parser" {
-  import type {BlockStatement, Expression, ImportDeclaration, TemplateLiteral} from "acorn";
+  import type {BlockStatement, Expression, TemplateLiteral} from "acorn";
+  import type {ImportDeclaration, ImportSpecifier} from "acorn";
   import type {Identifier, Node} from "acorn";
   import type {RecursiveVisitors, SimpleVisitors} from "acorn-walk";
   export type ViewExpression = Node & {type: "ViewExpression"; id: Identifier};
@@ -12,6 +13,9 @@ declare module "@observablehq/parser" {
     fileAttachments: Map<string, {start: number; end: number}[]>;
     databaseClients: Map<string, {start: number; end: number}[]>;
     secrets: Map<string, {start: number; end: number}[]>;
+  }
+  export interface ImportWithDeclaration extends ImportDeclaration {
+    injections: (ImportSpecifier & {view: boolean; mutable: boolean})[];
   }
   export interface TemplateCell extends BaseCell {
     tag: Node;

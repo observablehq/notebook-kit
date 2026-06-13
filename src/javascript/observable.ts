@@ -1,10 +1,18 @@
-import type {MutableExpression, ViewExpression, Visitors} from "@observablehq/parser";
+import type {
+  Cell,
+  ImportCell,
+  MutableExpression,
+  ViewExpression,
+  Visitors
+} from "@observablehq/parser";
 import {parseCell} from "@observablehq/parser";
-import type {Identifier, ImportDeclaration, ImportSpecifier, Literal, Node} from "acorn";
+import type {Identifier, Node} from "acorn";
 import {rewriteFileExpressions} from "./files.js";
+import {rewriteImportDeclarations} from "./imports.js";
+import {isMutableImport, isViewImport, toSpecialIndentifier} from "./imports/observable.js";
 import {Sourcemap} from "./sourcemap.js";
 import type {TranspiledJavaScript, TranspileOptions} from "./transpile.js";
-import {transpileJavaScript} from "./transpile.js";
+import {deat, transpileJavaScript} from "./transpile.js";
 import {simple} from "./walk.js";
 
 export function transpileObservable(
@@ -13,13 +21,10 @@ export function transpileObservable(
 ): TranspiledJavaScript {
   const cell = parseCell(input);
   if (!cell.body) return transpileJavaScript(input);
+  if (isImportCell(cell)) return transpileObservableImport(input, cell, options);
   if (cell.tag) throw new Error("tagged ojs cells are not supported");
   const output = new Sourcemap(input).trim();
   rewriteSpecialReferences(output, cell.body);
-  if (cell.body.type === "ImportDeclaration") {
-    rewriteImportSource(output, cell.body);
-    return transpileJavaScript(String(output));
-  }
   if (options?.resolveFiles) rewriteFileExpressions(output, cell.body);
   const inputs = Array.from(new Set(cell.references.map(asReference)));
   let start = "";
@@ -46,13 +51,55 @@ export function transpileObservable(
   };
 }
 
-/** Rewrite bare module specifiers to have the observable: protocol. */
-function rewriteImportSource(output: Sourcemap, body: ImportDeclaration): void {
-  const specifier = body.source.value;
-  if (typeof specifier === "string" && !/^\w+:/.test(specifier)) {
-    output.insertLeft(body.source.start + 1, "observable:");
+function isImportCell(cell: Cell): cell is ImportCell {
+  return cell.body.type === "ImportDeclaration";
+}
+
+function transpileObservableImport(
+  input: string,
+  cell: ImportCell,
+  options?: TranspileOptions
+): TranspiledJavaScript {
+  const output = new Sourcemap(input).trim();
+  const inputs = ["@variable"];
+  const declarations: Identifier[] = [];
+  for (const s of cell.body.specifiers) {
+    if (s.type === "ImportSpecifier") {
+      declarations.push(s.local);
+      if (isMutableImport(s)) declarations.push(toSpecialIndentifier(s.local, "mutable"));
+      if (isViewImport(s)) declarations.push(toSpecialIndentifier(s.local, "viewof"));
+    }
   }
-  output.insertRight(body.end, ";");
+  // = cell.body.specifiers.filter((s) => s.type === "ImportSpecifier").map((s) => s.local); // prettier-ignore
+  const outputs = Array.from(new Set(declarations.map(asDeclaration)));
+  console.log(outputs);
+  const source = cell.body.source.value;
+  if (typeof source === "string" && !/^\w+:/.test(source)) {
+    cell.body.source.value = `observable:${source}`;
+  }
+  cell.body.attributes = [
+    {
+      type: "ImportAttribute",
+      key: {type: "Literal", value: "type", start: 0, end: 0},
+      value: {type: "Literal", value: "observable", start: 0, end: 0},
+      start: 0,
+      end: 0
+    }
+  ];
+  rewriteImportDeclarations(output, cell.body, inputs, options);
+  output.insertLeft(0, `async (${inputs.map(deat)}) => {\n`);
+  if (outputs.length > 0) output.insertRight(input.length, `\nreturn {${outputs}};`);
+  output.insertRight(input.length, "\n}");
+  const body = String(output);
+  return {
+    body,
+    inputs,
+    outputs,
+    autodisplay: false,
+    files: new Set(),
+    secrets: new Set(),
+    databases: new Set()
+  };
 }
 
 /** Rewrite viewof x ↦ viewof$x, and mutable x ↦ mutable$x.value. */
@@ -63,27 +110,8 @@ function rewriteSpecialReferences(output: Sourcemap, body: Node): void {
     },
     ViewExpression(node) {
       output.replaceLeft(node.start, node.end, asReference(node));
-    },
-    ImportSpecifier(node) {
-      const inode = node as ImportSpecifier & {view: boolean; mutable: boolean};
-      const prefix = inode.view ? "viewof$" : inode.mutable ? "mutable$" : null;
-      if (prefix) {
-        const imported = asImportName(node.imported);
-        output.replaceLeft(node.start, node.imported.start, prefix);
-        if (node.imported === node.local) {
-          output.insertLeft(node.start, `${imported},`);
-        } else {
-          const local = asImportName(node.local);
-          output.insertLeft(node.start, `${imported} as ${local},`);
-          output.insertLeft(node.local.start, prefix);
-        }
-      }
     }
   } as Visitors);
-}
-
-function asImportName(ref: Identifier | Literal): string {
-  return ref.type === "Identifier" ? ref.name : ref.raw!;
 }
 
 function asReference(ref: Identifier | ViewExpression | MutableExpression): string {
