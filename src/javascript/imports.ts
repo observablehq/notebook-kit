@@ -214,15 +214,15 @@ export function flatMapImportSpecifiers<T>(
   node: ImportDeclaration,
   f: (node: NamedImportSpecifier) => T
 ): T[] {
-  return node.specifiers
-    .filter(isNamedSpecifier)
-    .flatMap((node) =>
-      isViewImport(node)
-        ? [f(node), f(toSpecialImportSpecifier(node, "viewof"))]
-        : isMutableImport(node)
-          ? [f(node), f(toSpecialImportSpecifier(node, "mutable"))]
-          : f(node)
-    );
+  return node.specifiers.flatMap((node) => {
+    if (node.type === "ImportNamespaceSpecifier")
+      throw new SyntaxError("unexpected namespace specifier");
+    return isViewImport(node)
+      ? [f(node), f(toSpecialImportSpecifier(node, "viewof"))]
+      : isMutableImport(node)
+        ? [f(node), f(toSpecialImportSpecifier(node, "mutable"))]
+        : f(node);
+  });
 }
 
 function rewriteImportSpecifier(node: NamedImportSpecifier): string {

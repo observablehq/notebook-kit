@@ -40,6 +40,11 @@ it("transpiles static observable: imports", () => {
   expect(transpile('import {viewof$rotation} from "observable:@rreusser/drawing-3d-objects-with-svg";', "js")).toMatchSnapshot();
 });
 
+it("does not allow namespace observable: imports", () => {
+  expect(() => transpile('import * as foo from "observable:2d6bf7be248d66f3";', "js")).toThrow(/namespace specifier/);
+  expect(() => transpile('import * as foo from "2d6bf7be248d66f3";', "ojs")).toThrow(/unexpected token/i);
+});
+
 it("transpiles static imports with {type: 'observable'}", () => {
   expect(transpile('import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
   expect(transpile('import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
