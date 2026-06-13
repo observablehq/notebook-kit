@@ -2,16 +2,23 @@ import type {CallExpression, ImportDeclaration, MemberExpression, Node} from "ac
 import type {ImportDefaultSpecifier, ImportNamespaceSpecifier, ImportSpecifier} from "acorn";
 import {resolveJsrImport} from "./imports/jsr.js";
 import {resolveNpmImport} from "./imports/npm.js";
-import {resolveObservableImport} from "./imports/observable.js";
-import {isObservableImport, renderObservableImport} from "./imports/observable.js";
+import {isObservableImport, isMutableImport, isViewImport} from "./imports/observable.js";
+import {resolveObservableImport, renderObservableImport} from "./imports/observable.js";
+import {toSpecialImportSpecifier} from "./imports/observable.js";
 import type {Sourcemap} from "./sourcemap.js";
 import type {StringLiteral} from "./strings.js";
 import {getStringLiteralValue, isStringLiteral} from "./strings.js";
 import {syntaxError} from "./syntaxError.js";
 import {simple} from "./walk.js";
 
-type NamedImportSpecifier = ImportSpecifier | ImportDefaultSpecifier;
-type AnyImportSpecifier = ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier;
+export type NamedImportSpecifier =
+  | ImportSpecifier // import {foo}
+  | ImportDefaultSpecifier; // import foo
+
+export type AnyImportSpecifier =
+  | ImportSpecifier // import {foo}
+  | ImportDefaultSpecifier // import foo
+  | ImportNamespaceSpecifier; // import * as foo
 
 /** Throws a syntax error if any export declarations are found. */
 export function checkExports(body: Node, {input}: {input: string}): void {
@@ -199,8 +206,23 @@ function isNamedSpecifier(node: AnyImportSpecifier): node is NamedImportSpecifie
 
 function rewriteImportSpecifiers(node: ImportDeclaration): string {
   return node.specifiers.some(isNamedSpecifier)
-    ? `{${node.specifiers.filter(isNamedSpecifier).map(rewriteImportSpecifier).join(", ")}}`
+    ? `{${flatMapImportSpecifiers(node, rewriteImportSpecifier).join(", ")}}`
     : (node.specifiers.find(isNamespaceSpecifier)?.local.name ?? "{}");
+}
+
+export function flatMapImportSpecifiers<T>(
+  node: ImportDeclaration,
+  f: (node: NamedImportSpecifier) => T
+): T[] {
+  return node.specifiers.flatMap((node) => {
+    if (node.type === "ImportNamespaceSpecifier")
+      throw new SyntaxError("unexpected namespace specifier");
+    return isViewImport(node)
+      ? [f(node), f(toSpecialImportSpecifier(node, "viewof"))]
+      : isMutableImport(node)
+        ? [f(node), f(toSpecialImportSpecifier(node, "mutable"))]
+        : f(node);
+  });
 }
 
 function rewriteImportSpecifier(node: NamedImportSpecifier): string {

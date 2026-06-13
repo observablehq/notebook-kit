@@ -1,5 +1,8 @@
-import type {ImportAttribute, ImportDeclaration} from "acorn";
-import {getImportedName, getLocalName} from "../imports.js";
+import type {ImportWithDeclaration} from "@observablehq/parser";
+import type {ImportAttribute, ImportDeclaration, ImportSpecifier} from "acorn";
+import type {Identifier} from "acorn";
+import type {NamedImportSpecifier} from "../imports.js";
+import {flatMapImportSpecifiers, getImportedName, getLocalName} from "../imports.js";
 
 const CODE_DOLLAR = 36;
 
@@ -21,21 +24,76 @@ function getImportAttributeKey(node: ImportAttribute): string {
 }
 
 /** Note: mutates inputs! */
-export function renderObservableImport(source: string, node: ImportDeclaration, inputs: string[]): string {
+export function renderObservableImport(
+  source: string,
+  node: ImportDeclaration | ImportWithDeclaration,
+  inputs: string[]
+): string {
   if (!inputs.includes("@variable")) inputs.push("@variable");
   return `(import(${JSON.stringify(source)}).then((_) => {
-  const module = __variable._module._runtime.module(_.default);
-  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));${node.specifiers
-    .map((specifier) => {
-      if (specifier.type === "ImportNamespaceSpecifier") throw new SyntaxError("observable namespace imports are not supported");
-      const iname = dedollar(getImportedName(specifier));
-      const lname = getLocalName(specifier);
+  const module = __variable._module._runtime.module(_.default)${
+    "injections" in node ? `.derive([${renderObservableInjections(node)}], __variable._module)` : ""
+  };
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));${flatMapImportSpecifiers(
+    node,
+    (specifier) => {
+      const i = dedollar(getImportedName(specifier));
+      const l = getLocalName(specifier);
       return `
-  outputs.get(${JSON.stringify(lname)})?.import(${JSON.stringify(iname)}${iname === lname ? "" : `, ${JSON.stringify(lname)}`}, module);`;
-    })
-    .join("")}
+  outputs.get(${JSON.stringify(l)})?.import(${JSON.stringify(i)}${i === l ? "" : `, ${JSON.stringify(l)}`}, module);`;
+    }
+  ).join("")}
   return {};
 }))`;
+}
+
+function renderObservableInjections(node: ImportWithDeclaration): string {
+  return node.injections
+    .map((node) => {
+      if (node.imported.type !== "Identifier") throw new SyntaxError("unexpected import specifier");
+      const imported = node.imported.name;
+      const local = node.local.name;
+      let injection;
+      if (imported === local) {
+        injection = `"${local}"`;
+        if (node.view) injection += `, "viewof ${local}"`;
+        if (node.mutable) injection += `, "mutable ${local}"`;
+      } else {
+        injection = `{name: "${imported}", alias: "${local}"}`;
+        if (node.view) injection += `, {name: "viewof ${imported}", alias: "viewof ${local}"}`;
+        if (node.mutable) injection += `, {name: "mutable ${imported}", alias: "mutable ${local}"}`;
+      }
+      return injection;
+    })
+    .join(", ");
+}
+
+export function toSpecialIdentifier(
+  identifier: Identifier,
+  type: "viewof" | "mutable"
+): Identifier {
+  return {...identifier, name: `${type}$${identifier.name}`};
+}
+
+export function toSpecialImportSpecifier(
+  specifier: ImportSpecifier,
+  type: "viewof" | "mutable"
+): ImportSpecifier {
+  if (specifier.imported.type !== "Identifier")
+    throw new SyntaxError("unexpected import specifier");
+  return {
+    ...specifier,
+    imported: toSpecialIdentifier(specifier.imported, type),
+    local: toSpecialIdentifier(specifier.local, type)
+  };
+}
+
+export function isViewImport(node: NamedImportSpecifier): node is ImportSpecifier {
+  return "view" in node && !!node.view;
+}
+
+export function isMutableImport(node: NamedImportSpecifier): node is ImportSpecifier {
+  return "mutable" in node && !!node.mutable;
 }
 
 /** Turns e.g. "viewof$foo" into "viewof foo", and "$$" into "$". */

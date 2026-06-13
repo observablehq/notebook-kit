@@ -40,6 +40,11 @@ it("transpiles static observable: imports", () => {
   expect(transpile('import {viewof$rotation} from "observable:@rreusser/drawing-3d-objects-with-svg";', "js")).toMatchSnapshot();
 });
 
+it("does not allow namespace observable: imports", () => {
+  expect(() => transpile('import * as foo from "observable:2d6bf7be248d66f3";', "js")).toThrow(/namespace specifier/);
+  expect(() => transpile('import * as foo from "2d6bf7be248d66f3";', "ojs")).toThrow(/unexpected token/i);
+});
+
 it("transpiles static imports with {type: 'observable'}", () => {
   expect(transpile('import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
   expect(transpile('import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
@@ -51,13 +56,32 @@ it("transpiles static imports with {type: 'observable'}", () => {
 it("transpiles Observable JavaScript imports", () => {
   expect(transpile('import {color} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
   expect(transpile('import {color} from "2d6bf7be248d66f3@173"', "ojs")).toMatchSnapshot();
+});
+
+it("transpiles Observable JavaScript imports of views", () => {
   expect(transpile('import {figure, viewof rotation} from "@rreusser/drawing-3d-objects-with-svg"', "ojs")).toMatchSnapshot();
   expect(transpile('import {figure, viewof rotation as rot} from "@rreusser/drawing-3d-objects-with-svg"', "ojs")).toMatchSnapshot();
 });
 
-it("transpiles ojs imports of mutables", () => {
+it("transpiles Observable JavaScript imports of mutables", () => {
   expect(transpile('import {mutable foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
   expect(transpile('import {mutable foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+});
+
+it("transpiles Observable JavaScript import-withs", () => {
+  expect(transpile('import {color} with {} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color as red} with {foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+});
+
+it("transpiles Observable JavaScript import-withs of views and mutables", () => {
+  expect(transpile('import {viewof color} with {foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {viewof foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {viewof foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {mutable foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {mutable foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {color} with {foo, viewof bar, mutable baz as qux} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
 });
 
 it("transpiles import.meta.resolve", () => {
