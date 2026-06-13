@@ -69,7 +69,7 @@ function renderObservableInjections(node: ImportWithDeclaration): string {
     .join(", ");
 }
 
-export function toSpecialIndentifier(
+export function toSpecialIdentifier(
   identifier: Identifier,
   type: "viewof" | "mutable"
 ): Identifier {
@@ -84,8 +84,8 @@ export function toSpecialImportSpecifier(
     throw new SyntaxError("unexpected import specifier");
   return {
     ...specifier,
-    imported: toSpecialIndentifier(specifier.imported, type),
-    local: toSpecialIndentifier(specifier.local, type)
+    imported: toSpecialIdentifier(specifier.imported, type),
+    local: toSpecialIdentifier(specifier.local, type)
   };
 }
 
