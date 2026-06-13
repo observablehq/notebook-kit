@@ -1,10 +1,5 @@
-import type {
-  Cell,
-  ImportCell,
-  MutableExpression,
-  ViewExpression,
-  Visitors
-} from "@observablehq/parser";
+import type {Cell, ImportCell, Visitors} from "@observablehq/parser";
+import type {MutableExpression, ViewExpression} from "@observablehq/parser";
 import {parseCell} from "@observablehq/parser";
 import type {Identifier, Node} from "acorn";
 import {rewriteFileExpressions} from "./files.js";
