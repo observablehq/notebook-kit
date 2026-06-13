@@ -1,7 +1,7 @@
 import type {Cell, ImportCell, Visitors} from "@observablehq/parser";
 import type {MutableExpression, ViewExpression} from "@observablehq/parser";
 import {parseCell} from "@observablehq/parser";
-import type {Identifier, Node} from "acorn";
+import type {Identifier, ImportDeclaration, Node} from "acorn";
 import {rewriteFileExpressions} from "./files.js";
 import {rewriteImportDeclarations} from "./imports.js";
 import {isMutableImport, isViewImport, toSpecialIndentifier} from "./imports/observable.js";
@@ -65,22 +65,8 @@ function transpileObservableImport(
       if (isViewImport(s)) declarations.push(toSpecialIndentifier(s.local, "viewof"));
     }
   }
-  // = cell.body.specifiers.filter((s) => s.type === "ImportSpecifier").map((s) => s.local); // prettier-ignore
   const outputs = Array.from(new Set(declarations.map(asDeclaration)));
-  console.log(outputs);
-  const source = cell.body.source.value;
-  if (typeof source === "string" && !/^\w+:/.test(source)) {
-    cell.body.source.value = `observable:${source}`;
-  }
-  cell.body.attributes = [
-    {
-      type: "ImportAttribute",
-      key: {type: "Literal", value: "type", start: 0, end: 0},
-      value: {type: "Literal", value: "observable", start: 0, end: 0},
-      start: 0,
-      end: 0
-    }
-  ];
+  transformObservableImport(cell.body);
   rewriteImportDeclarations(output, cell.body, inputs, options);
   output.insertLeft(0, `async (${inputs.map(deat)}) => {\n`);
   if (outputs.length > 0) output.insertRight(input.length, `\nreturn {${outputs}};`);
@@ -95,6 +81,23 @@ function transpileObservableImport(
     secrets: new Set(),
     databases: new Set()
   };
+}
+
+/** Mutates the given import declaration to be an Observable import. */
+function transformObservableImport(body: ImportDeclaration): void {
+  const source = body.source.value;
+  if (typeof source === "string" && !/^\w+:/.test(source)) {
+    body.source.value = `observable:${source}`;
+  }
+  body.attributes = [
+    {
+      type: "ImportAttribute",
+      key: {type: "Literal", value: "type", start: 0, end: 0},
+      value: {type: "Literal", value: "observable", start: 0, end: 0},
+      start: 0,
+      end: 0
+    }
+  ];
 }
 
 /** Rewrite viewof x ↦ viewof$x, and mutable x ↦ mutable$x.value. */
