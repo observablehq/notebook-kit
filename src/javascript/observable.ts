@@ -3,8 +3,7 @@ import type {MutableExpression, ViewExpression} from "@observablehq/parser";
 import {parseCell} from "@observablehq/parser";
 import type {Identifier, ImportDeclaration, Node} from "acorn";
 import {rewriteFileExpressions} from "./files.js";
-import {rewriteImportDeclarations} from "./imports.js";
-import {isMutableImport, isViewImport, toSpecialIdentifier} from "./imports/observable.js";
+import {flatMapImportSpecifiers, rewriteImportDeclarations} from "./imports.js";
 import {Sourcemap} from "./sourcemap.js";
 import type {TranspiledJavaScript, TranspileOptions} from "./transpile.js";
 import {transpileJavaScript} from "./transpile.js";
@@ -57,14 +56,7 @@ function transpileObservableImport(
 ): TranspiledJavaScript {
   const output = new Sourcemap(input).trim();
   const inputs = ["@variable"];
-  const declarations: Identifier[] = [];
-  for (const s of cell.body.specifiers) {
-    if (s.type === "ImportSpecifier") {
-      declarations.push(s.local);
-      if (isMutableImport(s)) declarations.push(toSpecialIdentifier(s.local, "mutable"));
-      if (isViewImport(s)) declarations.push(toSpecialIdentifier(s.local, "viewof"));
-    }
-  }
+  const declarations: Identifier[] = flatMapImportSpecifiers(cell.body, (s) => s.local);
   const outputs = Array.from(new Set(declarations.map(asDeclaration)));
   transformObservableImport(cell.body);
   rewriteImportDeclarations(output, cell.body, inputs, options);

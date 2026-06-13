@@ -2,7 +2,7 @@ import type {ImportWithDeclaration} from "@observablehq/parser";
 import type {ImportAttribute, ImportDeclaration, ImportSpecifier} from "acorn";
 import type {Identifier} from "acorn";
 import type {NamedImportSpecifier} from "../imports.js";
-import {getImportedName, getLocalName} from "../imports.js";
+import {flatMapImportSpecifiers, getImportedName, getLocalName} from "../imports.js";
 
 const CODE_DOLLAR = 36;
 
@@ -34,16 +34,15 @@ export function renderObservableImport(
   const module = __variable._module._runtime.module(_.default)${
     "injections" in node ? `.derive([${renderObservableInjections(node)}], __variable._module)` : ""
   };
-  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));${node.specifiers
-    .filter((specifier) => specifier.type !== "ImportNamespaceSpecifier")
-    .flatMap(flattenObservableImportSpecifier)
-    .map((specifier) => {
-      const iname = dedollar(getImportedName(specifier));
-      const lname = getLocalName(specifier);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));${flatMapImportSpecifiers(
+    node,
+    (specifier) => {
+      const i = dedollar(getImportedName(specifier));
+      const l = getLocalName(specifier);
       return `
-  outputs.get(${JSON.stringify(lname)})?.import(${JSON.stringify(iname)}${iname === lname ? "" : `, ${JSON.stringify(lname)}`}, module);`;
-    })
-    .join("")}
+  outputs.get(${JSON.stringify(l)})?.import(${JSON.stringify(i)}${i === l ? "" : `, ${JSON.stringify(l)}`}, module);`;
+    }
+  ).join("")}
   return {};
 }))`;
 }
@@ -87,16 +86,6 @@ export function toSpecialImportSpecifier(
     imported: toSpecialIdentifier(specifier.imported, type),
     local: toSpecialIdentifier(specifier.local, type)
   };
-}
-
-export function flattenObservableImportSpecifier(
-  node: NamedImportSpecifier
-): NamedImportSpecifier | NamedImportSpecifier[] {
-  return isViewImport(node)
-    ? [node, toSpecialImportSpecifier(node, "viewof")]
-    : isMutableImport(node)
-      ? [node, toSpecialImportSpecifier(node, "mutable")]
-      : node;
 }
 
 export function isViewImport(node: NamedImportSpecifier): node is ImportSpecifier {
