@@ -2,9 +2,9 @@ import type {CallExpression, ImportDeclaration, MemberExpression, Node} from "ac
 import type {ImportDefaultSpecifier, ImportNamespaceSpecifier, ImportSpecifier} from "acorn";
 import {resolveJsrImport} from "./imports/jsr.js";
 import {resolveNpmImport} from "./imports/npm.js";
-import {isMutableImport, isViewImport} from "./imports/observable.js";
-import {resolveObservableImport, toSpecialImportSpecifier} from "./imports/observable.js";
-import {isObservableImport, renderObservableImport} from "./imports/observable.js";
+import {isObservableImport, isMutableImport, isViewImport} from "./imports/observable.js";
+import {resolveObservableImport, renderObservableImport} from "./imports/observable.js";
+import {toSpecialImportSpecifier} from "./imports/observable.js";
 import type {Sourcemap} from "./sourcemap.js";
 import type {StringLiteral} from "./strings.js";
 import {getStringLiteralValue, isStringLiteral} from "./strings.js";
