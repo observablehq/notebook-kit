@@ -105,6 +105,6 @@ export function transpileJavaScript(
   return {body, inputs, outputs, autodisplay, files, databases, secrets};
 }
 
-export function deat(input: string): string {
+function deat(input: string): string {
   return input.replace(/^@/, "__"); // @variable to __variable
 }

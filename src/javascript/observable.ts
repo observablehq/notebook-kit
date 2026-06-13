@@ -7,7 +7,7 @@ import {rewriteImportDeclarations} from "./imports.js";
 import {isMutableImport, isViewImport, toSpecialIdentifier} from "./imports/observable.js";
 import {Sourcemap} from "./sourcemap.js";
 import type {TranspiledJavaScript, TranspileOptions} from "./transpile.js";
-import {deat, transpileJavaScript} from "./transpile.js";
+import {transpileJavaScript} from "./transpile.js";
 import {simple} from "./walk.js";
 
 export function transpileObservable(
@@ -68,7 +68,7 @@ function transpileObservableImport(
   const outputs = Array.from(new Set(declarations.map(asDeclaration)));
   transformObservableImport(cell.body);
   rewriteImportDeclarations(output, cell.body, inputs, options);
-  output.insertLeft(0, `async (${inputs.map(deat)}) => {\n`);
+  output.insertLeft(0, `async (__variable) => {\n`);
   if (outputs.length > 0) output.insertRight(input.length, `\nreturn {${outputs}};`);
   output.insertRight(input.length, "\n}");
   const body = String(output);
