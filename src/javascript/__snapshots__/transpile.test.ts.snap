@@ -489,6 +489,62 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 }
 `;
 
+exports[`transpiles ojs imports of mutables 1`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {foo, mutable$foo} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("foo")?.import("foo", module);
+  outputs.get("mutable$foo")?.import("mutable foo", "mutable$foo", module);
+  return {};
+}));
+
+return {foo,mutable$foo};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "foo",
+    "mutable$foo",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles ojs imports of mutables 2`] = `
+{
+  "autodisplay": false,
+  "body": "async (__variable) => {
+const {foo: bar, mutable$foo: mutable$bar} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4").then((_) => {
+  const module = __variable._module._runtime.module(_.default);
+  const outputs = new Map(Array.from(__variable._outputs, (v) => [v._name, v]));
+  outputs.get("bar")?.import("foo", "bar", module);
+  outputs.get("mutable$bar")?.import("mutable foo", "mutable$bar", module);
+  return {};
+}));
+
+return {bar,mutable$bar};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "@variable",
+  ],
+  "output": undefined,
+  "outputs": [
+    "bar",
+    "mutable$bar",
+  ],
+  "secrets": Set {},
+}
+`;
+
 exports[`transpiles static imports with {type: 'observable'} 1`] = `
 {
   "autodisplay": false,
