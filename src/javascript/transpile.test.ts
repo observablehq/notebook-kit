@@ -73,6 +73,11 @@ it("transpiles Observable JavaScript import-withs", () => {
   expect(transpile('import {color} with {foo, viewof bar, mutable baz as qux} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
 });
 
+it("transpiles ojs imports of mutables", () => {
+  expect(transpile('import {mutable foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+  expect(transpile('import {mutable foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
+});
+
 it("transpiles import.meta.resolve", () => {
   expect(transpile('import.meta.resolve("npm:d3")', "js")).toMatchSnapshot();
   expect(transpile('import.meta.resolve("./test")', "js", {resolveLocalImports: true})).toMatchSnapshot();
