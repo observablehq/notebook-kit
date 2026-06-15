@@ -95,16 +95,19 @@ function transformObservableImport(body: ImportDeclaration): void {
   ];
 }
 
-/** Rewrite a bare dynamic import such as import("d3") to a CDN URL, like
+/**
+ * Rewrite a bare dynamic import such as import("d3") to a CDN URL, like
  * import("https://cdn.jsdelivr.net/npm/d3/+esm"), using the same resolution as
- * static imports. Protocol (npm:, https:, …) and local imports are left alone. */
+ * static imports. Protocol (npm:, https:, …) and local imports are left alone.
+ */
 function rewriteDynamicImports(output: Sourcemap, body: Node): void {
   simple(body, {
     ImportExpression({source}) {
       if (!isStringLiteral(source)) return;
       const value = getStringLiteralValue(source);
       if (/^(\w+:|\.?\.?\/)/.test(value)) return;
-      output.replaceLeft(source.start, source.end, JSON.stringify(resolveNpmImport(`npm:${value}`)));
+      const resolution = resolveNpmImport(`npm:${value}`);
+      output.replaceLeft(source.start, source.end, JSON.stringify(resolution));
     }
   });
 }
