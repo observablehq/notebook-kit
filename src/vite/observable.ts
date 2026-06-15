@@ -226,7 +226,8 @@ define(
     assets: ${assets.size > 0 ? "assets" : "undefined"},
     autodisplay: ${transpiled.autodisplay},
     autoview: ${transpiled.autoview},
-    automutable: ${transpiled.automutable}
+    automutable: ${transpiled.automutable},
+    displayBuiltins: ${transpiled.displayBuiltins ?? false}
   }
 );`;
   })

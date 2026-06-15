@@ -22,6 +22,8 @@ export type Definition = {
   output?: string;
   /** whether to display this cell’s singular output automatically */
   autodisplay?: boolean;
+  /** whether to introduce the display and view builtins (js and ts cells only) */
+  displayBuiltins?: boolean;
   /** whether this cell’s singular output is a view */
   autoview?: boolean;
   /** whether this cell’s singular output is a mutable */
@@ -31,12 +33,12 @@ export type Definition = {
 };
 
 export function define(main: Module, state: DefineState, definition: Definition, observer = observe): void {
-  const {id, body, inputs = [], outputs = [], output, autodisplay, autoview, automutable} = definition;
+  const {id, body, inputs = [], outputs = [], output, autodisplay, autoview, automutable, displayBuiltins = false} = definition;
   const variables = state.variables;
   const v = main.variable(observer(state, definition), {shadow: {}});
   const vid = output ?? (outputs.length ? `cell ${id}` : null);
   state.autoclear = true;
-  if (inputs.includes("display") || inputs.includes("view")) {
+  if (displayBuiltins && (inputs.includes("display") || inputs.includes("view"))) {
     let displayVersion = -1; // the variable._version of currently-displayed values
     const vd = new (v.constructor as typeof Variable)(2, v._module);
     vd.define(
