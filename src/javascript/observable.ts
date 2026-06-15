@@ -19,6 +19,7 @@ export function transpileObservable(
   if (cell.tag) throw new Error("tagged ojs cells are not supported");
   const output = new Sourcemap(input).trim();
   rewriteSpecialReferences(output, cell.body);
+  rewriteDynamicImports(output, cell.body);
   if (options?.resolveFiles) rewriteFileExpressions(output, cell.body);
   const inputs = Array.from(new Set(cell.references.map(asReference)));
   let start = "";
@@ -90,6 +91,22 @@ function transformObservableImport(body: ImportDeclaration): void {
       end: 0
     }
   ];
+}
+
+function rewriteDynamicImports(output: Sourcemap, body: Node): void {
+  simple(body, {
+    ImportExpression(node) {
+      const specifier = node.source;
+      if (
+        specifier.type === "Literal" &&
+        typeof specifier.value === "string" &&
+        !/^(\w+:|\.?\.?\/)/.test(specifier.value)
+      ) {
+        output.insertRight(specifier.start + 1, "https://unpkg.com/");
+        output.insertLeft(specifier.end - 1, "?module");
+      }
+    }
+  });
 }
 
 /** Rewrite viewof x ↦ viewof$x, and mutable x ↦ mutable$x.value. */
