@@ -150,6 +150,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -176,6 +177,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -202,6 +204,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -228,6 +231,7 @@ const {color: red} = await (import("https://api.observablehq.com/d/2d6bf7be248d6
 return {red};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -255,6 +259,7 @@ const {color, viewof$color} = await (import("https://api.observablehq.com/d/2d6b
 return {color,viewof$color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -282,6 +287,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -308,6 +314,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -334,6 +341,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -360,6 +368,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -386,6 +395,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -412,6 +422,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -438,6 +449,7 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@1
 return {color};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -465,6 +477,7 @@ const {foo, mutable$foo} = await (import("https://api.observablehq.com/d/2d6bf7b
 return {foo,mutable$foo};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -493,6 +506,7 @@ const {foo: bar, mutable$foo: mutable$bar} = await (import("https://api.observab
 return {bar,mutable$bar};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -522,6 +536,7 @@ const {figure, rotation, viewof$rotation} = await (import("https://api.observabl
 return {figure,rotation,viewof$rotation};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -552,6 +567,7 @@ const {figure, rotation: rot, viewof$rotation: viewof$rot} = await (import("http
 return {figure,rot,viewof$rot};
 }",
   "databases": Set {},
+  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -609,6 +625,7 @@ exports[`transpiles empty cells 2`] = `
 
 }",
   "databases": Set {},
+  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -625,6 +642,7 @@ exports[`transpiles empty cells 3`] = `
 
 }",
   "databases": Set {},
+  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -641,6 +659,7 @@ exports[`transpiles empty cells 4`] = `
 
 }",
   "databases": Set {},
+  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -657,6 +676,7 @@ exports[`transpiles empty cells 5`] = `
 
 }",
   "databases": Set {},
+  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -729,6 +749,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
+  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",
@@ -749,6 +770,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
+  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",
@@ -769,6 +791,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
+  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",
@@ -789,6 +812,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
+  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",
@@ -809,6 +833,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
+  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",

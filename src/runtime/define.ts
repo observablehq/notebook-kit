@@ -22,7 +22,7 @@ export type Definition = {
   output?: string;
   /** whether to display this cell’s singular output automatically */
   autodisplay?: boolean;
-  /** whether to introduce the display and view builtins (js and ts cells only) */
+  /** whether to introduce the display and view builtins; defaults to false */
   displayBuiltins?: boolean;
   /** whether this cell’s singular output is a view */
   autoview?: boolean;

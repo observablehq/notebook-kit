@@ -20,7 +20,7 @@ export type TranspiledJavaScript = {
   output?: string;
   /** whether to implicitly display the body value (e.g., an expression) */
   autodisplay?: boolean;
-  /** whether to introduce the display and view builtins (js and ts cells only) */
+  /** whether to introduce the display and view builtins (every mode except ojs) */
   displayBuiltins?: boolean;
   /** whether to implicitly derive a view; requires viewof output */
   autoview?: boolean;
@@ -72,7 +72,7 @@ export function transpile(
           ? transpileJavaScript(transpileTemplate(cell), options)
           : transpileJavaScript(input, options);
   if (transpiled.output === undefined) transpiled.output = cell.output;
-  if (mode === "js" || mode === "ts") transpiled.displayBuiltins = true;
+  transpiled.displayBuiltins ??= mode !== "ojs";
   if (cell.hidden) transpiled.autodisplay = false;
   else if (mode !== "js" && mode !== "ts" && mode !== "ojs") {
     transpiled.autodisplay = !!input;
