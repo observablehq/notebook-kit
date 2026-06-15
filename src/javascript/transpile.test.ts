@@ -53,15 +53,6 @@ it("transpiles static imports with {type: 'observable'}", () => {
   expect(transpile('import {viewof$rotation} from "https://api.observablehq.com/@rreusser/drawing-3d-objects-with-svg.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot();
 });
 
-it("introduces the display and view builtins for every mode except Observable JavaScript", () => {
-  expect(transpile("display(1)", "js").displayBuiltins).toBe(true);
-  expect(transpile("display(1)", "ts").displayBuiltins).toBe(true);
-  expect(transpile("Hello ${display}", "md").displayBuiltins).toBe(true);
-  expect(transpile("<p>${display}", "html").displayBuiltins).toBe(true);
-  expect(transpile("display(1)", "ojs").displayBuiltins).toBe(false);
-  expect(transpile("viewof x = 1", "ojs").displayBuiltins).toBe(false);
-});
-
 it("transpiles Observable JavaScript imports", () => {
   expect(transpile('import {color} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
   expect(transpile('import {color} from "2d6bf7be248d66f3@173"', "ojs")).toMatchSnapshot();

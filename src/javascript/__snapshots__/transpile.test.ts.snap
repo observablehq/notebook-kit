@@ -9,7 +9,6 @@ return (
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -27,7 +26,6 @@ x + y
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "x",
@@ -48,7 +46,6 @@ await z
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "z",
@@ -68,7 +65,6 @@ display(1), display(2)
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "display",
@@ -87,7 +83,6 @@ const x = 1, y = 2;
 return {x,y};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -106,7 +101,6 @@ exports[`transpiles JavaScript programs 2`] = `
 x + y;
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "x",
@@ -125,7 +119,6 @@ exports[`transpiles JavaScript programs 3`] = `
 await z;
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "z",
@@ -150,7 +143,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -177,7 +169,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -204,7 +195,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -231,7 +221,6 @@ const {color: red} = await (import("https://api.observablehq.com/d/2d6bf7be248d6
 return {red};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -259,7 +248,6 @@ const {color, viewof$color} = await (import("https://api.observablehq.com/d/2d6b
 return {color,viewof$color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -287,7 +275,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -314,7 +301,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -341,7 +327,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -368,7 +353,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -395,7 +379,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -422,7 +405,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -449,7 +431,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@1
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -477,7 +458,6 @@ const {foo, mutable$foo} = await (import("https://api.observablehq.com/d/2d6bf7b
 return {foo,mutable$foo};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -506,7 +486,6 @@ const {foo: bar, mutable$foo: mutable$bar} = await (import("https://api.observab
 return {bar,mutable$bar};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -536,7 +515,6 @@ const {figure, rotation, viewof$rotation} = await (import("https://api.observabl
 return {figure,rotation,viewof$rotation};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -567,7 +545,6 @@ const {figure, rotation: rot, viewof$rotation: viewof$rot} = await (import("http
 return {figure,rot,viewof$rot};
 }",
   "databases": Set {},
-  "displayBuiltins": false,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -590,7 +567,6 @@ const d3 = await import("https://cdn.jsdelivr.net/npm/d3/+esm");
 return {d3};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -608,7 +584,6 @@ exports[`transpiles empty cells 1`] = `
 
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -625,7 +600,6 @@ exports[`transpiles empty cells 2`] = `
 
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -642,7 +616,6 @@ exports[`transpiles empty cells 3`] = `
 
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -659,7 +632,6 @@ exports[`transpiles empty cells 4`] = `
 
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -676,7 +648,6 @@ exports[`transpiles empty cells 5`] = `
 
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -694,7 +665,6 @@ return (
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -712,7 +682,6 @@ new URL("./test", document.baseURI).href
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -730,7 +699,6 @@ return (
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -749,7 +717,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",
@@ -770,7 +737,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",
@@ -791,7 +757,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",
@@ -812,7 +777,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",
@@ -833,7 +797,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 )
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "Interpreter",
@@ -858,7 +821,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -885,7 +847,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@1
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -912,7 +873,6 @@ const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubbe
 return {Scrubber};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -939,7 +899,6 @@ const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubbe
 return {Scrubber};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -966,7 +925,6 @@ const {viewof$rotation} = await (import("https://api.observablehq.com/@rreusser/
 return {viewof$rotation};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -988,7 +946,6 @@ const d3 = await import("https://cdn.jsdelivr.net/npm/d3/+esm");
 return {d3};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -1011,7 +968,6 @@ const {default: _} = await import("https://cdn.jsdelivr.net/npm/lodash/+esm").th
 return {_};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -1030,7 +986,6 @@ const [{}, {}] = await Promise.all([import("https://cdn.jsdelivr.net/npm/d3/+esm
 
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [],
   "output": undefined,
@@ -1053,7 +1008,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3.j
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -1080,7 +1034,6 @@ const {color} = await (import("https://api.observablehq.com/d/2d6bf7be248d66f3@1
 return {color};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -1107,7 +1060,6 @@ const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubbe
 return {Scrubber};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -1134,7 +1086,6 @@ const {Scrubber} = await (import("https://api.observablehq.com/@mbostock/scrubbe
 return {Scrubber};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",
@@ -1161,7 +1112,6 @@ const {viewof$rotation} = await (import("https://api.observablehq.com/@rreusser/
 return {viewof$rotation};
 }",
   "databases": Set {},
-  "displayBuiltins": true,
   "files": Set {},
   "inputs": [
     "@variable",

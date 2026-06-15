@@ -22,23 +22,23 @@ export type Definition = {
   output?: string;
   /** whether to display this cell’s singular output automatically */
   autodisplay?: boolean;
-  /** whether to introduce the display and view builtins; defaults to false */
-  displayBuiltins?: boolean;
   /** whether this cell’s singular output is a view */
   autoview?: boolean;
   /** whether this cell’s singular output is a mutable */
   automutable?: boolean;
+  /** whether to define the display and view builtins; defaults to false */
+  display?: boolean;
   /** an asset mapping to apply to any autodisplayed assets (e.g., images and videos) */
   assets?: Map<string, string>;
 };
 
 export function define(main: Module, state: DefineState, definition: Definition, observer = observe): void {
-  const {id, body, inputs = [], outputs = [], output, autodisplay, autoview, automutable, displayBuiltins = false} = definition;
+  const {id, body, inputs = [], outputs = [], output} = definition;
   const variables = state.variables;
   const v = main.variable(observer(state, definition), {shadow: {}});
   const vid = output ?? (outputs.length ? `cell ${id}` : null);
   state.autoclear = true;
-  if (displayBuiltins && (inputs.includes("display") || inputs.includes("view"))) {
+  if (definition.display && (inputs.includes("display") || inputs.includes("view"))) {
     let displayVersion = -1; // the variable._version of currently-displayed values
     const vd = new (v.constructor as typeof Variable)(2, v._module);
     vd.define(
@@ -62,15 +62,15 @@ export function define(main: Module, state: DefineState, definition: Definition,
       vv.define(["display"], (display) => (value: unknown) => input(display(value)));
       v._shadow.set("view", vv);
     }
-  } else if (!autodisplay) {
+  } else if (!definition.autodisplay) {
     clear(state);
   }
   variables.push(v.define(vid, inputs, body));
   if (output != null) {
-    if (autoview) {
+    if (definition.autoview) {
       const o = unprefix(output, "viewof$");
       variables.push(main.define(o, [output], input));
-    } else if (automutable) {
+    } else if (definition.automutable) {
       const o = unprefix(output, "mutable ");
       const x = `cell ${id}`;
       v.define(o, [x], ([mutable]) => mutable); // observe live value
