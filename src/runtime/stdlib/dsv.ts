@@ -44,19 +44,20 @@ export function inferSchema(
     // Chose the non-string, non-other type with the greatest count that is also
     // ≥90%; or if no such type meets that criterion, fall back to string if
     // ≥90%; and lastly fall back to other.
-    const minCount = Math.max(1, colCount.defined * 0.9);
-    let type: Type = "other";
+    const minCount = Math.max(1, Math.ceil(colCount.defined * 0.9));
+    let type: Type = "string";
     let typeCount = minCount - 1;
+    console.warn(colCount, typeCount)
     for (const inferrableType of inferrableTypes) {
       if (colCount[inferrableType] > typeCount) {
         type = inferrableType;
         typeCount = colCount[type];
       }
     }
-    if (colCount.string > typeCount) {
-      type = "string";
-      typeCount = colCount.string;
-    }
+    // if (colCount.string > typeCount) {
+    //   type = "string";
+    //   typeCount = colCount.string;
+    // }
     schema.push({name: col, type});
   }
   return schema;
@@ -73,7 +74,7 @@ export function enforceSchema(
   );
 }
 
-function coerceRow(
+export function coerceRow(
   object: Record<string, unknown>,
   types: Map<string, Type | "raw">,
   schema: ColumnSchema[]
@@ -87,7 +88,7 @@ function coerceRow(
   return coerced;
 }
 
-function coerceToType(value: unknown, type: Type): unknown {
+export function coerceToType(value: unknown, type: Type): unknown {
   switch (type) {
     case "string":
       return typeof value === "string" || value == null ? value : String(value);
@@ -145,7 +146,7 @@ function createTypeCount(): TypeCount {
 
 type TypeCount = Record<Exclude<Type, "other"> | "defined", number>;
 
-type Type =
+export type Type =
   | "boolean"
   | "integer"
   | "number"
@@ -165,14 +166,15 @@ const inferrableTypes: Exclude<Type, "other">[] = [
   "integer",
   "number",
   "date",
-  "bigint",
-  "array",
-  "object",
-  "buffer"
+  // "string"
+  // "bigint",
+  // "array",
+  // "object",
+  // "buffer"
   // Note: "other" and "string" are intentionally omitted; see below!
 ];
 
-function getAllKeys(rows: Record<string, string>[]): string[] {
+export function getAllKeys(rows: Record<string, string>[]): string[] {
   const keys = new Set<string>();
   for (const row of rows) {
     if (row != null) {
