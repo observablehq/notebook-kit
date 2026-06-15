@@ -279,7 +279,7 @@ exports[`transpiles Observable JavaScript dynamic imports 5`] = `
   "automutable": false,
   "autoview": false,
   "body": "function(){return(
-import("https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/controls/OrbitControls.js/+esm")
+import("https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/controls/OrbitControls.js")
 )}",
   "databases": Set {},
   "files": Set {},

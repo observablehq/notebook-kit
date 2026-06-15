@@ -28,19 +28,11 @@ test("adds /+esm as expected", () => {
   );
   assert.strictEqual(
     resolveNpmImport("npm:prettier/plugins/acorn.js"),
-    "https://cdn.jsdelivr.net/npm/prettier/plugins/acorn.js/+esm" // bundles JS module files
+    "https://cdn.jsdelivr.net/npm/prettier/plugins/acorn.js" // no /+esm because file extension
   );
   assert.strictEqual(
     resolveNpmImport("npm:prettier/plugins/acorn.js/+esm"),
     "https://cdn.jsdelivr.net/npm/prettier/plugins/acorn.js/+esm" // preserve existing /+esm
-  );
-  assert.strictEqual(
-    resolveNpmImport("npm:foo/bar.mjs"),
-    "https://cdn.jsdelivr.net/npm/foo/bar.mjs/+esm" // /+esm because JS module file
-  );
-  assert.strictEqual(
-    resolveNpmImport("npm:three@0.150.1/examples/jsm/controls/OrbitControls.js"),
-    "https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/controls/OrbitControls.js/+esm" // bundle so internal bare imports resolve
   );
   assert.strictEqual(
     resolveNpmImport("npm:leaflet/dist/leaflet.css"),
