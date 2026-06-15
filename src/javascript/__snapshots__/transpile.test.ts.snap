@@ -1,5 +1,85 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`ignores non-bare Observable JavaScript dynamic imports 1`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("./local.js")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
+exports[`ignores non-bare Observable JavaScript dynamic imports 2`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("../sibling.js")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
+exports[`ignores non-bare Observable JavaScript dynamic imports 3`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("/abs.js")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
+exports[`ignores non-bare Observable JavaScript dynamic imports 4`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("https://cdn.skypack.dev/canvas-confetti")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
+exports[`ignores non-bare Observable JavaScript dynamic imports 5`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("npm:d3")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
 exports[`transpiles JavaScript expressions 1`] = `
 {
   "autodisplay": true,
@@ -125,6 +205,102 @@ await z;
   ],
   "output": undefined,
   "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript dynamic imports 1`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("https://cdn.jsdelivr.net/npm/d3/+esm")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript dynamic imports 2`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("https://cdn.jsdelivr.net/npm/d3@7/+esm")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript dynamic imports 3`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("https://cdn.jsdelivr.net/npm/@observablehq/plot/+esm")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript dynamic imports 4`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("https://cdn.jsdelivr.net/npm/lodash/fp/+esm")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript dynamic imports 5`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/controls/OrbitControls.js/+esm")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles Observable JavaScript dynamic imports 6`] = `
+{
+  "autodisplay": true,
+  "automutable": false,
+  "autoview": false,
+  "body": "function(){return(
+import("https://cdn.jsdelivr.net/npm/leaflet/dist/leaflet.css")
+)}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
   "secrets": Set {},
 }
 `;
