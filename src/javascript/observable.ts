@@ -104,8 +104,9 @@ function rewriteDynamicImports(output: Sourcemap, body: Node): void {
   simple(body, {
     ImportExpression({source}) {
       if (!isStringLiteral(source)) return;
-      const value = getStringLiteralValue(source);
+      let value = getStringLiteralValue(source);
       if (/^(\w+:|\.?\.?\/)/.test(value)) return;
+      if (/\.(js|mjs|cjs)$/.test(value)) value += "/+esm";
       const resolution = resolveNpmImport(`npm:${value}`);
       output.replaceLeft(source.start, source.end, JSON.stringify(resolution));
     }
