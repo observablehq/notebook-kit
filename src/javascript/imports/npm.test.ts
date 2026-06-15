@@ -28,7 +28,7 @@ test("adds /+esm as expected", () => {
   );
   assert.strictEqual(
     resolveNpmImport("npm:prettier/plugins/acorn.js"),
-    "https://cdn.jsdelivr.net/npm/prettier/plugins/acorn.js" // no /+esm because file extension
+    "https://cdn.jsdelivr.net/npm/prettier/plugins/acorn.js/+esm" // bundles JS module files
   );
   assert.strictEqual(
     resolveNpmImport("npm:prettier/plugins/acorn.js/+esm"),

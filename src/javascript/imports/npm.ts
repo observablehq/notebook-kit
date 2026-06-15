@@ -24,15 +24,21 @@ function parseNpmSpecifier(specifier: string): NpmSpecifier {
 export function resolveNpmImport(specifier: string): string {
   if (!specifier.startsWith("npm:")) return specifier;
   const {name, range, path} = parseNpmSpecifier(specifier.slice(4));
-  return `https://cdn.jsdelivr.net/npm/${name}${
-    range || getDefaultRange(name)
-  }${
-    path
-      ? !/(\.\w+|\/|\/\+esm)$/.test(path) // if not file, directory, or /+esm
-        ? `${path}/+esm` // then append /+esm
-        : path // otherwise keep as-is
-      : getDefaultPath(name)
-  }`;
+  const base = `https://cdn.jsdelivr.net/npm/${name}${range || getDefaultRange(name)}`;
+  switch (true) {
+    case path === "": // bare package
+      return `${base}${getDefaultPath(name)}`;
+    case path.endsWith(".js"): // JS module file
+    case path.endsWith(".mjs"):
+    case path.endsWith(".cjs"):
+      return `${base}${path}/+esm`;
+    case path.endsWith("/"): // directory
+    case path.endsWith("/+esm"): // +esm
+    case path.slice(path.lastIndexOf("/")).includes("."): // file (.css, .wasm)
+      return `${base}${path}`;
+    default: // bare subpath
+      return `${base}${path}/+esm`;
+  }
 }
 
 function getDefaultRange(name: string): string {
