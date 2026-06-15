@@ -26,17 +26,25 @@ export type Definition = {
   autoview?: boolean;
   /** whether this cell’s singular output is a mutable */
   automutable?: boolean;
+  /** whether to define the display and view builtins; defaults to true */
+  display?: boolean;
   /** an asset mapping to apply to any autodisplayed assets (e.g., images and videos) */
   assets?: Map<string, string>;
 };
 
-export function define(main: Module, state: DefineState, definition: Definition, observer = observe): void {
-  const {id, body, inputs = [], outputs = [], output, autodisplay, autoview, automutable} = definition;
+export function define(
+  main: Module,
+  state: DefineState,
+  definition: Definition,
+  observer = observe
+): void {
+  const {id, body, inputs = [], outputs = [], output} = definition;
+  const {autodisplay, autoview, automutable, display: defineDisplay = true} = definition;
   const variables = state.variables;
   const v = main.variable(observer(state, definition), {shadow: {}});
   const vid = output ?? (outputs.length ? `cell ${id}` : null);
   state.autoclear = true;
-  if (inputs.includes("display") || inputs.includes("view")) {
+  if (defineDisplay && (inputs.includes("display") || inputs.includes("view"))) {
     let displayVersion = -1; // the variable._version of currently-displayed values
     const vd = new (v.constructor as typeof Variable)(2, v._module);
     vd.define(
