@@ -5,6 +5,7 @@ import type {Identifier, ImportDeclaration, Node} from "acorn";
 import {rewriteFileExpressions} from "./files.js";
 import {flatMapImportSpecifiers, rewriteImportDeclarations} from "./imports.js";
 import {Sourcemap} from "./sourcemap.js";
+import {getStringLiteralValue, isStringLiteral} from "./strings.js";
 import type {TranspiledJavaScript, TranspileOptions} from "./transpile.js";
 import {transpileJavaScript} from "./transpile.js";
 import {simple} from "./walk.js";
@@ -95,15 +96,10 @@ function transformObservableImport(body: ImportDeclaration): void {
 
 function rewriteDynamicImports(output: Sourcemap, body: Node): void {
   simple(body, {
-    ImportExpression(node) {
-      const specifier = node.source;
-      if (
-        specifier.type === "Literal" &&
-        typeof specifier.value === "string" &&
-        !/^(\w+:|\.?\.?\/)/.test(specifier.value)
-      ) {
-        output.insertRight(specifier.start + 1, "https://unpkg.com/");
-        output.insertLeft(specifier.end - 1, "?module");
+    ImportExpression({source}) {
+      if (isStringLiteral(source) && !/^(\w+:|\.?\.?\/)/.test(getStringLiteralValue(source))) {
+        output.insertRight(source.start + 1, "https://unpkg.com/");
+        output.insertLeft(source.end - 1, "?module");
       }
     }
   });
