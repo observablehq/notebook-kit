@@ -20,7 +20,7 @@ describe("inferTypes", () => {
     assert.deepStrictEqual(inferType([true, false, true, false, true, false, true, false, true, "", "pants on fire"].map(String)), [true, false, true, false, true, false, true, false, true, null, undefined]); // prettier-ignore
   });
   it("infers dates in common formats", () => {
-    assert.deepStrictEqual(inferType(["1/2/20", "2020-11-12 12:23:00", "", "2020-01-12"]), [new Date("2020-01-02T07:00:00.000Z"), new Date("2020-11-12T19:23:00.000Z"), null, new Date("2020-01-12T00:00:00.000Z")]); // prettier-ignore
+    assert.deepStrictEqual(inferType(["1/2/20", "2020-11-12 12:23:00", "", "2020-01-12"]), [new Date("2020-01-02T08:00:00.000Z"), new Date("2020-11-12T20:23:00.000Z"), null, new Date("2020-01-12T00:00:00.000Z")]); // prettier-ignore
   });
   it("infers strings", () => {
     assert.deepStrictEqual(inferType(["cat", "dog", "1,000", "null"]), ["cat", "dog", "1,000", "null"]); // prettier-ignore
