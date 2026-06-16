@@ -44,9 +44,9 @@ export function inferTypes<T extends Record<string, string>>(
   return output;
 }
 
-export function coerceBoolean(value: string): boolean | null {
+export function coerceBoolean(value: string): boolean | null | undefined {
   const trimmed = value.trim().toLowerCase();
-  return trimmed === "true" ? true : trimmed === "false" ? false : null;
+  return trimmed === "true" ? true : trimmed === "false" ? false : trimmed ? undefined : null;
 }
 
 export function coerceNumber(value: string): number {

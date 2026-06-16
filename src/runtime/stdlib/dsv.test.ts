@@ -17,7 +17,7 @@ describe("inferTypes", () => {
   });
   it("infers booleans", () => {
     assert.deepStrictEqual(inferType(["true", "", "false"]), [true, null, false]);
-    assert.deepStrictEqual(inferType([true, false, true, false, true, false, true, false, true, false, "pants on fire"].map(String)), [true, false, true, false, true, false, true, false, true, false, null]); // prettier-ignore
+    assert.deepStrictEqual(inferType([true, false, true, false, true, false, true, false, true, "", "pants on fire"].map(String)), [true, false, true, false, true, false, true, false, true, null, undefined]); // prettier-ignore
   });
   it("infers dates in common formats", () => {
     assert.deepStrictEqual(inferType(["1/2/20", "2020-11-12 12:23:00", "", "2020-01-12"]), [new Date("2020-01-02T07:00:00.000Z"), new Date("2020-11-12T19:23:00.000Z"), null, new Date("2020-01-12T00:00:00.000Z")]); // prettier-ignore
@@ -63,12 +63,12 @@ describe("coerceBoolean", () => {
     assert.deepStrictEqual(coerceBoolean("True   "), true);
     assert.deepStrictEqual(coerceBoolean("False"), false);
     assert.deepStrictEqual(coerceBoolean("false"), false);
-    assert.deepStrictEqual(coerceBoolean("1"), null); // TODO null vs. undefined?
-    assert.deepStrictEqual(coerceBoolean("2"), null);
-    assert.deepStrictEqual(coerceBoolean("0"), null);
-    assert.deepStrictEqual(coerceBoolean("{}"), null);
-    assert.deepStrictEqual(coerceBoolean("null"), null);
-    assert.deepStrictEqual(coerceBoolean("undefined"), null);
+    assert.deepStrictEqual(coerceBoolean(""), null);
+    assert.deepStrictEqual(coerceBoolean("1"), undefined);
+    assert.deepStrictEqual(coerceBoolean("2"), undefined);
+    assert.deepStrictEqual(coerceBoolean("0"), undefined);
+    assert.deepStrictEqual(coerceBoolean("null"), undefined);
+    assert.deepStrictEqual(coerceBoolean("undefined"), undefined);
   });
 });
 
