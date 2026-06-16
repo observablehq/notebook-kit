@@ -1,7 +1,9 @@
+import {inferTypes} from "./dsv.js";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const files = new Map<string, FileAttachmentImpl>();
 
-export type DsvOptions = {delimiter?: string; array?: boolean; typed?: boolean};
+export type DsvOptions = {delimiter?: string; array?: boolean; typed?: "auto" | boolean};
 export type DsvResult = (Record<string, any>[] | any[][]) & {columns: string[]};
 
 export interface FileAttachment {
@@ -136,11 +138,13 @@ export abstract class AbstractFile implements FileAttachment {
   async stream(): Promise<ReadableStream<Uint8Array<ArrayBufferLike>>> {
     return (await fetchFile(this)).body!;
   }
-  async dsv({delimiter = ",", array = false, typed = false} = {}): Promise<DsvResult> {
+  async dsv({delimiter = ",", array = false, typed = false}: DsvOptions = {}): Promise<DsvResult> {
     const [text, d3] = await Promise.all([this.text(), import("https://cdn.jsdelivr.net/npm/d3-dsv/+esm")]); // prettier-ignore
     const format = d3.dsvFormat(delimiter);
-    const parse = array ? format.parseRows : format.parse;
-    return parse(text, typed && d3.autoType);
+    const parse = array ? ((typed &&= true), format.parseRows) : format.parse;
+    const output = parse(text, typed === true ? d3.autoType : undefined);
+    if (typed === "auto") inferTypes(output, output.columns);
+    return output;
   }
   async csv(options?: Omit<DsvOptions, "delimiter">): Promise<DsvResult> {
     return this.dsv({...options, delimiter: ","});
