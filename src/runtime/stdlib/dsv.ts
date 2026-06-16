@@ -1,6 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
-/** Accepts dates in the form of ISOString and LocaleDateString, with or without time. */
+/**
+ * Accepts dates in the following forms:
+ * - ±YYYYYY-MM-DD
+ * - YYYY-MM-DD
+ * - MM/DD/YY
+ * - MM/DD/YYYY
+ *
+ * Following a "T" or a space, dates may additionally have a time:
+ * - HH:MM
+ * - HH:MM:SS
+ * - HH:MM:SS.MMM
+ *
+ * And the time may optionally have a time zone:
+ * - Z
+ * - ±HH:MM
+ */
 const DATE_TEST = /^([-+]\d{2})?\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}([T ]\d{2}:\d{2}(:\d{2}(\.\d{3})?)?(Z|[-+]\d{2}:\d{2})?)?$/; // prettier-ignore
 
 /** The maximum number of rows to sample (including missing values). */
