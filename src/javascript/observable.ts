@@ -4,6 +4,7 @@ import {parseCell} from "@observablehq/parser";
 import type {Identifier, ImportDeclaration, Node} from "acorn";
 import {rewriteFileExpressions} from "./files.js";
 import {flatMapImportSpecifiers, rewriteImportDeclarations} from "./imports.js";
+import {resolveNpmImport} from "./imports/npm.js";
 import {Sourcemap} from "./sourcemap.js";
 import {getStringLiteralValue, isStringLiteral} from "./strings.js";
 import type {TranspiledJavaScript, TranspileOptions} from "./transpile.js";
@@ -94,13 +95,20 @@ function transformObservableImport(body: ImportDeclaration): void {
   ];
 }
 
+/**
+ * Rewrite a bare dynamic import such as import("d3") to a CDN URL, like
+ * import("https://cdn.jsdelivr.net/npm/d3/+esm"), using the same resolution as
+ * static imports. Protocol (npm:, https:, …) and local imports are left alone.
+ */
 function rewriteDynamicImports(output: Sourcemap, body: Node): void {
   simple(body, {
     ImportExpression({source}) {
-      if (isStringLiteral(source) && !/^(\w+:|\.?\.?\/)/.test(getStringLiteralValue(source))) {
-        output.insertRight(source.start + 1, "https://unpkg.com/");
-        output.insertLeft(source.end - 1, "?module");
-      }
+      if (!isStringLiteral(source)) return;
+      let value = getStringLiteralValue(source);
+      if (/^(\w+:|\.?\.?\/)/.test(value)) return;
+      if (/\.(js|mjs|cjs)$/.test(value)) value += "/+esm";
+      const resolution = resolveNpmImport(`npm:${value}`);
+      output.replaceLeft(source.start, source.end, JSON.stringify(resolution));
     }
   });
 }

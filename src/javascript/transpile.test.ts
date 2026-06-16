@@ -84,6 +84,23 @@ it("transpiles Observable JavaScript import-withs of views and mutables", () => 
   expect(transpile('import {color} with {foo, viewof bar, mutable baz as qux} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
 });
 
+it("transpiles Observable JavaScript dynamic imports", () => {
+  expect(transpile('import("d3")', "ojs")).toMatchSnapshot();
+  expect(transpile('import("d3@7")', "ojs")).toMatchSnapshot();
+  expect(transpile('import("@observablehq/plot")', "ojs")).toMatchSnapshot();
+  expect(transpile('import("lodash/fp")', "ojs")).toMatchSnapshot();
+  expect(transpile('import("three@0.150.1/examples/jsm/controls/OrbitControls.js")', "ojs")).toMatchSnapshot();
+  expect(transpile('import("leaflet/dist/leaflet.css")', "ojs")).toMatchSnapshot();
+});
+
+it("ignores non-bare Observable JavaScript dynamic imports", () => {
+  expect(transpile('import("./local.js")', "ojs")).toMatchSnapshot();
+  expect(transpile('import("../sibling.js")', "ojs")).toMatchSnapshot();
+  expect(transpile('import("/abs.js")', "ojs")).toMatchSnapshot();
+  expect(transpile('import("https://cdn.skypack.dev/canvas-confetti")', "ojs")).toMatchSnapshot();
+  expect(transpile('import("npm:d3")', "ojs")).toMatchSnapshot();
+});
+
 it("transpiles import.meta.resolve", () => {
   expect(transpile('import.meta.resolve("npm:d3")', "js")).toMatchSnapshot();
   expect(transpile('import.meta.resolve("./test")', "js", {resolveLocalImports: true})).toMatchSnapshot();
