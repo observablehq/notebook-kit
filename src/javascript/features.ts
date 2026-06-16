@@ -1,5 +1,5 @@
 import type {Node, CallExpression} from "acorn";
-import {getStringLiteralValue, isStringLiteral} from "./literal.js";
+import {getStringLiteralValue, isStringLiteral} from "./strings.js";
 import {findReferences} from "./references.js";
 import {syntaxError} from "./syntaxError.js";
 import {simple} from "./walk.js";

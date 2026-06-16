@@ -4,7 +4,9 @@ import {parseCell} from "@observablehq/parser";
 import type {Identifier, ImportDeclaration, Node} from "acorn";
 import {rewriteFileExpressions} from "./files.js";
 import {flatMapImportSpecifiers, rewriteImportDeclarations} from "./imports.js";
+import {resolveNpmImport} from "./imports/npm.js";
 import {Sourcemap} from "./sourcemap.js";
+import {getStringLiteralValue, isStringLiteral} from "./strings.js";
 import type {TranspiledJavaScript, TranspileOptions} from "./transpile.js";
 import {transpileJavaScript} from "./transpile.js";
 import {simple} from "./walk.js";
@@ -19,6 +21,7 @@ export function transpileObservable(
   if (cell.tag) throw new Error("tagged ojs cells are not supported");
   const output = new Sourcemap(input).trim();
   rewriteSpecialReferences(output, cell.body);
+  rewriteDynamicImports(output, cell.body);
   if (options?.resolveFiles) rewriteFileExpressions(output, cell.body);
   const inputs = Array.from(new Set(cell.references.map(asReference)));
   let start = "";
@@ -90,6 +93,24 @@ function transformObservableImport(body: ImportDeclaration): void {
       end: 0
     }
   ];
+}
+
+/**
+ * Rewrite a bare dynamic import such as import("d3") to a CDN URL, like
+ * import("https://cdn.jsdelivr.net/npm/d3/+esm"), using the same resolution as
+ * static imports. Protocol (npm:, https:, …) and local imports are left alone.
+ */
+function rewriteDynamicImports(output: Sourcemap, body: Node): void {
+  simple(body, {
+    ImportExpression({source}) {
+      if (!isStringLiteral(source)) return;
+      let value = getStringLiteralValue(source);
+      if (/^(\w+:|\.?\.?\/)/.test(value)) return;
+      if (/\.(js|mjs|cjs)$/.test(value)) value += "/+esm";
+      const resolution = resolveNpmImport(`npm:${value}`);
+      output.replaceLeft(source.start, source.end, JSON.stringify(resolution));
+    }
+  });
 }
 
 /** Rewrite viewof x ↦ viewof$x, and mutable x ↦ mutable$x.value. */
