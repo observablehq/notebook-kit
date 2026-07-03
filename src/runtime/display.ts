@@ -49,17 +49,21 @@ export function clear(state: DisplayState): void {
   while (state.root.lastChild) state.root.lastChild.remove();
 }
 
+const observers = new WeakMap<DisplayState, unknown>();
+
 export function observe(state: DisplayState, {autodisplay, assets, output}: Definition) {
-  return {
+  const observer = {
     _error: false,
     _node: state.root, // _node for visibility promise
     pending() {
+      if (observers.get(state) !== this) return; // stale, e.g., after the cell is redefined
       if (this._error) {
         this._error = false;
         clear(state);
       }
     },
     fulfilled(value: unknown) {
+      if (observers.get(state) !== this) return;
       if (autodisplay) {
         if (assets && value instanceof Element) mapAssets(value, assets);
         clear(state);
@@ -69,10 +73,13 @@ export function observe(state: DisplayState, {autodisplay, assets, output}: Defi
       }
     },
     rejected(error: unknown) {
+      if (observers.get(state) !== this) return;
       console.error(error);
       this._error = true;
       clear(state);
       displayError(state, error, output);
     }
   };
+  observers.set(state, observer);
+  return observer;
 }
