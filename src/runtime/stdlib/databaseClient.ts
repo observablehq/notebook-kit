@@ -6,7 +6,7 @@ import {hash, nameHash} from "../../lib/hash.js";
 export type QueryParam = any;
 
 /** @see https://observablehq.com/@observablehq/database-client-specification#%C2%A71 */
-export type QueryResult = Record<string, any>[] & {schema: ColumnSchema[]; date: Date};
+export type QueryResult<T = Record<string, any>> = T[] & {schema: ColumnSchema[]; date: Date};
 
 /** @see https://observablehq.com/@observablehq/database-client-specification#%C2%A72.2 */
 export interface ColumnSchema {
@@ -39,10 +39,24 @@ export interface QueryOptions extends QueryOptionsSpec {
   since?: Date;
 }
 
+export type SqlDialect =
+  | "bigquery"
+  | "databricks"
+  | "duckdb"
+  | "mongosql"
+  | "mssql"
+  | "mysql"
+  | "oracle"
+  | "postgres"
+  | "snowflake"
+  | "sql"
+  | "sqlite";
+
 export interface DatabaseClient {
   readonly name: string;
   readonly options: QueryOptions;
-  sql(strings: readonly string[], ...params: QueryParam[]): Promise<QueryResult>;
+  readonly dialect?: SqlDialect;
+  sql<T = Record<string, any>>(strings: readonly string[],  ...params: QueryParam[]): Promise<QueryResult<T>>; // prettier-ignore
 }
 
 export const DatabaseClient = (name: string, options?: QueryOptionsSpec): DatabaseClient => {
@@ -65,11 +79,11 @@ class DatabaseClientImpl implements DatabaseClient {
       options: {value: options, enumerable: true}
     });
   }
-  async sql(strings: readonly string[], ...params: QueryParam[]): Promise<QueryResult> {
+  async sql<T = Record<string, any>>(strings: readonly string[], ...params: QueryParam[]): Promise<QueryResult<T>> {
     const path = await this.cachePath(strings, ...params);
     const response = await fetch(path);
     if (!response.ok) throw new Error(`failed to fetch: ${path}`);
-    return await response.json().then(revive);
+    return (await response.json().then(revive)) as QueryResult<T>;
   }
   async cachePath(strings: readonly string[], ...params: QueryParam[]): Promise<string> {
     return `.observable/cache/${await nameHash(this.name)}-${await hash(strings, ...params)}.json`;
