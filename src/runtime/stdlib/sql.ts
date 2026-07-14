@@ -35,7 +35,7 @@ sql.text = function text(value: string): SqlFragment {
   return sql([squote(value)]);
 };
 
-export class SqlFragment {
+class SqlFragment {
   readonly strings: Readonly<string[]>;
   readonly params: unknown[];
   constructor(strings: Readonly<string[]>, params: unknown[]) {
@@ -115,13 +115,13 @@ export class SqlFragment {
   }
 }
 
-export class SqlView extends SqlFragment {
+class SqlView extends SqlFragment {
   constructor(strings: Readonly<string[]>, params: unknown[]) {
     super(strings, params);
   }
 }
 
-export class SqlVariant {
+class SqlVariant {
   readonly variants: Partial<Record<SqlDialect | "default", unknown>>;
   constructor(variants: Partial<Record<SqlDialect | "default", unknown>>) {
     this.variants = variants;

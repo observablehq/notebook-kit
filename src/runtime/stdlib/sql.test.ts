@@ -1,13 +1,13 @@
 import {assert, describe, test} from "vitest";
-import {sql, SqlFragment, SqlView} from "./sql.js";
+import {sql} from "./sql.js";
 import type {QueryResult, SqlDialect} from "./databaseClient.js";
 
 describe("sql`…`", () => {
   test("defines a SQL fragment", () => {
-    assert.deepStrictEqual(sql`PURCHASES`, new SqlFragment(["PURCHASES"], []));
-    assert.deepStrictEqual(sql`FOO = ${42}`, new SqlFragment(["FOO = ", ""], [42]));
-    assert.deepStrictEqual(sql`${1} = ${2}`, new SqlFragment(["", " = ", ""], [1, 2]));
-    assert.deepStrictEqual(sql`FOO = ${sql`42`}`, new SqlFragment(["FOO = ", ""], [sql`42`]));
+    assert.deepStrictEqual(sql`PURCHASES`, new sql.Fragment(["PURCHASES"], []));
+    assert.deepStrictEqual(sql`FOO = ${42}`, new sql.Fragment(["FOO = ", ""], [42]));
+    assert.deepStrictEqual(sql`${1} = ${2}`, new sql.Fragment(["", " = ", ""], [1, 2]));
+    assert.deepStrictEqual(sql`FOO = ${sql`42`}`, new sql.Fragment(["FOO = ", ""], [sql`42`]));
   });
   test("maintains reference equality with SQL params", () => {
     const val = sql`42`;
@@ -17,9 +17,9 @@ describe("sql`…`", () => {
 
 describe("sql.view`…`", () => {
   test("defines a SQL view", () => {
-    assert.deepStrictEqual(sql.view`SELECT * FROM FOO`, new SqlView(["SELECT * FROM FOO"], []));
-    assert.deepStrictEqual(sql.view`SELECT * FROM FOO WHERE BAR = ${42}`, new SqlView(["SELECT * FROM FOO WHERE BAR = ", ""], [42])); // prettier-ignore
-    assert.deepStrictEqual(sql.view`SELECT * FROM FOO WHERE BAR = ${sql`42`}`, new SqlView(["SELECT * FROM FOO WHERE BAR = ", ""], [sql`42`])); // prettier-ignore
+    assert.deepStrictEqual(sql.view`SELECT * FROM FOO`, new sql.View(["SELECT * FROM FOO"], []));
+    assert.deepStrictEqual(sql.view`SELECT * FROM FOO WHERE BAR = ${42}`, new sql.View(["SELECT * FROM FOO WHERE BAR = ", ""], [42])); // prettier-ignore
+    assert.deepStrictEqual(sql.view`SELECT * FROM FOO WHERE BAR = ${sql`42`}`, new sql.View(["SELECT * FROM FOO WHERE BAR = ", ""], [sql`42`])); // prettier-ignore
   });
   test("maintains reference equality with SQL params", () => {
     const bar = sql`42`;
@@ -27,29 +27,29 @@ describe("sql.view`…`", () => {
     assert.strictEqual(foo.params[0], bar);
     assert.strictEqual(sql.view`SELECT * FROM ${foo}`.params[0], foo);
   });
-  test("sql.view`…`.flat() returns a SqlView", () => {
-    assert.instanceOf(sql.view`SELECT ${sql`1`}`.flat(), SqlView);
+  test("sql.view`…`.flat() returns a sql.View", () => {
+    assert.instanceOf(sql.view`SELECT ${sql`1`}`.flat(), sql.View);
   });
-  test("sql.view`…`.toDialect() returns a SqlView", () => {
-    assert.instanceOf(sql.view`SELECT ${sql.variant({default: sql`1`})}`.toDialect(), SqlView);
+  test("sql.view`…`.toDialect() returns a sql.View", () => {
+    assert.instanceOf(sql.view`SELECT ${sql.variant({default: sql`1`})}`.toDialect(), sql.View);
   });
 });
 
 describe("sql`…`.flat()", () => {
   test("returns a flattened SQL fragment", () => {
-    assert.deepStrictEqual(sql`FOO = 42`.flat(), new SqlFragment(["FOO = 42"], []));
-    assert.deepStrictEqual(sql`FOO = ${42}`.flat(), new SqlFragment(["FOO = ", ""], [42]));
-    assert.deepStrictEqual(sql`FOO = ${sql`42`}`.flat(), new SqlFragment(["FOO = 42"], []));
-    assert.deepStrictEqual(sql`FOO = ${sql`${42}`}`.flat(), new SqlFragment(["FOO = ", ""], [42]));
+    assert.deepStrictEqual(sql`FOO = 42`.flat(), new sql.Fragment(["FOO = 42"], []));
+    assert.deepStrictEqual(sql`FOO = ${42}`.flat(), new sql.Fragment(["FOO = ", ""], [42]));
+    assert.deepStrictEqual(sql`FOO = ${sql`42`}`.flat(), new sql.Fragment(["FOO = 42"], []));
+    assert.deepStrictEqual(sql`FOO = ${sql`${42}`}`.flat(), new sql.Fragment(["FOO = ", ""], [42]));
   });
   test("handles arbitrarily nested SQL", () => {
-    assert.deepStrictEqual(sql`ORDER BY 3, ${sql`2 ${sql`DESC`}`}`.flat(), new SqlFragment(["ORDER BY 3, 2 DESC"], []));
+    assert.deepStrictEqual(sql`ORDER BY 3, ${sql`2 ${sql`DESC`}`}`.flat(), new sql.Fragment(["ORDER BY 3, 2 DESC"], []));
   });
   test("adds a WITH clause for selected views", () => {
     const view = sql.view`SELECT * FROM PURCHASES`;
     assert.deepStrictEqual(
       sql`SELECT * FROM ${view}`.flat(),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `WITH
 "_1" AS (SELECT * FROM PURCHASES)
@@ -64,7 +64,7 @@ SELECT * FROM "_1"`
     const view2 = sql.view`SELECT * FROM SURVEYS`;
     assert.deepStrictEqual(
       sql`SELECT * FROM ${view1} UNION ALL SELECT * FROM ${view2}`.flat(),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `WITH
 "_1" AS (SELECT * FROM PURCHASES),
@@ -80,7 +80,7 @@ SELECT * FROM "_1" UNION ALL SELECT * FROM "_2"`
     const view2 = sql.view`SELECT * FROM SURVEYS`;
     assert.deepStrictEqual(
       sql`SELECT * FROM ${view1} UNION ALL SELECT * FROM ${view2}`.flat("databricks"),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `WITH
 \`_1\` AS (SELECT * FROM PURCHASES),
@@ -97,7 +97,7 @@ SELECT * FROM \`_1\` UNION ALL SELECT * FROM \`_2\``
       sql`WITH FOO AS (SELECT * FROM BAR)
 SELECT * FROM ${view}
 UNION ALL SELECT * FROM FOO`.flat(),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `WITH
 "_1" AS (SELECT * FROM PURCHASES),
@@ -122,7 +122,7 @@ WITH RECURSIVE trip AS (
 SELECT airport, min(hops) AS hops FROM trip GROUP BY airport ORDER BY hops`;
     assert.deepStrictEqual(
       reachable.flat(),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `
 WITH RECURSIVE
@@ -145,7 +145,7 @@ SELECT airport, min(hops) AS hops FROM trip GROUP BY airport ORDER BY hops`
     const view = sql.view`SELECT * FROM PURCHASES`;
     assert.deepStrictEqual(
       sql`SELECT * FROM ${view} UNION ALL SELECT * FROM ${view}`.flat(),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `WITH
 "_1" AS (SELECT * FROM PURCHASES)
@@ -160,7 +160,7 @@ SELECT * FROM "_1" UNION ALL SELECT * FROM "_1"`
     const filtered = sql.view`SELECT * FROM ${purchases} WHERE FOO = 42`;
     assert.deepStrictEqual(
       sql`SELECT * FROM ${filtered}`.flat(),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `WITH
 "_2" AS (SELECT * FROM PURCHASES),
@@ -176,7 +176,7 @@ SELECT * FROM "_1"`
     const outer = sql.view`SELECT * FROM ${inner} WHERE Y = ${2}`;
     assert.deepStrictEqual(
       sql`SELECT * FROM ${outer}`.flat(),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `WITH
 "_2" AS (SELECT * FROM PURCHASES WHERE X = `,
@@ -193,7 +193,7 @@ SELECT * FROM "_1"`
     const view = sql.view`SELECT * FROM PURCHASES`;
     assert.deepStrictEqual(
       sql`SELECT * FROM ${view} UNION ALL SELECT * FROM _1`.flat(),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `WITH
 "_2" AS (SELECT * FROM PURCHASES)
@@ -207,7 +207,7 @@ SELECT * FROM "_2" UNION ALL SELECT * FROM _1`
     const view = sql.view`SELECT * FROM PURCHASES`;
     assert.deepStrictEqual(
       sql`SELECT * FROM ${view} UNION ALL SELECT * FROM "_1"`.flat(),
-      new SqlFragment(
+      new sql.Fragment(
         [
           `WITH
 "_2" AS (SELECT * FROM PURCHASES)
