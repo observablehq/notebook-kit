@@ -123,6 +123,40 @@ SELECT * FROM "_1" UNION ALL SELECT * FROM "_1"`
       )
     );
   });
+  test("hoists chained views in topological order", () => {
+    const purchases = sql.view`SELECT * FROM PURCHASES`;
+    const filtered = sql.view`SELECT * FROM ${purchases} WHERE FOO = 42`;
+    assert.deepStrictEqual(
+      sql`SELECT * FROM ${filtered}`.flat(),
+      new SqlFragment(
+        [
+          `WITH
+"_2" AS (SELECT * FROM PURCHASES),
+"_1" AS (SELECT * FROM "_2" WHERE FOO = 42)
+SELECT * FROM "_1"`
+        ],
+        []
+      )
+    );
+  });
+  test("orders params by CTE definition when chaining views", () => {
+    const inner = sql.view`SELECT * FROM PURCHASES WHERE X = ${1}`;
+    const outer = sql.view`SELECT * FROM ${inner} WHERE Y = ${2}`;
+    assert.deepStrictEqual(
+      sql`SELECT * FROM ${outer}`.flat(),
+      new SqlFragment(
+        [
+          `WITH
+"_2" AS (SELECT * FROM PURCHASES WHERE X = `,
+          `),
+"_1" AS (SELECT * FROM "_2" WHERE Y = `,
+          `)
+SELECT * FROM "_1"`
+        ],
+        [1, 2]
+      )
+    );
+  });
   test("avoids conflicts with existing unquoted table names", () => {
     const view = sql.view`SELECT * FROM PURCHASES`;
     assert.deepStrictEqual(
@@ -241,6 +275,31 @@ describe("sql`…`.query(database)", () => {
 SELECT * FROM "_1"`
       ],
       42
+    ]);
+  });
+  test("flattens chained views", async () => {
+    const inner = sql.view`SELECT * FROM PURCHASES WHERE X = ${1}`;
+    const outer = sql.view`SELECT * FROM ${inner}`;
+    const args: unknown[] = [];
+    const result: QueryResult = Object.assign([], {schema: [], date: new Date()});
+    const output = await sql`SELECT * FROM ${outer}`.query({
+      name: "",
+      options: {},
+      async sql<T>(strings: Readonly<string[]>, ...params: unknown[]) {
+        args.push(strings, ...params);
+        return result as QueryResult<T>;
+      }
+    });
+    assert.strictEqual(output, result);
+    assert.deepStrictEqual(args, [
+      [
+        `WITH
+"_2" AS (SELECT * FROM PURCHASES WHERE X = `,
+        `),
+"_1" AS (SELECT * FROM "_2")
+SELECT * FROM "_1"`
+      ],
+      1
     ]);
   });
   test("handles matching dialect-specific variants", async () => {
