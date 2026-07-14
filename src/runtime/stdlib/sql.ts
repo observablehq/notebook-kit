@@ -56,7 +56,7 @@ export const sql = (() => {
         iparams: unknown[]
       ): [Readonly<string[]>, unknown[]] {
         let ostrings: string[] | undefined;
-        let oparams: unknown[] | undefined;
+        let oparams!: unknown[];
         for (let i = 0; i < iparams.length; ++i) {
           const param = iparams[i];
           const string = istrings[i + 1];
@@ -87,15 +87,15 @@ export const sql = (() => {
             ostrings[ostrings.length - 1] += pstrings[0];
             ostrings.push(...pstrings.slice(1));
             ostrings[ostrings.length - 1] += string;
-            oparams!.push(...pparams);
+            oparams.push(...pparams);
           } else if (ostrings !== undefined) {
-            oparams!.push(param);
+            oparams.push(param);
             ostrings.push(string);
           }
         }
         return ostrings === undefined
           ? [istrings, iparams]
-          : [ostrings, oparams!];
+          : [ostrings, oparams];
       }
 
       const [fstrings, fparams] = flatParams(strings, params);
@@ -123,7 +123,7 @@ export const sql = (() => {
   ): T {
     const {strings, params} = fragment;
     let ostrings: string[] | undefined;
-    let oparams: unknown[] | undefined;
+    let oparams!: unknown[];
     for (let i = 0; i < params.length; ++i) {
       const param = params[i];
       const string = strings[i + 1];
@@ -138,10 +138,10 @@ export const sql = (() => {
             oparams = params.slice(0, i);
           }
           ostrings.push(string);
-          oparams!.push(dparam);
+          oparams.push(dparam);
         } else if (ostrings !== undefined) {
           ostrings.push(string);
-          oparams!.push(param);
+          oparams.push(param);
         }
       } else if (param instanceof SqlVariant) {
         let dparam: unknown;
@@ -153,15 +153,15 @@ export const sql = (() => {
           oparams = params.slice(0, i);
         }
         ostrings.push(string);
-        oparams!.push(dparam);
+        oparams.push(dparam);
       } else if (ostrings !== undefined) {
         ostrings.push(string);
-        oparams!.push(param);
+        oparams.push(param);
       }
     }
     return ostrings === undefined
       ? fragment
-      : reconstruct(fragment, ostrings, oparams!);
+      : reconstruct(fragment, ostrings, oparams);
   }
 
   function reconstruct<T extends SqlFragment>(
