@@ -17,18 +17,21 @@ sql.variant = function variant(
   return new SqlVariant(variants);
 };
 
-sql.ident = function (name: string): SqlVariant {
-  return new SqlVariant(
-    Object.fromEntries(
-      (["databricks", "bigquery", "default"] as SqlDialect[]).map((dialect) => [
-        dialect,
-        sql([getIquote(dialect)(name)])
-      ])
-    )
-  );
+sql.ident = function ident(name: string): SqlVariant {
+  return new SqlVariant({
+    get databricks() {
+      return sql([tquote(name)]);
+    },
+    get bigquery() {
+      return sql([tquote(name)]);
+    },
+    get default() {
+      return sql([dquote(name)]);
+    }
+  });
 };
 
-sql.text = function (value: string): SqlFragment {
+sql.text = function text(value: string): SqlFragment {
   return sql([squote(value)]);
 };
 
