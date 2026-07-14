@@ -444,7 +444,7 @@ describe("sql.variant(variants)", () => {
     const snowflake = sql`APPROX_PERCENTILE`;
     const variant = sql.variant({duckdb, snowflake});
     assert.throws(() => variant.toDialect("postgres"), /missing variant: postgres/);
-    assert.throws(() => variant.toDialect(), /missing variant: undefined/);
+    assert.throws(() => variant.toDialect(), /missing dialect/);
   });
   test("implements toString", () => {
     assert.strictEqual(String(sql.variant({default: sql`"Shipping Address State"`})), '"Shipping Address State"');
