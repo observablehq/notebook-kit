@@ -18,15 +18,15 @@ export const sql = (() => {
     return new SqlVariant(variants);
   };
 
-  // TODO Combine with getIquote?
   sql.ident = function (name: string): SqlVariant {
-    const tname = sql([tquote(name)]);
-    const dname = sql([dquote(name)]);
-    return new SqlVariant({
-      databricks: tname,
-      bigquery: tname,
-      default: dname
-    });
+    return new SqlVariant(
+      Object.fromEntries(
+        (["databricks", "bigquery", "default"] as SqlDialect[]).map((dialect) => [
+          dialect,
+          sql([getIquote(dialect)(name)])
+        ])
+      )
+    );
   };
 
   sql.text = function (value: string): SqlFragment {
