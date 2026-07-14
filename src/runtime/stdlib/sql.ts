@@ -40,7 +40,7 @@ export class SqlFragment {
     this.params = params;
   }
   flat(dialect?: SqlDialect): typeof this {
-    const iquote = getIquote(dialect); // TODO combine with sql.ident?
+    const iquote = getIquote(dialect);
     const that = this.toDialect(dialect);
     const {strings, params} = that;
     const names = findUndernames(strings, params); // in-use table names, including ctes
@@ -268,7 +268,6 @@ function findUndernames(
 }
 
 /** Quotes the specified SQL identifier. */
-// TODO Combine with sql.ident.
 function getIquote(dialect?: SqlDialect): (name: string) => string {
   switch (dialect) {
     case "databricks":
