@@ -109,6 +109,38 @@ UNION ALL SELECT * FROM FOO`
       )
     );
   });
+  test("chains a view into a recursive query (flight reachability)", () => {
+    const routes = sql.view`SELECT origin, dest FROM routes WHERE airline = ${"AA"}`;
+    const reachable = sql`
+WITH RECURSIVE trip AS (
+  SELECT ${sql.text("SFO")} AS airport, 0 AS hops
+  UNION
+  SELECT r.dest, t.hops + 1
+  FROM ${routes} r
+  JOIN trip t ON r.origin = t.airport
+)
+SELECT airport, min(hops) AS hops FROM trip GROUP BY airport ORDER BY hops`;
+    assert.deepStrictEqual(
+      reachable.flat(),
+      new SqlFragment(
+        [
+          `
+WITH RECURSIVE
+"_1" AS (SELECT origin, dest FROM routes WHERE airline = `,
+          `),
+ trip AS (
+  SELECT 'SFO' AS airport, 0 AS hops
+  UNION
+  SELECT r.dest, t.hops + 1
+  FROM "_1" r
+  JOIN trip t ON r.origin = t.airport
+)
+SELECT airport, min(hops) AS hops FROM trip GROUP BY airport ORDER BY hops`
+        ],
+        ["AA"]
+      )
+    );
+  });
   test("consolidates multiple references to the same view", () => {
     const view = sql.view`SELECT * FROM PURCHASES`;
     assert.deepStrictEqual(

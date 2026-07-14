@@ -242,7 +242,7 @@ function withViews(
 }
 
 function findWith(input: string): number {
-  const match = /^\s*(--.*\n|\/\*[\s\S]*?\*\/|\s)*with\b/i.exec(input);
+  const match = /^\s*(--.*\n|\/\*[\s\S]*?\*\/|\s)*with\b(\s+recursive\b)?/i.exec(input);
   return match ? match[0].length : -1;
 }
 
