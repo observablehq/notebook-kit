@@ -197,7 +197,7 @@ function variantToDialect(
   let v: unknown;
   if (dialect !== undefined && dialect in variant.variants) v = variant.variants[dialect];
   else if ("default" in variant.variants) v = variant.variants.default;
-  else throw new Error(`missing variant: ${dialect}`);
+  else throw new Error(dialect ? `missing variant: ${dialect}` : `missing dialect`);
   return v instanceof SqlFragment
     ? fragmentToDialect(v, dialect, cache)
     : v instanceof SqlVariant
