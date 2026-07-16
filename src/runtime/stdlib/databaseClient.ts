@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type {SerializableQueryResult} from "../../databases/index.js";
 import {hash, nameHash} from "../../lib/hash.js";
+import {sql} from "./sql.js";
 
 /** A serializable value that can be interpolated into a query. */
 export type QueryParam = any;
@@ -59,8 +60,8 @@ export interface DatabaseClient {
   sql<T = Record<string, any>>(strings: readonly string[],  ...params: QueryParam[]): Promise<QueryResult<T>>; // prettier-ignore
 }
 
-export const DatabaseClient = (name: string, options?: QueryOptionsSpec): DatabaseClient => {
-  return new DatabaseClientImpl(name, normalizeOptions(options));
+export const DatabaseClient = (name: string, options?: QueryOptionsSpec, dialect?: SqlDialect): DatabaseClient => {
+  return new DatabaseClientImpl(name, normalizeOptions(options), dialect);
 };
 
 function normalizeOptions({id, since}: QueryOptionsSpec = {}): QueryOptions {
@@ -73,14 +74,17 @@ function normalizeOptions({id, since}: QueryOptionsSpec = {}): QueryOptions {
 class DatabaseClientImpl implements DatabaseClient {
   readonly name!: string;
   readonly options!: QueryOptions;
-  constructor(name: string, options: QueryOptions) {
+  readonly dialect?: SqlDialect;
+  constructor(name: string, options: QueryOptions, dialect?: SqlDialect) {
     Object.defineProperties(this, {
       name: {value: name, enumerable: true},
-      options: {value: options, enumerable: true}
+      options: {value: options, enumerable: true},
+      dialect: {value: dialect, enumerable: true}
     });
   }
   async sql<T = Record<string, any>>(strings: readonly string[], ...params: QueryParam[]): Promise<QueryResult<T>> {
-    const path = await this.cachePath(strings, ...params);
+    const {strings: fstrings, params: fparams} = sql(strings, ...params).flat(this.dialect);
+    const path = await this.cachePath(fstrings, ...fparams);
     const response = await fetch(path);
     if (!response.ok) throw new Error(`failed to fetch: ${path}`);
     return (await response.json().then(revive)) as QueryResult<T>;
