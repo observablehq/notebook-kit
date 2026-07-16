@@ -83,7 +83,7 @@ class DatabaseClientImpl implements DatabaseClient {
     });
   }
   async sql<T = Record<string, any>>(strings: readonly string[], ...params: QueryParam[]): Promise<QueryResult<T>> {
-    const {strings: fstrings, params: fparams} = sql(strings, ...params).flat(this.dialect);
+    const {strings: fstrings, params: fparams} = sql(strings, ...params).flat();
     const path = await this.cachePath(fstrings, ...fparams);
     const response = await fetch(path);
     if (!response.ok) throw new Error(`failed to fetch: ${path}`);
