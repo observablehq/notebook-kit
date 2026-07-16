@@ -453,10 +453,11 @@ describe("sql.variant(variants)", () => {
 
 describe("sql`…`.bind(database)", () => {
   // A mock database client that records the (strings, ...params) it receives.
-  function db(args: unknown[]): DatabaseClient {
+  function db(args: unknown[], dialect?: SqlDialect): DatabaseClient {
     return {
       name: "",
       options: {},
+      dialect,
       async sql<T>(strings: Readonly<string[]>, ...params: unknown[]) {
         args.push(strings, ...params);
         return Object.assign([], {schema: [], date: new Date()}) as QueryResult<T>;
@@ -472,6 +473,16 @@ describe("sql`…`.bind(database)", () => {
   });
   test("preserves the subclass, so a bound view is still a view", () => {
     assert.instanceOf(sql.view`SELECT 1`.bind(db([])), sql.View);
+  });
+  test("flattens using the bound database’s dialect", () => {
+    const frag = sql`SELECT ${sql.ident("full name")}`;
+    assert.strictEqual(String(frag), 'SELECT "full name"'); // default dialect: double quotes
+    assert.strictEqual(String(frag.bind(db([], "databricks"))), "SELECT `full name`"); // bound: backticks
+  });
+  test("throws when flattening a bound fragment for a different dialect", () => {
+    const frag = sql`SELECT 1`.bind(db([], "databricks"));
+    assert.throws(() => frag.flat("postgres"), /different dialect/);
+    assert.doesNotThrow(() => frag.flat("databricks")); // its own dialect is fine
   });
   test("queries the bound database", async () => {
     const args: unknown[] = [];

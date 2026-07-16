@@ -44,7 +44,9 @@ class SqlFragment {
     this.params = params;
     this.db = maybeBound(params);
   }
-  flat(dialect?: SqlDialect): typeof this {
+  flat(dialect: SqlDialect | undefined = this.db?.dialect): typeof this {
+    if (this.db?.dialect !== undefined && dialect !== this.db.dialect)
+      throw new Error("cannot flatten a bound fragment for a different dialect");
     const iquote = getIquote(dialect);
     const that = this.toDialect(dialect);
     const {strings, params} = that;
