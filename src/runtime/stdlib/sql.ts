@@ -38,9 +38,11 @@ sql.text = function text(value: string): SqlFragment {
 class SqlFragment {
   readonly strings: Readonly<string[]>;
   readonly params: unknown[];
+  db: DatabaseClient | undefined;
   constructor(strings: Readonly<string[]>, params: unknown[]) {
     this.strings = strings;
     this.params = params;
+    this.db = maybeBound(params);
   }
   flat(dialect?: SqlDialect): typeof this {
     const iquote = getIquote(dialect);
@@ -103,9 +105,22 @@ class SqlFragment {
       ? that
       : reconstruct(that, vstrings, vparams);
   }
-  query<T>(database: DatabaseClient): Promise<QueryResult<T>> {
+  query<T>(database?: DatabaseClient): Promise<QueryResult<T>> {
+    if (this.db !== undefined) {
+      if (database !== undefined && database !== this.db)
+        throw new Error("cannot query a bound fragment against a different database");
+      database = this.db;
+    }
+    if (!database) throw new Error("missing database");
     const {strings, params} = this.flat(database.dialect);
     return database.sql<T>(strings, ...params);
+  }
+  bind(database: DatabaseClient): typeof this {
+    if (this.db !== undefined && this.db !== database)
+      throw new Error("cannot mix fragments bound to different databases");
+    const copy = reconstruct(this, this.strings, this.params);
+    copy.db = database;
+    return copy;
   }
   toDialect(dialect?: SqlDialect): typeof this {
     return fragmentToDialect(this, dialect, new Map());
@@ -137,6 +152,18 @@ class SqlVariant {
 sql.Fragment = SqlFragment;
 sql.View = SqlView;
 sql.Variant = SqlVariant;
+
+function maybeBound(params: unknown[]): DatabaseClient | undefined {
+  let db: DatabaseClient | undefined;
+  for (const param of params) {
+    if (param instanceof SqlFragment && param.db !== undefined) {
+      if (db !== undefined && db !== param.db)
+        throw new Error("cannot mix fragments bound to different databases");
+      db = param.db;
+    }
+  }
+  return db;
+}
 
 function fragmentToDialect<T extends SqlFragment>(
   fragment: T,
@@ -189,7 +216,9 @@ function reconstruct<T extends SqlFragment>(
   strings: Readonly<string[]>,
   params: unknown[]
 ): T {
-  return new (fragment.constructor as typeof SqlFragment)(strings, params) as T;
+  const result = new (fragment.constructor as typeof SqlFragment)(strings, params) as T;
+  result.db = fragment.db; // preserve the binding across dialect/flatten transforms
+  return result;
 }
 
 function variantToDialect(

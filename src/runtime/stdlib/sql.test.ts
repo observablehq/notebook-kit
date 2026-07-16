@@ -1,6 +1,6 @@
 import {assert, describe, test} from "vitest";
 import {sql} from "./sql.js";
-import type {QueryResult, SqlDialect} from "./databaseClient.js";
+import type {DatabaseClient, QueryResult, SqlDialect} from "./databaseClient.js";
 
 describe("sql`…`", () => {
   test("defines a SQL fragment", () => {
@@ -448,5 +448,88 @@ describe("sql.variant(variants)", () => {
   });
   test("implements toString", () => {
     assert.strictEqual(String(sql.variant({default: sql`"Shipping Address State"`})), '"Shipping Address State"');
+  });
+});
+
+describe("sql`…`.bind(database)", () => {
+  // A mock database client that records the (strings, ...params) it receives.
+  function db(args: unknown[]): DatabaseClient {
+    return {
+      name: "",
+      options: {},
+      async sql<T>(strings: Readonly<string[]>, ...params: unknown[]) {
+        args.push(strings, ...params);
+        return Object.assign([], {schema: [], date: new Date()}) as QueryResult<T>;
+      }
+    };
+  }
+  test("returns a bound copy, leaving the original unbound", () => {
+    const frag = sql`SELECT 1`;
+    const bound = frag.bind(db([]));
+    assert.notStrictEqual(bound, frag); // a distinct copy
+    assert.strictEqual(frag.db, undefined); // original untouched
+    assert.deepStrictEqual([bound.strings, bound.params], [frag.strings, frag.params]);
+  });
+  test("preserves the subclass, so a bound view is still a view", () => {
+    assert.instanceOf(sql.view`SELECT 1`.bind(db([])), sql.View);
+  });
+  test("queries the bound database", async () => {
+    const args: unknown[] = [];
+    await sql`SELECT * FROM ${sql`PURCHASES`}`.bind(db(args)).query();
+    assert.deepStrictEqual(args, [["SELECT * FROM PURCHASES"]]);
+  });
+  test("flattens interpolated views", async () => {
+    const args: unknown[] = [];
+    await sql`SELECT * FROM ${sql.view`SELECT * FROM PURCHASES`}`.bind(db(args)).query();
+    assert.deepStrictEqual(args, [
+      [
+        `WITH
+"_1" AS (SELECT * FROM PURCHASES)
+SELECT * FROM "_1"`
+      ]
+    ]);
+  });
+  test("throws when no database has been bound nor passed", () => {
+    assert.throws(() => sql`SELECT 1`.query(), /missing database/);
+  });
+  test("uses an explicit database when the fragment is unbound", async () => {
+    const args: unknown[] = [];
+    await sql`SELECT 1`.query(db(args));
+    assert.deepStrictEqual(args, [["SELECT 1"]]);
+  });
+  test("throws when an explicit database differs from the bound one", () => {
+    const frag = sql`SELECT 1`.bind(db([]));
+    assert.throws(() => frag.query(db([])), /different database/);
+  });
+  test("allows an explicit database equal to the bound one", async () => {
+    const args: unknown[] = [];
+    const d = db(args);
+    await sql`SELECT 1`.bind(d).query(d);
+    assert.deepStrictEqual(args, [["SELECT 1"]]);
+  });
+  test("throws when interpolating fragments bound to different databases", () => {
+    const a = sql`A`.bind(db([]));
+    const b = sql`B`.bind(db([]));
+    assert.throws(() => sql`SELECT ${a}, ${b}`, /different databases/);
+  });
+  test("allows fragments bound to the same database", async () => {
+    const args: unknown[] = [];
+    const d = db(args);
+    const a = sql`1`.bind(d);
+    const b = sql`2`.bind(d);
+    await sql`SELECT ${a}, ${b}`.query(d);
+    assert.deepStrictEqual(args, [["SELECT 1, 2"]]);
+  });
+  test("runs against the database bound to an interpolated fragment", async () => {
+    const args: unknown[] = [];
+    const inner = sql.view`SELECT * FROM PURCHASES`.bind(db(args));
+    await sql`SELECT * FROM ${inner}`.query(); // outer is unbound
+    assert.deepStrictEqual(args, [
+      [
+        `WITH
+"_1" AS (SELECT * FROM PURCHASES)
+SELECT * FROM "_1"`
+      ]
+    ]);
   });
 });
