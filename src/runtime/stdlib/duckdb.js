@@ -416,8 +416,8 @@ function isArqueroTable(value) {
 function isFlechetteTable(value) {
   return (
     value &&
-    typeof value.toColumns === "function" &&
     typeof value.getChild === "function" &&
+    typeof value.toColumns === "function" &&
     value.schema &&
     Array.isArray(value.schema.fields)
   );
