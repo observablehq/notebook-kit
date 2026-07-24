@@ -335,7 +335,7 @@ async function insertFlechetteTable(database, name, table, options) {
   const {tableToIPC} = await import("https://cdn.jsdelivr.net/npm/@uwdata/flechette@2.5.0/+esm");
   const connection = await database.connect();
   try {
-    await connection.insertArrowFromIPCStream(tableToIPC(table), {
+    await connection.insertArrowFromIPCStream(tableToIPC(table, {format: "stream"}), {
       name,
       schema: "main",
       ...options
