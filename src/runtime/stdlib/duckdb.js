@@ -221,6 +221,7 @@ Object.defineProperty(DuckDBClient.prototype, "dialect", {value: "duckdb"});
 async function insertSource(database, name, source) {
   source = await source;
   if (isFileAttachment(source)) return insertFile(database, name, source);
+  if (isFlechetteTable(source)) return insertFlechetteTable(database, name, source);
   if (isArrowTable(source)) return insertArrowTable(database, name, source);
   if (Array.isArray(source)) return insertArray(database, name, source);
   if (isArqueroTable(source)) return insertArqueroTable(database, name, source);
@@ -229,6 +230,7 @@ async function insertSource(database, name, source) {
     if ("data" in source) {
       // data + options
       const {data, ...options} = source;
+      if (isFlechetteTable(data)) return insertFlechetteTable(database, name, data, options);
       if (isArrowTable(data)) return insertArrowTable(database, name, data, options);
       return insertArray(database, name, data, options);
     }
@@ -329,6 +331,20 @@ async function insertArrowTable(database, name, table, options) {
   }
 }
 
+async function insertFlechetteTable(database, name, table, options) {
+  const {tableToIPC} = await import("https://cdn.jsdelivr.net/npm/@uwdata/flechette@2.5.0/+esm");
+  const connection = await database.connect();
+  try {
+    await connection.insertArrowFromIPCStream(tableToIPC(table), {
+      name,
+      schema: "main",
+      ...options
+    });
+  } finally {
+    await connection.close();
+  }
+}
+
 async function insertArqueroTable(database, name, source) {
   // TODO When we have stdlib versioning and can upgrade Arquero to version 5,
   // we can then call source.toArrow() directly, with insertArrowTable()
@@ -399,6 +415,17 @@ function isFileAttachment(value) {
 // Arquero tables have a `toArrowBuffer` function
 function isArqueroTable(value) {
   return value && typeof value.toArrowBuffer === "function";
+}
+
+// Flechette tables have a `toColumns` method
+function isFlechetteTable(value) {
+  return (
+    value &&
+    typeof value.toColumns === "function" &&
+    typeof value.getChild === "function" &&
+    value.schema &&
+    Array.isArray(value.schema.fields)
+  );
 }
 
 // Returns true if the value is an Apache Arrow table. This uses a “duck” test
