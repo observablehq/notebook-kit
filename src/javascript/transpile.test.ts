@@ -71,9 +71,7 @@ it("transpiles TypeScript programs", () => {
   expect(transpile("interface Point { x: number; y: number; }", "ts")).toMatchSnapshot();
   expect(transpile("declare function foo(x: number): void;", "ts")).toMatchSnapshot();
   expect(transpile("class Dict { [key: string]: number; }", "ts")).toMatchSnapshot();
-  expect(
-    transpile("class C { m(x: number): void; m(x: string) { display(x); } }", "ts")
-  ).toMatchSnapshot();
+  expect(transpile("class C { m(x: number): void; m(x: string) { display(x); } }", "ts")).toMatchSnapshot(); // prettier-ignore
 });
 
 it("strips TypeScript type syntax", () => {
@@ -85,12 +83,7 @@ it("strips TypeScript type syntax", () => {
   expect(transpile("function f<T>(a: T, b?: string): T { return a; }", "ts")).toMatchSnapshot();
   expect(transpile("let v!: number;", "ts")).toMatchSnapshot();
   expect(transpile("const obj: {a: number; b: string} = {a: 1, b: 2};", "ts")).toMatchSnapshot();
-  expect(
-    transpile(
-      "abstract class A extends B<number> implements I { abstract m(): void; private readonly p: number = 1; static s = 2; q?: string; }",
-      "ts"
-    )
-  ).toMatchSnapshot();
+  expect(transpile("abstract class A extends B<number> implements I { abstract m(): void; private readonly p: number = 1; static s = 2; q?: string; }", "ts")).toMatchSnapshot(); // prettier-ignore
 });
 
 it("transpiles static npm: imports", () => {
@@ -105,63 +98,23 @@ it("transpiles dynamic npm: imports", () => {
 
 it("transpiles static observable: imports", () => {
   expect(transpile('import {color} from "observable:2d6bf7be248d66f3";', "js")).toMatchSnapshot();
-  expect(
-    transpile('import {color} from "observable:2d6bf7be248d66f3@173";', "js")
-  ).toMatchSnapshot();
-  expect(
-    transpile('import {Scrubber} from "observable:@mbostock/scrubber";', "js")
-  ).toMatchSnapshot();
-  expect(
-    transpile('import {Scrubber} from "observable:@mbostock/scrubber@255";', "js")
-  ).toMatchSnapshot();
-  expect(
-    transpile(
-      'import {viewof$rotation} from "observable:@rreusser/drawing-3d-objects-with-svg";',
-      "js"
-    )
-  ).toMatchSnapshot();
+  expect(transpile('import {color} from "observable:2d6bf7be248d66f3@173";', "js")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {Scrubber} from "observable:@mbostock/scrubber";', "js")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {Scrubber} from "observable:@mbostock/scrubber@255";', "js")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {viewof$rotation} from "observable:@rreusser/drawing-3d-objects-with-svg";', "js")).toMatchSnapshot(); // prettier-ignore
 });
 
 it("does not allow namespace observable: imports", () => {
-  expect(() => transpile('import * as foo from "observable:2d6bf7be248d66f3";', "js")).toThrow(
-    /namespace specifier/
-  );
-  expect(() => transpile('import * as foo from "2d6bf7be248d66f3";', "ojs")).toThrow(
-    /unexpected token/i
-  );
+  expect(() => transpile('import * as foo from "observable:2d6bf7be248d66f3";', "js")).toThrow(/namespace specifier/); // prettier-ignore
+  expect(() => transpile('import * as foo from "2d6bf7be248d66f3";', "ojs")).toThrow(/unexpected token/i); // prettier-ignore
 });
 
 it("transpiles static imports with {type: 'observable'}", () => {
-  expect(
-    transpile(
-      'import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4" with {type: "observable"};',
-      "js"
-    )
-  ).toMatchSnapshot();
-  expect(
-    transpile(
-      'import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4" with {type: "observable"};',
-      "js"
-    )
-  ).toMatchSnapshot();
-  expect(
-    transpile(
-      'import {Scrubber} from "https://api.observablehq.com/@mbostock/scrubber.js?v=4" with {type: "observable"};',
-      "js"
-    )
-  ).toMatchSnapshot();
-  expect(
-    transpile(
-      'import {Scrubber} from "https://api.observablehq.com/@mbostock/scrubber@255.js?v=4" with {type: "observable"};',
-      "js"
-    )
-  ).toMatchSnapshot();
-  expect(
-    transpile(
-      'import {viewof$rotation} from "https://api.observablehq.com/@rreusser/drawing-3d-objects-with-svg.js?v=4" with {type: "observable"};',
-      "js"
-    )
-  ).toMatchSnapshot();
+  expect(transpile('import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {color} from "https://api.observablehq.com/d/2d6bf7be248d66f3@173.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {Scrubber} from "https://api.observablehq.com/@mbostock/scrubber.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {Scrubber} from "https://api.observablehq.com/@mbostock/scrubber@255.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {viewof$rotation} from "https://api.observablehq.com/@rreusser/drawing-3d-objects-with-svg.js?v=4" with {type: "observable"};', "js")).toMatchSnapshot(); // prettier-ignore
 });
 
 it("transpiles Observable JavaScript imports", () => {
@@ -170,18 +123,8 @@ it("transpiles Observable JavaScript imports", () => {
 });
 
 it("transpiles Observable JavaScript imports of views", () => {
-  expect(
-    transpile(
-      'import {figure, viewof rotation} from "@rreusser/drawing-3d-objects-with-svg"',
-      "ojs"
-    )
-  ).toMatchSnapshot();
-  expect(
-    transpile(
-      'import {figure, viewof rotation as rot} from "@rreusser/drawing-3d-objects-with-svg"',
-      "ojs"
-    )
-  ).toMatchSnapshot();
+  expect(transpile('import {figure, viewof rotation} from "@rreusser/drawing-3d-objects-with-svg"', "ojs")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {figure, viewof rotation as rot} from "@rreusser/drawing-3d-objects-with-svg"', "ojs")).toMatchSnapshot(); // prettier-ignore
 });
 
 it("transpiles Observable JavaScript imports of mutables", () => {
@@ -192,36 +135,17 @@ it("transpiles Observable JavaScript imports of mutables", () => {
 it("transpiles Observable JavaScript import-withs", () => {
   expect(transpile('import {color} with {} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
   expect(transpile('import {color} with {foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot();
-  expect(
-    transpile('import {color} with {foo as bar} from "2d6bf7be248d66f3"', "ojs")
-  ).toMatchSnapshot();
-  expect(
-    transpile('import {color as red} with {foo} from "2d6bf7be248d66f3"', "ojs")
-  ).toMatchSnapshot();
+  expect(transpile('import {color} with {foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {color as red} with {foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot(); // prettier-ignore
 });
 
 it("transpiles Observable JavaScript import-withs of views and mutables", () => {
-  expect(
-    transpile('import {viewof color} with {foo as bar} from "2d6bf7be248d66f3"', "ojs")
-  ).toMatchSnapshot();
-  expect(
-    transpile('import {color} with {viewof foo} from "2d6bf7be248d66f3"', "ojs")
-  ).toMatchSnapshot();
-  expect(
-    transpile('import {color} with {viewof foo as bar} from "2d6bf7be248d66f3"', "ojs")
-  ).toMatchSnapshot();
-  expect(
-    transpile('import {color} with {mutable foo} from "2d6bf7be248d66f3"', "ojs")
-  ).toMatchSnapshot();
-  expect(
-    transpile('import {color} with {mutable foo as bar} from "2d6bf7be248d66f3"', "ojs")
-  ).toMatchSnapshot();
-  expect(
-    transpile(
-      'import {color} with {foo, viewof bar, mutable baz as qux} from "2d6bf7be248d66f3"',
-      "ojs"
-    )
-  ).toMatchSnapshot();
+  expect(transpile('import {viewof color} with {foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {color} with {viewof foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {color} with {viewof foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {color} with {mutable foo} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {color} with {mutable foo as bar} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {color} with {foo, viewof bar, mutable baz as qux} from "2d6bf7be248d66f3"', "ojs")).toMatchSnapshot(); // prettier-ignore
 });
 
 it("transpiles Observable JavaScript dynamic imports", () => {
@@ -229,9 +153,7 @@ it("transpiles Observable JavaScript dynamic imports", () => {
   expect(transpile('import("d3@7")', "ojs")).toMatchSnapshot();
   expect(transpile('import("@observablehq/plot")', "ojs")).toMatchSnapshot();
   expect(transpile('import("lodash/fp")', "ojs")).toMatchSnapshot();
-  expect(
-    transpile('import("three@0.150.1/examples/jsm/controls/OrbitControls.js")', "ojs")
-  ).toMatchSnapshot();
+  expect(transpile('import("three@0.150.1/examples/jsm/controls/OrbitControls.js")', "ojs")).toMatchSnapshot(); // prettier-ignore
   expect(transpile('import("leaflet/dist/leaflet.css")', "ojs")).toMatchSnapshot();
 });
 
@@ -245,22 +167,14 @@ it("ignores non-bare Observable JavaScript dynamic imports", () => {
 
 it("transpiles import.meta.resolve", () => {
   expect(transpile('import.meta.resolve("npm:d3")', "js")).toMatchSnapshot();
-  expect(
-    transpile('import.meta.resolve("./test")', "js", {resolveLocalImports: true})
-  ).toMatchSnapshot();
-  expect(
-    transpile('import.meta.resolve("./test")', "js", {resolveLocalImports: false})
-  ).toMatchSnapshot();
+  expect(transpile('import.meta.resolve("./test")', "js", {resolveLocalImports: true})).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import.meta.resolve("./test")', "js", {resolveLocalImports: false})).toMatchSnapshot(); // prettier-ignore
 });
 
 it("transpiles node cells", () => {
   expect(transpile("process.stdout.write(`Node ${process.version}`);", "node")).toMatchSnapshot();
   expect(transpile("process.stdout.write(`Node \\${process.version}`);", "node")).toMatchSnapshot();
-  expect(
-    transpile("process.stdout.write(`Node \\\\${process.version}`);", "node")
-  ).toMatchSnapshot();
+  expect(transpile("process.stdout.write(`Node \\\\${process.version}`);", "node")).toMatchSnapshot(); // prettier-ignore
   expect(transpile("process.stdout.write(`Node $\\{process.version}`);", "node")).toMatchSnapshot();
-  expect(
-    transpile("process.stdout.write(`Node \\$\\{process.version}`);", "node")
-  ).toMatchSnapshot();
+  expect(transpile("process.stdout.write(`Node \\$\\{process.version}`);", "node")).toMatchSnapshot(); // prettier-ignore
 });
