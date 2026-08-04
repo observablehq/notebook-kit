@@ -22,6 +22,29 @@ it("transpiles JavaScript programs", () => {
   expect(transpile("await z;", "js")).toMatchSnapshot();
 });
 
+it("transpiles TypeScript programs", () => {
+  expect(transpile("const x: number = 1, y: string = `hello`;", "ts")).toMatchSnapshot();
+  expect(transpile("x + (y as number);", "ts")).toMatchSnapshot();
+  expect(transpile("type strumber = string | number;", "ts")).toMatchSnapshot();
+  expect(transpile("const sum = (a: number, b: number) => a + b;", "ts")).toMatchSnapshot();
+  expect(transpile("interface Point { x: number; y: number; }", "ts")).toMatchSnapshot();
+  expect(transpile("declare function foo(x: number): void;", "ts")).toMatchSnapshot();
+  expect(transpile("class Dict { [key: string]: number; }", "ts")).toMatchSnapshot();
+  expect(transpile("class C { m(x: number): void; m(x: string) { display(x); } }", "ts")).toMatchSnapshot();
+});
+
+it("strips TypeScript type syntax", () => {
+  expect(transpile("x satisfies Foo;", "ts")).toMatchSnapshot();
+  expect(transpile("obj!.value;", "ts")).toMatchSnapshot();
+  expect(transpile("(<string>value);", "ts")).toMatchSnapshot();
+  expect(transpile("identity<number>(42);", "ts")).toMatchSnapshot();
+  expect(transpile("new Map<string, number>();", "ts")).toMatchSnapshot();
+  expect(transpile("function f<T>(a: T, b?: string): T { return a; }", "ts")).toMatchSnapshot();
+  expect(transpile("let v!: number;", "ts")).toMatchSnapshot();
+  expect(transpile("const obj: {a: number; b: string} = {a: 1, b: 2};", "ts")).toMatchSnapshot();
+  expect(transpile("abstract class A extends B<number> implements I { abstract m(): void; private readonly p: number = 1; static s = 2; q?: string; }", "ts")).toMatchSnapshot();
+});
+
 it("transpiles static npm: imports", () => {
   expect(transpile('import * as d3 from "npm:d3";', "js")).toMatchSnapshot();
   expect(transpile('import _ from "npm:lodash";', "js")).toMatchSnapshot();

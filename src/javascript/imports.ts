@@ -160,7 +160,7 @@ export function rewriteImportDeclarations(
 function renderImport(source: string, node: ImportDeclaration, input: string): string {
   const names = node.specifiers.filter(isNamedSpecifier).map(getImportedName);
   return `import(${source}${
-    node.attributes.length > 0
+    node.attributes?.length > 0
       ? `, {with: {${input.slice(
           node.attributes[0].start,
           node.attributes[node.attributes.length - 1].end

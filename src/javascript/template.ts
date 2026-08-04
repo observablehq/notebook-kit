@@ -2,8 +2,12 @@ import type {Node, ParserImpl, TemplateLiteral} from "acorn";
 import {TokContext, tokTypes as tt, Parser, Options} from "acorn";
 import {getInterpreterMethod, isInterpreter} from "../lib/interpreters.js";
 import type {Cell} from "../lib/notebook.js";
-import {acornOptions} from "./parse.js";
 import {Sourcemap} from "./sourcemap.js";
+
+const options: Options = {
+  ecmaVersion: "latest",
+  sourceType: "module"
+};
 
 const CODE_DOLLAR = 36;
 const CODE_BACKSLASH = 92;
@@ -73,7 +77,7 @@ class TemplateCellParser extends (Parser as typeof ParserImpl) {
 }
 
 export function parseTemplate(input: string): TemplateLiteral {
-  return TemplateCellParser.parse(input, acornOptions) as Node as TemplateLiteral;
+  return TemplateCellParser.parse(input, options) as Node as TemplateLiteral;
 }
 
 /** @deprecated */
