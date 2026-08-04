@@ -5,7 +5,7 @@ import type {FunctionDeclaration, FunctionExpression} from "acorn";
 import type {Identifier, Node, Pattern, Program} from "acorn";
 import {checkAssignments} from "./assignments.js";
 import {defaultGlobals} from "./globals.js";
-import {checkExports} from "./imports.js";
+import {checkExports, isTypeImport} from "./imports.js";
 import {ancestor} from "./walk.js";
 
 // Based on https://github.com/ForbesLindesay/acorn-globals
@@ -13,7 +13,7 @@ import {ancestor} from "./walk.js";
 // https://github.com/ForbesLindesay/acorn-globals/blob/master/LICENSE
 
 type FunctionNode =
-  | FunctionExpression
+  | FunctionExpression // prettier
   | FunctionDeclaration
   | ArrowFunctionExpression
   | AnonymousFunctionDeclaration;
@@ -137,7 +137,10 @@ export function findReferences(
     ClassExpression: declareClass,
     CatchClause: declareCatchClause,
     ImportDeclaration(node, _state, [root]) {
-      node.specifiers.forEach((specifier) => declareLocal(root, specifier.local));
+      if (isTypeImport(node)) return;
+      node.specifiers
+        .filter((specifier) => !isTypeImport(specifier))
+        .forEach((specifier) => declareLocal(root, specifier.local));
     }
   });
 

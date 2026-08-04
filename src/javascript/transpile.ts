@@ -4,10 +4,11 @@ import {rewriteFileExpressions} from "./files.js";
 import {hasImportDeclaration} from "./imports.js";
 import {rewriteImportDeclarations, rewriteImportExpressions} from "./imports.js";
 import {transpileObservable} from "./observable.js";
+import type {JavaScriptCell} from "./parse.js";
 import {parseJavaScript} from "./parse.js";
 import {Sourcemap} from "./sourcemap.js";
 import {transpileTemplate} from "./template.js";
-import {transpileTypeScript} from "./typescript.js";
+import {stripTypes} from "./typescript.js";
 
 export type TranspiledJavaScript = {
   /** the source code of a JavaScript function defining the primary variable */
@@ -63,7 +64,7 @@ export function transpile(
   }
   const transpiled =
     mode === "ts"
-      ? transpileJavaScript(transpileTypeScript(input), options)
+      ? transpileTypeScript(input, options)
       : mode === "ojs"
         ? transpileObservable(input, options)
         : mode !== "js"
@@ -79,24 +80,43 @@ export function transpile(
   return transpiled;
 }
 
+export function transpileTypeScript(
+  input: string,
+  options?: TranspileOptions
+): TranspiledJavaScript {
+  const cell = parseJavaScript(input, "ts");
+  const output = new Sourcemap(input);
+  stripTypes(cell, output);
+  return transpileCell(cell, output, options);
+}
+
 export function transpileJavaScript(
   input: string,
   options?: TranspileOptions
 ): TranspiledJavaScript {
-  const cell = parseJavaScript(input);
+  const cell = parseJavaScript(input, "js");
+  const output = new Sourcemap(input);
+  return transpileCell(cell, output, options);
+}
+
+function transpileCell(
+  cell: JavaScriptCell,
+  output: Sourcemap,
+  options?: TranspileOptions
+): TranspiledJavaScript {
   let async = cell.async;
   const inputs = Array.from(new Set(cell.references.map((r) => r.name)));
   if (hasImportDeclaration(cell.body)) async = true;
   const outputs = Array.from(new Set(cell.declarations?.map((r) => r.name)));
-  const output = new Sourcemap(input).trim();
+  output.trim();
   rewriteImportDeclarations(output, cell.body, inputs, options);
   rewriteImportExpressions(output, cell.body, options);
   if (options?.resolveFiles) rewriteFileExpressions(output, cell.body);
   if (cell.expression) output.insertLeft(0, `return (\n`);
   output.insertLeft(0, `${async ? "async " : ""}(${inputs.map(deat)}) => {\n`);
-  if (outputs.length > 0) output.insertRight(input.length, `\nreturn {${outputs}};`);
-  if (cell.expression) output.insertRight(input.length, `\n)`);
-  output.insertRight(input.length, "\n}");
+  if (outputs.length > 0) output.insertRight(output.length, `\nreturn {${outputs}};`);
+  if (cell.expression) output.insertRight(output.length, `\n)`);
+  output.insertRight(output.length, "\n}");
   const body = String(output);
   const autodisplay = cell.expression && !(inputs.includes("display") || inputs.includes("view"));
   const files = new Set(cell.files.map((f) => f.argument));

@@ -80,6 +80,163 @@ import("npm:d3")
 }
 `;
 
+exports[`strips TypeScript type syntax 1`] = `
+{
+  "autodisplay": false,
+  "body": "(x) => {
+x;
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "x",
+  ],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`strips TypeScript type syntax 2`] = `
+{
+  "autodisplay": false,
+  "body": "(obj) => {
+obj.value;
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "obj",
+  ],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`strips TypeScript type syntax 3`] = `
+{
+  "autodisplay": false,
+  "body": "(value) => {
+(value);
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "value",
+  ],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`strips TypeScript type syntax 4`] = `
+{
+  "autodisplay": false,
+  "body": "(identity) => {
+identity(42);
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "identity",
+  ],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`strips TypeScript type syntax 5`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+new Map();
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`strips TypeScript type syntax 6`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+function f(a, b) { return a; }
+return {f};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "f",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`strips TypeScript type syntax 7`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+let v;
+return {v};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "v",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`strips TypeScript type syntax 8`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+const obj = {a: 1, b: 2};
+return {obj};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "obj",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`strips TypeScript type syntax 9`] = `
+{
+  "autodisplay": false,
+  "body": "(B) => {
+class A extends B {  p = 1; static s = 2; q; }
+return {A};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "B",
+  ],
+  "output": undefined,
+  "outputs": [
+    "A",
+  ],
+  "secrets": Set {},
+}
+`;
+
 exports[`transpiles JavaScript expressions 1`] = `
 {
   "autodisplay": true,
@@ -205,6 +362,28 @@ await z;
   ],
   "output": undefined,
   "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles JavaScript programs 4`] = `
+{
+  "autodisplay": false,
+  "body": "async () => {
+const {default: data} = await import("https://example.com", {with: {type: "json"}}).then((module) => {
+  if (!("default" in module)) throw new SyntaxError(\`export 'default' not found\`);
+  return module;
+});
+
+return {data};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "data",
+  ],
   "secrets": Set {},
 }
 `;
@@ -731,6 +910,464 @@ return {figure,rot,viewof$rot};
     "rot",
     "viewof$rot",
   ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript class expressions 1`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+class Foo {}
+return {Foo};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "Foo",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript expressions 1`] = `
+{
+  "autodisplay": true,
+  "body": "() => {
+return (
+1 + 2
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript expressions 2`] = `
+{
+  "autodisplay": true,
+  "body": "() => {
+return (
+1, 2
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript expressions 3`] = `
+{
+  "autodisplay": true,
+  "body": "() => {
+return (
+1, 2 // comment
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript expressions 4`] = `
+{
+  "autodisplay": true,
+  "body": "() => {
+return (
+(1), (2)
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript expressions 5`] = `
+{
+  "autodisplay": true,
+  "body": "() => {
+return (
+(1 + 2)
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript expressions 6`] = `
+{
+  "autodisplay": true,
+  "body": "() => {
+return (
+{x: 42}
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript expressions 7`] = `
+{
+  "autodisplay": true,
+  "body": "() => {
+return (
+({x: 42})
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript function expressions 1`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+function foo() {}
+return {foo};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "foo",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript imports 1`] = `
+{
+  "autodisplay": false,
+  "body": "async () => {
+const {foo} = await import("https://cdn.jsdelivr.net/npm/bar/+esm").then((module) => {
+  if (!("foo" in module)) throw new SyntaxError(\`export 'foo' not found\`);
+  return module;
+});
+
+return {foo};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "foo",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript imports 2`] = `
+{
+  "autodisplay": false,
+  "body": "async () => {
+const {} = await import("https://cdn.jsdelivr.net/npm/bar/+esm");
+
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript imports 3`] = `
+{
+  "autodisplay": false,
+  "body": "async () => {
+
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript imports 4`] = `
+{
+  "autodisplay": false,
+  "body": "async () => {
+const {default: data} = await import("https://example.com", {with: {type: "json"}}).then((module) => {
+  if (!("default" in module)) throw new SyntaxError(\`export 'default' not found\`);
+  return module;
+});
+
+return {data};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "data",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript programs 1`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+const x = 1, y = \`hello\`;
+return {x,y};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "x",
+    "y",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript programs 2`] = `
+{
+  "autodisplay": false,
+  "body": "(x,y) => {
+x + (y);
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "x",
+    "y",
+  ],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript programs 3`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript programs 4`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+const sum = (a, b) => a + b;
+return {sum};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "sum",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript programs 5`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript programs 6`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript programs 7`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+class Dict {  }
+return {Dict};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "Dict",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript programs 8`] = `
+{
+  "autodisplay": false,
+  "body": "(display) => {
+class C {  m(x) { display(x); } }
+return {C};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "display",
+  ],
+  "output": undefined,
+  "outputs": [
+    "C",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript statements 1`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+1 + 2;
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript statements 2`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+1, 2;
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript statements 3`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+(1), (2);
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript statements 4`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+(1 + 2);
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript statements 5`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+{x: 42};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript statements 6`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+({x: 42});
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
   "secrets": Set {},
 }
 `;
