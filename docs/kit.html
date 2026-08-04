@@ -399,12 +399,12 @@
     The Build API analyzes cell source code to find unbound references, such that the appropriate variable graph can be initialized using the [Observable Runtime](https://github.com/observablehq/runtime). For non-JavaScript cells (such as Markdown, HTML, and SQL), the Build API also transpiles the source into a tagged template literal expression.
   </script>
   <script id="18" type="text/markdown">
-    #### <code class="language-ts">maybeParseJavaScript(input: string): JavaScriptCell | undefined</code>
+    #### <code class="language-ts">maybeParseJavaScript(input: string, dialect: "js" | "ts" = "js"): JavaScriptCell | undefined</code>
 
     Parses the specified JavaScript cell source code, returning the resulting AST as either a `Program` or `Expression` node, along with any top-level variable `declarations` and unbound `references` to other variables. If the specified `input` has invalid syntax, returns `undefined`.
   </script>
   <script id="19" type="text/markdown">
-    #### <code class="language-ts">parseJavaScript(input: string): JavaScriptCell</code>
+    #### <code class="language-ts">parseJavaScript(input: string, dialect: "js" | "ts" = "js"): JavaScriptCell</code>
 
     Parses the specified JavaScript cell source code, returning the resulting AST as either a `Program` or `Expression`, along with any top-level variable `declarations` and unbound `references` to other variables. (This method is called internally by `transpileJavaScript`.)
   </script>
@@ -417,16 +417,6 @@
     #### <code class="language-ts">transpile(input: Cell, options?: TranspileOptions): TranspiledJavaScript</code>
 
     Transpiles the specified cell. The transpiled source is returned as a `body` function suitable for use with [`variable.define`](https://github.com/observablehq/runtime/blob/main/README.md#variabledefinename-inputs-definition) from the Observable Runtime, along with any named `inputs` (unbound references) and `outputs` (top-level declarations).
-  </script>
-  <script id="23" type="text/markdown">
-    #### <code class="language-ts">transpileJavaScript(input: string, options?: TranspileOptions): TranspiledJavaScript</code>
-
-    Transpiles the specified JavaScript cell source code. The transpiled source is returned as a `body` function suitable for use with [`variable.define`](https://github.com/observablehq/runtime/blob/main/README.md#variabledefinename-inputs-definition) from the Observable Runtime, along with any named `inputs` (unbound references) and `outputs` (top-level declarations).
-  </script>
-  <script id="21" type="text/markdown">
-    #### <code class="language-ts">transpileTemplate(input: Cell): string</code>
-
-    Transpiles the specified template cell, such as a Markdown or SQL cell, returning the corresponding JavaScript source code consisting of a single template literal expression. (This method is called internally by `transpile`, and the result is passed to `transpileJavaScript`.)
   </script>
   <script id="45" type="text/markdown">
     ### Utility API
