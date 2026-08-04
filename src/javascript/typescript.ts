@@ -24,7 +24,15 @@ const TYPE_PROPERTIES = [
 
 // TypeScript-only modifier keywords; static/get/set/async are valid JavaScript
 // and so are deliberately excluded (and preserved).
-const MODIFIERS = new Set(["public", "private", "protected", "readonly", "override", "declare", "abstract"]);
+const MODIFIERS = new Set([
+  "public",
+  "private",
+  "protected",
+  "readonly",
+  "override",
+  "declare",
+  "abstract"
+]);
 
 /**
  * Erases TypeScript-specific syntax from output, leaving equivalent JavaScript.
@@ -89,7 +97,11 @@ export function stripTypes(cell: JavaScriptCell, output: Sourcemap): void {
       if (node.optional || node.definite) deleteMarker(node.key.end, markerEnd(node));
     } else if (node.type === "Identifier" && node.optional) {
       deleteMarker(node.start, node.typeAnnotation?.start ?? node.end);
-    } else if (node.type === "VariableDeclarator" && node.definite && node.id.type === "Identifier") {
+    } else if (
+      node.type === "VariableDeclarator" &&
+      node.definite &&
+      node.id.type === "Identifier"
+    ) {
       deleteMarker(node.id.start, node.id.typeAnnotation?.start ?? node.init?.start ?? node.id.end);
     }
 
@@ -164,7 +176,11 @@ export function stripTypes(cell: JavaScriptCell, output: Sourcemap): void {
   // Invokes fn for each token in the given span, with absolute offsets. The span
   // is re-tokenized with acorn so that comments and strings are handled
   // correctly; any tokenizing error (e.g. an unexpected character) is ignored.
-  function eachToken(start: number, end: number, fn: (token: {text: string; start: number; end: number}) => void): void {
+  function eachToken(
+    start: number,
+    end: number,
+    fn: (token: {text: string; start: number; end: number}) => void
+  ): void {
     if (start >= end) return;
     const code = input.slice(start, end);
     try {

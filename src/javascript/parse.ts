@@ -14,7 +14,8 @@ const jsOptions: Options = {
 
 const tsOptions: Options = {
   ...jsOptions,
-  locations: true
+  locations: true,
+  preserveParens: true // needed for accurate type stripping
 };
 
 export interface JavaScriptCell {
