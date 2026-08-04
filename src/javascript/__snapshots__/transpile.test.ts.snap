@@ -366,6 +366,28 @@ await z;
 }
 `;
 
+exports[`transpiles JavaScript programs 4`] = `
+{
+  "autodisplay": false,
+  "body": "async () => {
+const {default: data} = await import("https://example.com", {with: {type: "json"}}).then((module) => {
+  if (!("default" in module)) throw new SyntaxError(\`export 'default' not found\`);
+  return module;
+});
+
+return {data};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "data",
+  ],
+  "secrets": Set {},
+}
+`;
+
 exports[`transpiles Observable JavaScript dynamic imports 1`] = `
 {
   "autodisplay": true,
@@ -1096,6 +1118,28 @@ exports[`transpiles TypeScript imports 3`] = `
   "inputs": [],
   "output": undefined,
   "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TypeScript imports 4`] = `
+{
+  "autodisplay": false,
+  "body": "async () => {
+const {default: data} = await import("https://example.com", {with: {type: "json"}}).then((module) => {
+  if (!("default" in module)) throw new SyntaxError(\`export 'default' not found\`);
+  return module;
+});
+
+return {data};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [
+    "data",
+  ],
   "secrets": Set {},
 }
 `;

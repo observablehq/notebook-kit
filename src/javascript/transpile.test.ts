@@ -20,6 +20,7 @@ it("transpiles JavaScript programs", () => {
   expect(transpile("const x = 1, y = 2;", "js")).toMatchSnapshot();
   expect(transpile("x + y;", "js")).toMatchSnapshot();
   expect(transpile("await z;", "js")).toMatchSnapshot();
+  expect(transpile('import data from "https://example.com" with {type: "json"};', "js")).toMatchSnapshot();
 });
 
 it("transpiles TypeScript expressions", () => {
@@ -51,8 +52,9 @@ it("transpiles TypeScript statements", () => {
 
 it("transpiles TypeScript imports", () => {
   expect(transpile('import {foo} from "npm:bar";', "ts")).toMatchSnapshot();
-  expect(transpile('import {type foo} from "npm:bar";', "ts")).toMatchSnapshot(); // TODO should be stripped
-  expect(transpile('import type {foo} from "npm:bar";', "ts")).toMatchSnapshot(); // TODO should be stripped
+  expect(transpile('import {type foo} from "npm:bar";', "ts")).toMatchSnapshot();
+  expect(transpile('import type {foo} from "npm:bar";', "ts")).toMatchSnapshot();
+  expect(transpile('import data from "https://example.com" with {type: "json"};', "ts")).toMatchSnapshot();
 });
 
 it("throws SyntaxError on invalid TypeScript syntax", () => {
