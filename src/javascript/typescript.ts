@@ -1,7 +1,10 @@
-import {Token, tokenizer, tokTypes} from "acorn";
+import type {Node, Token} from "acorn";
+import {tokenizer, tokTypes} from "acorn";
 import {base, recursive} from "acorn-walk";
 import type {JavaScriptCell} from "./parse.js";
 import type {Sourcemap} from "./sourcemap.js";
+import {syntaxError} from "./syntaxError.js";
+import {simple} from "./walk.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped acorn-typescript nodes
 type AnyNode = any;
@@ -29,6 +32,24 @@ const MODIFIERS = new Set([
   "abstract"
 ]);
 
+const checkErasableVisitors: Record<string, (node: Node, state: string) => void> = {
+  TSEnumDeclaration: checkErasable,
+  TSModuleDeclaration: checkErasable,
+  TSParameterProperty: checkErasable,
+  TSImportEqualsDeclaration: checkErasable,
+  TSExportAssignment: checkErasable
+};
+
+/** Throws a SyntaxError for any non-erasable TypeScript syntax. */
+export function checkErasableSyntax(node: Node, input: string): void {
+  simple(node, checkErasableVisitors, input);
+}
+
+function checkErasable(node: Node, input: string): void {
+  if ((node as {declare?: boolean}).declare) return; // ambient declarations are erasable
+  throw syntaxError(`unsupported syntax: ${node.type}`, node, input);
+}
+
 /** Erases TypeScript-specific syntax from output, leaving equivalent JavaScript. */
 export function stripTypes(cell: JavaScriptCell, output: Sourcemap): void {
   // The AST is traversed with acorn-walk’s recursive walker. Because acorn-walk’s
@@ -44,10 +65,10 @@ export function stripTypes(cell: JavaScriptCell, output: Sourcemap): void {
   // markers), so they are located by re-tokenizing the small, AST-bounded span in
   // which they must occur. Re-tokenizing (rather than string matching) correctly
   // ignores comments and string literals within that span.
-  recursive(cell.body, output, visitors);
+  recursive(cell.body, output, stripTypesVisitors);
 }
 
-const visitors: Record<string, Visitor> = {
+const stripTypesVisitors: Record<string, Visitor> = {
   // Type-only declarations, erased entirely.
   TSTypeAliasDeclaration: deleteStatement,
   TSInterfaceDeclaration: deleteStatement,
@@ -55,6 +76,10 @@ const visitors: Record<string, Visitor> = {
   TSDeclareMethod: deleteStatement,
   TSIndexSignature: deleteStatement,
   TSNamespaceExportDeclaration: deleteStatement,
+  // Ambient (declare) enums and namespaces; non-ambient forms, which require
+  // runtime support, are rejected earlier by checkErasableSyntax.
+  TSEnumDeclaration: deleteStatement,
+  TSModuleDeclaration: deleteStatement,
   // TypeScript expression wrappers, unwrapped to their value expression.
   TSAsExpression: unwrapType, // x as T
   TSSatisfiesExpression: unwrapType, // x satisfies T
@@ -62,7 +87,6 @@ const visitors: Record<string, Visitor> = {
   TSInstantiationExpression: unwrapType, // f<T>
   TSTypeAssertion: unwrapAssertion, // <T>x
   TSTypeCastExpression: unwrapCast, // (x: T)
-  TSParameterProperty: stripParameterProperty,
   // Standard nodes that may carry type syntax. Function and Class are aggregate
   // types dispatched by acorn-walk’s base walkers, so overriding them covers
   // every function and class form.
@@ -107,14 +131,6 @@ function unwrapAssertion(node: AnyNode, output: State, next: Continue): void {
 function unwrapCast(node: AnyNode, output: State, next: Continue): void {
   output.delete(node.typeAnnotation.start, node.typeAnnotation.end);
   next(node.expression, output);
-}
-
-// Drops accessibility/readonly modifiers from a constructor parameter property,
-// keeping the parameter binding. (Note: the implied field assignment is not
-// synthesized, so parameter properties are erased but not fully transformed.)
-function stripParameterProperty(node: AnyNode, output: State, next: Continue): void {
-  deleteModifiers(output, findModifiersStart(node), node.parameter.start);
-  next(node.parameter, output, "Pattern");
 }
 
 // Removes the return type and generic type parameters from a function.

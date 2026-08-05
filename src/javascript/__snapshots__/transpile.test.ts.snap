@@ -1,5 +1,50 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`erases ambient TypeScript declarations 1`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`erases ambient TypeScript declarations 2`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`erases ambient TypeScript declarations 3`] = `
+{
+  "autodisplay": false,
+  "body": "() => {
+
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
 exports[`ignores non-bare Observable JavaScript dynamic imports 1`] = `
 {
   "autodisplay": true,

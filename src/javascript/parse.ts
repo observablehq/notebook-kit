@@ -6,6 +6,7 @@ import {findDeclarations} from "./declarations.js";
 import type {FeatureExpression} from "./features.js";
 import {findFeatures} from "./features.js";
 import {findReferences} from "./references.js";
+import {checkErasableSyntax} from "./typescript.js";
 
 const jsOptions: Options = {
   ecmaVersion: "latest",
@@ -56,6 +57,7 @@ export function parseJavaScript(input: string, dialect?: Dialect): JavaScriptCel
   if (expression?.type === "ClassExpression" && expression.id) expression = null; // treat named class as program
   if (expression?.type === "FunctionExpression" && expression.id) expression = null; // treat named function as program
   const body = expression ?? parseProgram(input, dialect); // otherwise parse as a program
+  if (dialect === "ts") checkErasableSyntax(body, input);
   return {
     body,
     declarations: expression ? null : findDeclarations(body as Program, input),

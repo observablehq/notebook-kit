@@ -86,6 +86,23 @@ it("strips TypeScript type syntax", () => {
   expect(transpile("abstract class A extends B<number> implements I { abstract m(): void; private readonly p: number = 1; static s = 2; q?: string; }", "ts")).toMatchSnapshot(); // prettier-ignore
 });
 
+it("errors on TypeScript features that require runtime support", () => {
+  expect(() => transpile("enum Direction { Up, Down, Left, Right }", "ts")).toThrow(SyntaxError);
+  expect(() => transpile("const enum Direction { Up, Down }", "ts")).toThrow(SyntaxError);
+  expect(() => transpile("namespace N { export const x = 1; }", "ts")).toThrow(SyntaxError);
+  expect(() => transpile("module M { export const x = 1; }", "ts")).toThrow(SyntaxError);
+  expect(() => transpile("class C { constructor(private x: number) {} }", "ts")).toThrow(SyntaxError);
+  expect(() => transpile('import fs = require("fs");', "ts")).toThrow(SyntaxError);
+  expect(() => transpile("import x = A.B;", "ts")).toThrow(SyntaxError);
+  expect(() => transpile("export = foo;", "ts")).toThrow(SyntaxError);
+});
+
+it("erases ambient TypeScript declarations", () => {
+  expect(transpile("declare enum E { A, B }", "ts")).toMatchSnapshot();
+  expect(transpile("declare namespace N { const x: number; }", "ts")).toMatchSnapshot();
+  expect(transpile('declare module "m" { export const x: number; }', "ts")).toMatchSnapshot();
+});
+
 it("transpiles static npm: imports", () => {
   expect(transpile('import * as d3 from "npm:d3";', "js")).toMatchSnapshot();
   expect(transpile('import _ from "npm:lodash";', "js")).toMatchSnapshot();

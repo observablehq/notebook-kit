@@ -30,6 +30,10 @@ const visitors = {
   TSDeclareMethod: skip,
   TSIndexSignature: skip,
   TSNamespaceExportDeclaration: skip,
+  TSEnumDeclaration: skip,
+  TSModuleDeclaration: skip,
+  TSImportEqualsDeclaration: skip,
+  TSExportAssignment: skip,
   TSAsExpression: callbackExpression,
   TSSatisfiesExpression: callbackExpression,
   TSNonNullExpression: callbackExpression,
@@ -41,14 +45,14 @@ const visitors = {
 
 const walk = make(visitors as RecursiveVisitors<unknown>);
 
-export function ancestor<T>(node: Node, visitors: AncestorVisitors<T>): void {
-  return baseAncestor(node, visitors, walk as RecursiveVisitors<T>);
+export function ancestor<T>(node: Node, visitors: AncestorVisitors<T>, state?: T): void {
+  return baseAncestor(node, visitors, walk as RecursiveVisitors<T>, state);
 }
 
 export function recursive<T>(node: Node, state: T, functions: RecursiveVisitors<T>): void {
   return baseRecursive(node, state, functions, walk as RecursiveVisitors<T>);
 }
 
-export function simple<T>(node: Node, visitors: SimpleVisitors<T>): void {
-  return baseSimple(node, visitors, walk as RecursiveVisitors<T>);
+export function simple<T>(node: Node, visitors: SimpleVisitors<T>, state?: T): void {
+  return baseSimple(node, visitors, walk as RecursiveVisitors<T>, state);
 }
