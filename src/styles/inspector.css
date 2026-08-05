@@ -59,12 +59,9 @@
   color: var(--syntax-string);
 }
 
+.observablehq--undefined,
 .observablehq--null {
   color: var(--syntax-keyword);
-}
-
-.observablehq--undefined {
-  color: var(--syntax-variable);
 }
 
 .observablehq--prototype-key {
