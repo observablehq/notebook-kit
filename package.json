@@ -5,7 +5,7 @@
     "type": "git",
     "url": "git+https://github.com/observablehq/notebook-kit.git"
   },
-  "version": "2.1.9",
+  "version": "2.2.0",
   "type": "module",
   "scripts": {
     "test": "TZ=America/Los_Angeles vitest",
@@ -56,12 +56,12 @@
     "@observablehq/parser": "^6.1.0",
     "@observablehq/runtime": "^6.0.0",
     "@sindresorhus/slugify": "^2.2.1",
+    "@sveltejs/acorn-typescript": "^1.0.11",
     "acorn": "^8.16.0",
     "acorn-walk": "^8.3.5",
     "jsdom": "^26.1.0",
     "markdown-it": "^14.1.1",
     "markdown-it-anchor": "^9.2.0",
-    "typescript": "^5.9.3",
     "vite": "^7.0.0 || ^8.0.0"
   },
   "devDependencies": {
@@ -82,6 +82,7 @@
     "postgres": "^3.4.9",
     "snowflake-sdk": "^2.4.2",
     "tsx": "^4.22.3",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.4",
     "vitest": "^4.1.7"
   },

@@ -68,6 +68,12 @@ export function isImportMetaUrl(node: MemberExpression): boolean {
   );
 }
 
+type TSImportSpecifier = AnyImportSpecifier & {importKind: "type" | "value"};
+
+export function isTypeImport(node: AnyImportSpecifier | ImportDeclaration): boolean {
+  return (node as TSImportSpecifier).importKind === "type";
+}
+
 function resolveImport(specifier: string): string {
   return resolveObservableImport(resolveJsrImport(resolveNpmImport(specifier)));
 }
@@ -125,7 +131,9 @@ export function rewriteImportDeclarations(
 
   simple(body, {
     ImportDeclaration(node) {
-      if (isStringLiteral(node.source)) {
+      if (isTypeImport(node)) {
+        output.delete(node.start, node.end);
+      } else if (isStringLiteral(node.source)) {
         declarations.push([node, node.source]);
       }
     }
@@ -158,9 +166,12 @@ export function rewriteImportDeclarations(
 }
 
 function renderImport(source: string, node: ImportDeclaration, input: string): string {
-  const names = node.specifiers.filter(isNamedSpecifier).map(getImportedName);
+  const names = node.specifiers
+    .filter((node) => !isTypeImport(node))
+    .filter(isNamedSpecifier)
+    .map(getImportedName);
   return `import(${source}${
-    node.attributes.length > 0
+    node.attributes?.length > 0
       ? `, {with: {${input.slice(
           node.attributes[0].start,
           node.attributes[node.attributes.length - 1].end
@@ -207,7 +218,7 @@ function isNamedSpecifier(node: AnyImportSpecifier): node is NamedImportSpecifie
 function rewriteImportSpecifiers(node: ImportDeclaration): string {
   return node.specifiers.some(isNamedSpecifier)
     ? `{${flatMapImportSpecifiers(node, rewriteImportSpecifier).join(", ")}}`
-    : (node.specifiers.find(isNamespaceSpecifier)?.local.name ?? "{}");
+    : (node.specifiers.find((node) => isNamespaceSpecifier(node) && !isTypeImport(node))?.local.name ?? "{}"); // prettier-ignore
 }
 
 export function flatMapImportSpecifiers<T>(
@@ -221,7 +232,9 @@ export function flatMapImportSpecifiers<T>(
       ? [f(node), f(toSpecialImportSpecifier(node, "viewof"))]
       : isMutableImport(node)
         ? [f(node), f(toSpecialImportSpecifier(node, "mutable"))]
-        : f(node);
+        : isTypeImport(node)
+          ? []
+          : f(node);
   });
 }
 

@@ -13,9 +13,11 @@ interface Position {
 }
 
 export class Sourcemap {
+  readonly length: number;
   readonly input: string;
   private readonly _edits: Edit[];
   constructor(input: string) {
+    this.length = input.length;
     this.input = input;
     this._edits = [];
   }
