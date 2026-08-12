@@ -5,7 +5,7 @@
     "type": "git",
     "url": "git+https://github.com/observablehq/notebook-kit.git"
   },
-  "version": "2.2.0",
+  "version": "2.2.1",
   "type": "module",
   "scripts": {
     "test": "TZ=America/Los_Angeles vitest",
