@@ -1,6 +1,5 @@
 import {assert, describe, test} from "vitest";
 import {sql} from "./sql.js";
-import type {QueryResult, SqlDialect} from "./databaseClient.js";
 
 describe("sql`…`", () => {
   test("defines a SQL fragment", () => {
@@ -43,7 +42,7 @@ describe("sql`…`.flat()", () => {
     assert.deepStrictEqual(sql`FOO = ${sql`${42}`}`.flat(), new sql.Fragment(["FOO = ", ""], [42]));
   });
   test("handles arbitrarily nested SQL", () => {
-    assert.deepStrictEqual(sql`ORDER BY 3, ${sql`2 ${sql`DESC`}`}`.flat(), new sql.Fragment(["ORDER BY 3, 2 DESC"], []));
+    assert.deepStrictEqual(sql`ORDER BY 3, ${sql`2 ${sql`DESC`}`}`.flat(), new sql.Fragment(["ORDER BY 3, 2 DESC"], [])); // prettier-ignore
   });
   test("adds a WITH clause for selected views", () => {
     const view = sql.view`SELECT * FROM PURCHASES`;
@@ -226,17 +225,17 @@ SELECT * FROM "_2" UNION ALL SELECT * FROM "_1"`
 
 describe("sql`…`.toDialect(dialect)", () => {
   test("converts the SQL fragment to the specified dialect", () => {
-    assert.deepStrictEqual(sql`SELECT ${sql.variant({duckdb: "DUCKDB"})}`.toDialect("duckdb"), sql`SELECT ${"DUCKDB"}`);
+    assert.deepStrictEqual(sql`SELECT ${sql.variant({duckdb: "DUCKDB"})}`.toDialect("duckdb"), sql`SELECT ${"DUCKDB"}`); // prettier-ignore
   });
   test("handles the default dialect", () => {
     const fragment = sql`SELECT ${sql.variant({duckdb: "DUCKDB", default: "DEFAULT"})}`;
     assert.deepStrictEqual(fragment.toDialect("duckdb"), sql`SELECT ${"DUCKDB"}`);
     assert.deepStrictEqual(fragment.toDialect("postgres"), sql`SELECT ${"DEFAULT"}`);
-    assert.deepStrictEqual(fragment.toDialect("unknown" as SqlDialect), sql`SELECT ${"DEFAULT"}`);
+    assert.deepStrictEqual(fragment.toDialect("unknown"), sql`SELECT ${"DEFAULT"}`);
     assert.deepStrictEqual(fragment.toDialect(), sql`SELECT ${"DEFAULT"}`);
   });
   test("throws an error for unknown dialects", () => {
-    assert.throws(() => sql`SELECT ${sql.variant({duckdb: "DUCKDB"})}`.toDialect("postgres"), /missing variant/);
+    assert.throws(() => sql`SELECT ${sql.variant({duckdb: "DUCKDB"})}`.toDialect("postgres"), /missing variant/); // prettier-ignore
   });
   test("converts nested SQL fragments", () => {
     assert.deepStrictEqual(
@@ -274,13 +273,11 @@ describe("sql`…`.toDialect(dialect)", () => {
 describe("sql`…`.query(database)", () => {
   test("queries the specified database via database.sql", async () => {
     const args: unknown[] = [];
-    const result: QueryResult = Object.assign([], {schema: [], date: new Date()});
+    const result = Symbol("result");
     const output = await sql`SELECT * FROM ${sql`PURCHASES`}`.query({
-      name: "",
-      options: {},
-      async sql<T>(strings: Readonly<string[]>, ...params: unknown[]) {
+      async sql(strings: readonly string[], ...params: unknown[]) {
         args.push(strings, ...params);
-        return result as QueryResult<T>;
+        return result;
       }
     });
     assert.strictEqual(output, result);
@@ -289,13 +286,11 @@ describe("sql`…`.query(database)", () => {
   test("flattens any views", async () => {
     const view = sql.view`SELECT * FROM PURCHASES WHERE FOO = ${42}`;
     const args: unknown[] = [];
-    const result: QueryResult = Object.assign([], {schema: [], date: new Date()});
+    const result = Symbol("result");
     const output = await sql`SELECT * FROM ${view}`.query({
-      name: "",
-      options: {},
-      async sql<T>(strings: Readonly<string[]>, ...params: unknown[]) {
+      async sql(strings: readonly string[], ...params: unknown[]) {
         args.push(strings, ...params);
-        return result as QueryResult<T>;
+        return result;
       }
     });
     assert.strictEqual(output, result);
@@ -313,13 +308,11 @@ SELECT * FROM "_1"`
     const inner = sql.view`SELECT * FROM PURCHASES WHERE X = ${1}`;
     const outer = sql.view`SELECT * FROM ${inner}`;
     const args: unknown[] = [];
-    const result: QueryResult = Object.assign([], {schema: [], date: new Date()});
+    const result = Symbol("result");
     const output = await sql`SELECT * FROM ${outer}`.query({
-      name: "",
-      options: {},
-      async sql<T>(strings: Readonly<string[]>, ...params: unknown[]) {
+      async sql(strings: readonly string[], ...params: unknown[]) {
         args.push(strings, ...params);
-        return result as QueryResult<T>;
+        return result;
       }
     });
     assert.strictEqual(output, result);
@@ -336,15 +329,13 @@ SELECT * FROM "_1"`
   });
   test("handles matching dialect-specific variants", async () => {
     const args: unknown[] = [];
-    const result: QueryResult = Object.assign([], {schema: [], date: new Date()});
+    const result = Symbol("result");
     const query = sql`SELECT * FROM ${sql.variant({duckdb: sql`PURCHASES_DUCKDB`, default: sql`PURCHASES`})}`;
     const output = await query.query({
-      name: "",
-      options: {},
       dialect: "duckdb",
-      async sql<T>(strings: Readonly<string[]>, ...params: unknown[]) {
+      async sql(strings: readonly string[], ...params: unknown[]) {
         args.push(strings, ...params);
-        return result as QueryResult<T>;
+        return result;
       }
     });
     assert.strictEqual(output, result);
@@ -352,15 +343,13 @@ SELECT * FROM "_1"`
   });
   test("handles default dialect-specific variants", async () => {
     const args: unknown[] = [];
-    const result: QueryResult = Object.assign([], {schema: [], date: new Date()});
+    const result = Symbol("result");
     const query = sql`SELECT * FROM ${sql.variant({duckdb: sql`PURCHASES_DUCKDB`, default: sql`PURCHASES`})}`;
     const output = await query.query({
-      name: "",
-      options: {},
       dialect: "postgres",
-      async sql<T>(strings: Readonly<string[]>, ...params: unknown[]) {
+      async sql(strings: readonly string[], ...params: unknown[]) {
         args.push(strings, ...params);
-        return result as QueryResult<T>;
+        return result;
       }
     });
     assert.strictEqual(output, result);
@@ -419,7 +408,7 @@ describe("sql.variant(variants)", () => {
     assert.deepStrictEqual(variant.toDialect("duckdb"), duckdb);
     assert.deepStrictEqual(variant.toDialect("snowflake"), snowflake);
     assert.deepStrictEqual(variant.toDialect("postgres"), duckdb);
-    assert.deepStrictEqual(variant.toDialect("unknown" as SqlDialect), duckdb);
+    assert.deepStrictEqual(variant.toDialect("unknown"), duckdb);
     assert.deepStrictEqual(variant.toDialect(), duckdb);
   });
   test("supports variants with parameters", () => {
@@ -447,6 +436,6 @@ describe("sql.variant(variants)", () => {
     assert.throws(() => variant.toDialect(), /missing dialect/);
   });
   test("implements toString", () => {
-    assert.strictEqual(String(sql.variant({default: sql`"Shipping Address State"`})), '"Shipping Address State"');
+    assert.strictEqual(String(sql.variant({default: sql`"Shipping Address State"`})), '"Shipping Address State"'); // prettier-ignore
   });
 });
