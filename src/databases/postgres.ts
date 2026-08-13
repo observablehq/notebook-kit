@@ -29,7 +29,8 @@ export default function postgres(options: PostgresConfig): QueryTemplateFunction
     try {
       rows = await sql.unsafe(
         strings.reduce((p, c, i) => `${p}$${i}${c}`),
-        params
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        params as any
       );
     } finally {
       await sql.end();

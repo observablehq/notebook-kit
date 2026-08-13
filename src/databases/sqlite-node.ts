@@ -11,7 +11,8 @@ export default function sqlite({path = ":memory:"}: SQLiteConfig): QueryTemplate
     const database = new DatabaseSync(path);
     try {
       const statement = database.prepare(strings.join("?"));
-      const rows = statement.all(...params) as Record<string, unknown>[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rows = statement.all(...(params as any[])) as Record<string, unknown>[];
       return {
         rows,
         schema: getStatementSchema(statement),

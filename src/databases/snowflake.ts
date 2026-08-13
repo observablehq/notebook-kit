@@ -67,7 +67,8 @@ async function execute(
     const date = new Date();
     connection.execute({
       sqlText: sql,
-      binds: params,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      binds: params as any,
       complete(error, statement, rows) {
         if (error) return reject(error);
         resolve({
