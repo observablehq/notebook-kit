@@ -1,5 +1,5 @@
 type SqlDialect = string;
-type QueryResult = unknown; // TODO
+type QueryResult = unknown; // TODO Arrow.Table
 
 interface DatabaseClient {
   readonly dialect?: SqlDialect;
