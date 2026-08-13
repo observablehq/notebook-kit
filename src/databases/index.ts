@@ -3,7 +3,7 @@ import {dirname, join} from "node:path";
 import {json} from "node:stream/consumers";
 import {isEnoent} from "../lib/error.js";
 import {hash, nameHash} from "../lib/hash.js";
-import type {ColumnSchema, QueryParam} from "../runtime/index.js";
+import type {ColumnSchema} from "../runtime/index.js";
 import type {BigQueryConfig} from "./bigquery.js";
 import type {DatabricksConfig} from "./databricks.js";
 import type {DuckDBConfig} from "./duckdb.js";
@@ -21,7 +21,7 @@ export type DatabaseConfig =
 
 export type QueryTemplateFunction = (
   strings: readonly string[],
-  ...params: QueryParam[]
+  ...params: unknown[]
 ) => Promise<SerializableQueryResult>;
 
 export type SerializableQueryResult = {

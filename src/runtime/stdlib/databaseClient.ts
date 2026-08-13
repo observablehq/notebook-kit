@@ -2,7 +2,7 @@
 import type {SerializableQueryResult} from "../../databases/index.js";
 import {hash, nameHash} from "../../lib/hash.js";
 
-/** A serializable value that can be interpolated into a query. */
+/** @deprecated Use unknown instead. */
 export type QueryParam = any;
 
 /** @see https://observablehq.com/@observablehq/database-client-specification#%C2%A71 */
@@ -39,11 +39,11 @@ export interface QueryOptions extends QueryOptionsSpec {
   since?: Date;
 }
 
-export interface DatabaseClient {
+export interface DatabaseClient<T = QueryResult> {
   readonly name: string;
   readonly options: QueryOptions;
   readonly dialect?: string;
-  sql(strings: readonly string[], ...params: QueryParam[]): Promise<QueryResult>;
+  sql<S extends T = T>(strings: readonly string[], ...params: unknown[]): Promise<S>;
 }
 
 export const DatabaseClient = (name: string, options?: QueryOptionsSpec): DatabaseClient => {
@@ -66,13 +66,13 @@ class DatabaseClientImpl implements DatabaseClient {
       options: {value: options, enumerable: true}
     });
   }
-  async sql(strings: readonly string[], ...params: QueryParam[]): Promise<QueryResult> {
+  async sql<T = QueryResult>(strings: readonly string[], ...params: unknown[]): Promise<T> {
     const path = await this.cachePath(strings, ...params);
     const response = await fetch(path);
     if (!response.ok) throw new Error(`failed to fetch: ${path}`);
-    return await response.json().then(revive);
+    return (await response.json().then(revive)) as T;
   }
-  async cachePath(strings: readonly string[], ...params: QueryParam[]): Promise<string> {
+  async cachePath(strings: readonly string[], ...params: unknown[]): Promise<string> {
     return `.observable/cache/${await nameHash(this.name)}-${await hash(strings, ...params)}.json`;
   }
 }

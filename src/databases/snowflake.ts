@@ -1,6 +1,6 @@
 import type {Column, Connection, ConnectionOptions, RowStatement} from "snowflake-sdk";
 import Snowflake from "snowflake-sdk";
-import type {ColumnSchema, QueryParam} from "../runtime/index.js";
+import type {ColumnSchema} from "../runtime/index.js";
 import {QueryTemplateFunction, SerializableQueryResult} from "./index.js";
 import {optionalString} from "./options.js";
 
@@ -61,7 +61,7 @@ async function destroy(connection: Connection): Promise<void> {
 async function execute(
   connection: Connection,
   sql: string,
-  params?: QueryParam[]
+  params?: unknown[]
 ): Promise<SerializableQueryResult> {
   return new Promise<SerializableQueryResult>((resolve, reject) => {
     const date = new Date();
