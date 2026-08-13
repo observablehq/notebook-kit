@@ -131,11 +131,23 @@ function getPrefix(cell: Cell): string {
           : cell.mode;
 }
 
-function getSqlPrefix(cell: Cell): string {
+function getDatabase(cell: Cell): string {
   const {id, database = "var:db", since} = cell;
   return database.startsWith("var:")
-    ? `${database.slice("var:".length)}.sql`
-    : `DatabaseClient(${JSON.stringify(database)}, {id: ${id}${since === undefined ? "" : `, since: ${JSON.stringify(since)}`}}).sql`;
+    ? database.slice("var:".length)
+    : `DatabaseClient(${JSON.stringify(database)}, {id: ${id}${since === undefined ? "" : `, since: ${JSON.stringify(since)}`}})`;
+}
+
+function getSqlPrefix(cell: Cell): string {
+  return `${getDatabase(cell)}.sql`;
+}
+
+function getSqlSuffix(cell: Cell): string {
+  return cell.hidden ? "" : ".then(Inputs.table)";
+}
+
+function getSqlViewSuffix(cell: Cell): string {
+  return `.bind(${getDatabase(cell)})`;
 }
 
 function getInterpreterPrefix(cell: Cell): string {
@@ -144,11 +156,13 @@ function getInterpreterPrefix(cell: Cell): string {
 }
 
 function getSuffix(cell: Cell): string {
-  return cell.mode === "sql" && !cell.hidden
-    ? ".then(Inputs.table)"
-    : isInterpreter(cell.mode)
-      ? getInterpreterSuffix(cell)
-      : "";
+  return cell.mode === "sql"
+    ? getSqlSuffix(cell)
+    : cell.mode === "sql.view"
+      ? getSqlViewSuffix(cell)
+      : isInterpreter(cell.mode)
+        ? getInterpreterSuffix(cell)
+        : "";
 }
 
 function getInterpreterSuffix(cell: Cell): string {

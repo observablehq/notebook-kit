@@ -15,6 +15,37 @@ export type NotebookTheme =
   | "stark"
   | "sun-faded";
 
+export type CellMode =
+  | "js"
+  | "ts"
+  | "ojs"
+  | "md"
+  | "html"
+  | "tex"
+  | "dot"
+  | "sql"
+  | "sql.view"
+  | "node"
+  | "python"
+  | "r";
+
+export type CellFormat =
+  | "text"
+  | "blob"
+  | "buffer"
+  | "json"
+  | "csv"
+  | "tsv"
+  | "jpeg"
+  | "gif"
+  | "webp"
+  | "png"
+  | "arrow"
+  | "parquet"
+  | "html"
+  | "svg"
+  | "xml";
+
 export type LightDarkNotebookTheme = {
   light: NotebookTheme;
   dark: NotebookTheme;
@@ -44,7 +75,7 @@ export interface CellSpec {
   /** the committed cell value; defaults to empty */
   value?: string;
   /** the mode; affects how the value is evaluated; defaults to js */
-  mode?: "js" | "ts" | "ojs" | "md" | "html" | "tex" | "dot" | "sql" | "node" | "python" | "r";
+  mode?: CellMode;
   /** if true, the editor will stay open when not focused; defaults to false */
   pinned?: boolean;
   /** if true, implicit display will be suppressed; defaults to false */
@@ -52,22 +83,7 @@ export interface CellSpec {
   /** if present, exposes the cell’s value to the rest of the notebook */
   output?: string;
   /** for data loader cells, how the data is represented */
-  format?:
-    | "text"
-    | "blob"
-    | "buffer"
-    | "json"
-    | "csv"
-    | "tsv"
-    | "jpeg"
-    | "gif"
-    | "webp"
-    | "png"
-    | "arrow"
-    | "parquet"
-    | "html"
-    | "svg"
-    | "xml";
+  format?: CellFormat;
   /** for SQL cells, the database to query; use var:<name> to refer to a variable */
   database?: string;
   /** for SQL cells, the oldest allowable age of the cached query result */
@@ -104,7 +120,7 @@ export function toCell({
   hidden = false,
   output,
   format = isInterpreter(mode) ? "buffer" : undefined,
-  database = mode === "sql" ? "var:db" : undefined,
+  database = isDatabase(mode) ? "var:db" : undefined,
   since
 }: CellSpec): Cell {
   return {
@@ -115,9 +131,17 @@ export function toCell({
     hidden,
     output,
     format: isInterpreter(mode) ? format : undefined,
-    database: mode === "sql" ? database : undefined,
+    database: isDatabase(mode) ? database : undefined,
     since: since !== undefined ? asDate(since) : undefined
   };
+}
+
+export function isDatabase(mode: Cell["mode"]): mode is "sql" | "sql.view" {
+  return mode === "sql" || mode === "sql.view";
+}
+
+function isJavaScript(mode: Cell["mode"]): mode is "js" | "ts" | "ojs" {
+  return mode === "js" || mode === "ts" || mode === "ojs";
 }
 
 function asDate(date: Date | string | number): Date {
@@ -125,5 +149,5 @@ function asDate(date: Date | string | number): Date {
 }
 
 export function defaultPinned(mode: Cell["mode"]): boolean {
-  return mode === "js" || mode === "ts" || mode === "sql" || isInterpreter(mode) || mode === "ojs";
+  return isJavaScript(mode) || isDatabase(mode) || isInterpreter(mode);
 }

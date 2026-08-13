@@ -67,6 +67,8 @@ function serializeMode(mode: Cell["mode"]): string {
       return "application/x-tex";
     case "sql":
       return "application/sql";
+    case "sql.view":
+      return "application/sql+view";
     case "dot":
       return "text/vnd.graphviz";
     case "node":
@@ -94,6 +96,8 @@ function deserializeMode(mode: string | null): Cell["mode"] {
       return "tex";
     case "application/sql":
       return "sql";
+    case "application/sql+view":
+      return "sql.view";
     case "text/vnd.graphviz":
       return "dot";
     case "application/vnd.node.javascript":
