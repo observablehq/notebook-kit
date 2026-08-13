@@ -42,6 +42,7 @@ export interface QueryOptions extends QueryOptionsSpec {
 export interface DatabaseClient {
   readonly name: string;
   readonly options: QueryOptions;
+  readonly dialect?: string;
   sql(strings: readonly string[], ...params: QueryParam[]): Promise<QueryResult>;
 }
 

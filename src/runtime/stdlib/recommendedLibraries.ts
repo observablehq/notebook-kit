@@ -17,7 +17,7 @@ export const mermaid = () => import("./mermaid.js").then((_) => _.mermaid);
 export const Plot = () => import("https://cdn.jsdelivr.net/npm/@observablehq/plot/+esm");
 export const React = () => import("https://cdn.jsdelivr.net/npm/react/+esm");
 export const ReactDOM = () => import("https://cdn.jsdelivr.net/npm/react-dom/+esm");
-// export const sql = () => import("observablehq:stdlib/duckdb").then((_) => _.sql);
+export const sql = () => import("./sql.js").then((_) => _.sql);
 // export const SQLite = () => import("observablehq:stdlib/sqlite").then((_) => _.default);
 // export const SQLiteDatabaseClient = () => import("observablehq:stdlib/sqlite").then((_) => _.SQLiteDatabaseClient);
 export const tex = () => import("./tex.js").then((_) => _.tex);
