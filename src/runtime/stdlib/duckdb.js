@@ -337,7 +337,7 @@ async function insertArrowIpc(database, name, buffer, options) {
 }
 
 async function insertFlechetteTable(database, name, table, options) {
-  const {tableToIPC} = await import("https://cdn.jsdelivr.net/npm/@uwdata/flechette@2.5.0/+esm");
+  const {tableToIPC} = await import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm");
   return await insertArrowIpc(database, name, tableToIPC(table, {format: "stream"}), options);
 }
 

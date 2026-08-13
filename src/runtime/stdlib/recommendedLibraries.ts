@@ -6,6 +6,7 @@ export const dot = () => import("./dot.js").then((_) => _.dot);
 export const duckdb = () => import("https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm");
 export const DuckDBClient = () => import("./duckdb.js").then((_) => _.DuckDBClient);
 export const echarts = () => import("https://cdn.jsdelivr.net/npm/echarts/+esm");
+export const Flechette = () => import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm");
 export const htl = () => import("https://cdn.jsdelivr.net/npm/htl/+esm");
 export const html = () => import("https://cdn.jsdelivr.net/npm/htl/+esm").then((_) => _.html);
 export const svg = () => import("https://cdn.jsdelivr.net/npm/htl/+esm").then((_) => _.svg);

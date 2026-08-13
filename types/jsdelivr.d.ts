@@ -7,6 +7,7 @@ declare module "https://cdn.jsdelivr.net/npm/arquero/+esm";
 declare module "https://cdn.jsdelivr.net/npm/d3-dsv/+esm";
 declare module "https://cdn.jsdelivr.net/npm/d3/+esm";
 declare module "https://cdn.jsdelivr.net/npm/echarts/+esm";
+declare module "https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm";
 declare module "https://cdn.jsdelivr.net/npm/htl/+esm";
 declare module "https://cdn.jsdelivr.net/npm/katex/+esm";
 declare module "https://cdn.jsdelivr.net/npm/leaflet/+esm";
