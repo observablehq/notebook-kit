@@ -1,4 +1,5 @@
 import type {Identifier, Pattern, Program} from "acorn";
+import {isTypeImport} from "./imports.js";
 import {defaultGlobals} from "./globals.js";
 import {syntaxError} from "./syntaxError.js";
 
@@ -18,7 +19,7 @@ export function findDeclarations(node: Program, input: string): Identifier[] {
         declareLocal(node);
         break;
       case "ObjectPattern":
-        node.properties.forEach((node) => declarePattern(node.type === "Property" ? node.value : node));
+        node.properties.forEach((node) => declarePattern(node.type === "Property" ? node.value : node)); // prettier-ignore
         break;
       case "ArrayPattern":
         node.elements.forEach((node) => node && declarePattern(node));
@@ -42,7 +43,10 @@ export function findDeclarations(node: Program, input: string): Identifier[] {
         declareLocal(child.id);
         break;
       case "ImportDeclaration":
-        child.specifiers.forEach((node) => declareLocal(node.local));
+        if (isTypeImport(child)) break;
+        child.specifiers
+          .filter((node) => !isTypeImport(node))
+          .forEach((node) => declareLocal(node.local));
         break;
     }
   }

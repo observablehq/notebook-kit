@@ -1,3 +1,4 @@
+import {tsPlugin} from "@sveltejs/acorn-typescript";
 import {Parser, tokTypes} from "acorn";
 import type {Expression, Identifier, Options, Program} from "acorn";
 import {findAwaits} from "./awaits.js";
@@ -5,10 +6,17 @@ import {findDeclarations} from "./declarations.js";
 import type {FeatureExpression} from "./features.js";
 import {findFeatures} from "./features.js";
 import {findReferences} from "./references.js";
+import {checkErasableSyntax} from "./typescript.js";
 
-export const acornOptions: Options = {
+const jsOptions: Options = {
   ecmaVersion: "latest",
   sourceType: "module"
+};
+
+const tsOptions: Options = {
+  ...jsOptions,
+  locations: true,
+  preserveParens: true // needed for accurate type stripping
 };
 
 export interface JavaScriptCell {
@@ -22,20 +30,34 @@ export interface JavaScriptCell {
   async: boolean; // does this use top-level await?
 }
 
-export function maybeParseJavaScript(input: string): JavaScriptCell | undefined {
+type Dialect = "js" | "ts";
+
+const JsParser = Parser;
+const TsParser = Parser.extend(tsPlugin());
+
+function getParser(dialect: Dialect = "js"): typeof Parser {
+  return dialect === "ts" ? TsParser : JsParser;
+}
+
+function getOptions(dialect: Dialect = "js"): Options {
+  return dialect === "ts" ? tsOptions : jsOptions;
+}
+
+export function maybeParseJavaScript(input: string, dialect?: Dialect): JavaScriptCell | undefined {
   try {
-    return parseJavaScript(input);
+    return parseJavaScript(input, dialect);
   } catch (error) {
     if (!(error instanceof SyntaxError)) throw error;
     return;
   }
 }
 
-export function parseJavaScript(input: string): JavaScriptCell {
-  let expression = maybeParseExpression(input); // first attempt to parse as expression
+export function parseJavaScript(input: string, dialect?: Dialect): JavaScriptCell {
+  let expression = maybeParseExpression(input, dialect); // first attempt to parse as expression
   if (expression?.type === "ClassExpression" && expression.id) expression = null; // treat named class as program
   if (expression?.type === "FunctionExpression" && expression.id) expression = null; // treat named function as program
-  const body = expression ?? parseProgram(input); // otherwise parse as a program
+  const body = expression ?? parseProgram(input, dialect); // otherwise parse as a program
+  if (dialect === "ts") checkErasableSyntax(body, input);
   return {
     body,
     declarations: expression ? null : findDeclarations(body as Program, input),
@@ -48,13 +70,12 @@ export function parseJavaScript(input: string): JavaScriptCell {
   };
 }
 
-function parseProgram(input: string): Program {
-  return Parser.parse(input, acornOptions);
+function parseProgram(input: string, dialect?: Dialect): Program {
+  return getParser(dialect).parse(input, getOptions(dialect));
 }
 
-function maybeParseExpression(input: string): Expression | null {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const parser = new (Parser as any)(acornOptions, input, 0); // private constructor
+function maybeParseExpression(input: string, dialect?: Dialect): Expression | null {
+  const parser = new (getParser(dialect) as any)(getOptions(dialect), input, 0); // eslint-disable-line @typescript-eslint/no-explicit-any -- private constructor
   parser.nextToken();
   try {
     const node = parser.parseExpression();
