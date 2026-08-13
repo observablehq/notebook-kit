@@ -8,14 +8,12 @@ import {Mutable} from "./mutable.js";
 import * as Promises from "./promises/index.js";
 import * as recommendedLibraries from "./recommendedLibraries.js";
 import * as sampleDatasets from "./sampleDatasets.js";
-import {sql} from "./sql.js";
 
 export const root = document.querySelector("main") ?? document.body;
 
 export const library = {
   dark: () => Generators.dark(),
   now: () => Generators.now(),
-  sql: () => sql,
   width: () => Generators.width(root),
   DatabaseClient: () => DatabaseClient,
   FileAttachment: () => FileAttachment,
