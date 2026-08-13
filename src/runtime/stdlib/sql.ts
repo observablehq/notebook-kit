@@ -1,9 +1,8 @@
 type SqlDialect = string;
-type QueryResult = unknown; // TODO Arrow.Table
 
 interface DatabaseClient {
   readonly dialect?: SqlDialect;
-  sql(strings: readonly string[], ...params: unknown[]): Promise<QueryResult>;
+  sql<T>(strings: readonly string[], ...params: unknown[]): Promise<T>;
 }
 
 export function sql(strings: readonly string[], ...params: unknown[]): SqlFragment {
@@ -102,9 +101,9 @@ class SqlFragment {
     const [vstrings, vparams] = withViews(fstrings, fparams, views, iquote);
     return vstrings === strings && vparams === params ? that : reconstruct(that, vstrings, vparams);
   }
-  query(database: DatabaseClient): Promise<QueryResult> {
+  query<T = unknown>(database: DatabaseClient): Promise<T> {
     const {strings, params} = this.flat(database.dialect);
-    return database.sql(strings, ...params);
+    return database.sql<T>(strings, ...params);
   }
   toDialect(dialect?: SqlDialect): typeof this {
     return fragmentToDialect(this, dialect, new Map());
@@ -117,6 +116,28 @@ class SqlFragment {
 class SqlView extends SqlFragment {
   constructor(strings: readonly string[], params: unknown[]) {
     super(strings, params);
+  }
+  bind(database: DatabaseClient): BoundSqlView {
+    return new BoundSqlView(this.strings, this.params, database);
+  }
+}
+
+class BoundSqlView extends SqlView {
+  readonly database: DatabaseClient;
+  constructor(strings: readonly string[], params: unknown[], database: DatabaseClient) {
+    super(strings, params);
+    this.database = database;
+  }
+  flat(): typeof this {
+    const flat = super.flat(this.database.dialect);
+    if (flat !== this) (flat as {database: unknown}).database = this.database;
+    return flat;
+  }
+  query<T>(): Promise<T> {
+    return super.query<T>(this.database);
+  }
+  bind(): BoundSqlView {
+    throw new Error("already bound");
   }
 }
 
@@ -136,6 +157,8 @@ class SqlVariant {
 sql.Fragment = SqlFragment;
 sql.View = SqlView;
 sql.Variant = SqlVariant;
+
+export type {SqlFragment, SqlView, SqlVariant};
 
 function fragmentToDialect<T extends SqlFragment>(
   fragment: T,
@@ -213,7 +236,7 @@ function variantToDialect(
 function withViews(
   istrings: readonly string[],
   iparams: unknown[],
-  views: Record<string, SqlView>,
+  views: Record<string, SqlFragment>,
   iquote: (name: string) => string
 ): [readonly string[], unknown[]] {
   const entries = Object.entries(views);

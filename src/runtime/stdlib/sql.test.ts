@@ -1,4 +1,5 @@
 import {assert, describe, test} from "vitest";
+import type {SqlView} from "./sql.js";
 import {sql} from "./sql.js";
 
 describe("sql`…`", () => {
@@ -437,5 +438,81 @@ describe("sql.variant(variants)", () => {
   });
   test("implements toString", () => {
     assert.strictEqual(String(sql.variant({default: sql`"Shipping Address State"`})), '"Shipping Address State"'); // prettier-ignore
+  });
+});
+
+class MockDatabaseClient {
+  dialect?: string;
+  strings: readonly string[];
+  params: unknown[];
+
+  constructor(dialect?: string) {
+    this.dialect = dialect;
+    this.strings = [];
+    this.params = [];
+  }
+
+  async sql<T>(strings: readonly string[], ...params: unknown[]): Promise<T> {
+    this.strings = strings;
+    this.params = params;
+    return undefined as T;
+  }
+}
+
+describe("sql.view`…`.bind(database)", () => {
+  test("returns a bound copy, leaving the original unbound", () => {
+    const db = new MockDatabaseClient();
+    const view = sql.view`SELECT 1`;
+    const bound = view.bind(db);
+    assert.strictEqual(bound.database, db);
+    assert.instanceOf(bound, sql.View);
+    assert.deepStrictEqual([bound.strings, bound.params], [view.strings, view.params]);
+    assert.strictEqual((view as SqlView & {database: unknown}).database, undefined);
+  });
+  test("flattens using the bound database’s dialect", () => {
+    const databricks = new MockDatabaseClient("databricks");
+    const view = sql.view`SELECT ${sql.ident("full name")}`;
+    assert.strictEqual(String(view), 'SELECT "full name"'); // default dialect: double quotes
+    assert.strictEqual(String(view.bind(databricks)), "SELECT `full name`"); // bound: backticks
+  });
+  test("ignores the passed dialect when flattening", () => {
+    const databricks = new MockDatabaseClient("databricks");
+    const view = sql.view`SELECT ${sql.ident("full name")}`.bind(databricks);
+    assert.strictEqual(String((view as SqlView).flat("postgres")), "SELECT `full name`");
+    assert.strictEqual(String((view as SqlView).flat()), "SELECT `full name`");
+  });
+  test("queries the bound database", async () => {
+    const db = new MockDatabaseClient();
+    await sql.view`SELECT * FROM ${sql`PURCHASES`}`.bind(db).query();
+    assert.deepStrictEqual(db.strings, ["SELECT * FROM PURCHASES"]);
+    assert.deepStrictEqual(db.params, []);
+  });
+  test("flattens interpolated views", async () => {
+    const db = new MockDatabaseClient();
+    await sql.view`SELECT * FROM ${sql.view`SELECT * FROM PURCHASES`}`.bind(db).query();
+    assert.deepStrictEqual(db.strings, [
+      `WITH
+"_1" AS (SELECT * FROM PURCHASES)
+SELECT * FROM "_1"`
+    ]);
+    assert.deepStrictEqual(db.params, []);
+  });
+  test("ignores the database passed to query", async () => {
+    const db1 = new MockDatabaseClient();
+    const db2 = new MockDatabaseClient();
+    const view = sql.view`SELECT 1`.bind(db1);
+    await (view as SqlView).query(db2);
+    assert.deepStrictEqual(db1.strings, ["SELECT 1"]);
+    assert.deepStrictEqual(db2.strings, []);
+  });
+  test("ignores the database when interpolating fragments bound to different databases", () => {
+    const dba = new MockDatabaseClient();
+    const dbb = new MockDatabaseClient();
+    const a = sql.view`A`.bind(dba);
+    const b = sql.view`B`.bind(dbb);
+    assert.strictEqual(String(sql`SELECT ${a}, ${b}`), `WITH
+"_1" AS (A),
+"_2" AS (B)
+SELECT "_1", "_2"`);
   });
 });
