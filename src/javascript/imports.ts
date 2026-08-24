@@ -74,11 +74,13 @@ export function isTypeImport(node: AnyImportSpecifier | ImportDeclaration): bool
   return (node as TSImportSpecifier).importKind === "type";
 }
 
-function resolveImport(specifier: string): string {
+export function resolveImportDefault(specifier: string): string {
   return resolveObservableImport(resolveJsrImport(resolveNpmImport(specifier)));
 }
 
-export type RewriteImportOptions = {
+export type ImportOptions = {
+  /** Returns the URL for the given import specifier; defaults to resolveImportDefault. */
+  resolveImport?: (specifier: string) => string;
   /** If true, resolve local imports relative to document.baseURI. */
   resolveLocalImports?: boolean;
 };
@@ -86,7 +88,7 @@ export type RewriteImportOptions = {
 export function rewriteImportExpressions(
   output: Sourcemap,
   body: Node,
-  {resolveLocalImports}: RewriteImportOptions = {}
+  {resolveImport = resolveImportDefault, resolveLocalImports}: ImportOptions = {}
 ): void {
   function rewriteImportSource(source: StringLiteral, node: Node = source) {
     const value = getStringLiteralValue(source);
@@ -125,7 +127,7 @@ export function rewriteImportDeclarations(
   output: Sourcemap,
   body: Node,
   inputs: string[],
-  {resolveLocalImports}: RewriteImportOptions = {}
+  {resolveImport = resolveImportDefault, resolveLocalImports}: ImportOptions = {}
 ): void {
   const declarations: [ImportDeclaration, StringLiteral][] = [];
 

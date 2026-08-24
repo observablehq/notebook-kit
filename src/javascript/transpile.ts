@@ -1,6 +1,7 @@
 import type {Cell} from "../lib/notebook.js";
 import {toCell} from "../lib/notebook.js";
 import {rewriteFileExpressions} from "./files.js";
+import type {ImportOptions} from "./imports.js";
 import {hasImportDeclaration} from "./imports.js";
 import {rewriteImportDeclarations, rewriteImportExpressions} from "./imports.js";
 import {transpileObservable} from "./observable.js";
@@ -33,12 +34,10 @@ export type TranspiledJavaScript = {
   secrets?: Set<string>;
 };
 
-export type TranspileOptions = {
-  /** If true, resolve local imports paths relative to document.baseURI. */
-  resolveLocalImports?: boolean;
+export interface TranspileOptions extends ImportOptions {
   /** If true, resolve file using import.meta.url (so Vite treats it as an asset). */
   resolveFiles?: boolean;
-};
+}
 
 /** @deprecated */
 export function transpile(
