@@ -143,21 +143,19 @@ export function rewriteImportDeclarations(
 
   const specifiers: string[] = [];
   const imports: string[] = [];
-  for (const [node, source] of declarations) {
+  for (const [node, literal] of declarations) {
     output.delete(node.start, node.end + +(output.input[node.end] === "\n"));
     specifiers.push(rewriteImportSpecifiers(node));
-    const value = getStringLiteralValue(source);
+    const value = getStringLiteralValue(literal);
     const resolution = resolveImport(value);
+    const source =
+      resolveLocalImports && isLocalImport(resolution)
+        ? `new URL(${JSON.stringify(resolution)}, document.baseURI)`
+        : JSON.stringify(resolution);
     imports.push(
       isObservableImport(node, value)
-        ? renderObservableImport(resolution, node, inputs)
-        : renderImport(
-            resolveLocalImports && isLocalImport(resolution)
-              ? `new URL(${JSON.stringify(resolution)}, document.baseURI)`
-              : JSON.stringify(resolution),
-            node,
-            output.input
-          )
+        ? renderObservableImport(source, node, inputs)
+        : renderImport(source, node, output.input)
     );
   }
   if (declarations.length > 1) {
