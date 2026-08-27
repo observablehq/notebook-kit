@@ -959,6 +959,48 @@ return {figure,rot,viewof$rot};
 }
 `;
 
+exports[`transpiles SQL cells 1`] = `
+{
+  "autodisplay": true,
+  "body": "async (Inputs,db) => {
+return (
+Inputs.table(await db.sql\`SELECT 1 + 2\`)
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "Inputs",
+    "db",
+  ],
+  "output": undefined,
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles SQL cells 2`] = `
+{
+  "autodisplay": false,
+  "body": "async (display,Inputs,db) => {
+const three = ((_) => (display(Inputs.table(_)), _))(await db.sql\`SELECT 1 + 2\`);
+return {three};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "display",
+    "Inputs",
+    "db",
+  ],
+  "output": "three",
+  "outputs": [
+    "three",
+  ],
+  "secrets": Set {},
+}
+`;
+
 exports[`transpiles TypeScript class expressions 1`] = `
 {
   "autodisplay": false,
@@ -1453,7 +1495,6 @@ exports[`transpiles empty cells 1`] = `
 exports[`transpiles empty cells 2`] = `
 {
   "autodisplay": false,
-  "autoview": false,
   "body": "() => {
 
 }",
@@ -1469,7 +1510,6 @@ exports[`transpiles empty cells 2`] = `
 exports[`transpiles empty cells 3`] = `
 {
   "autodisplay": false,
-  "autoview": false,
   "body": "() => {
 
 }",
@@ -1485,7 +1525,6 @@ exports[`transpiles empty cells 3`] = `
 exports[`transpiles empty cells 4`] = `
 {
   "autodisplay": false,
-  "autoview": false,
   "body": "() => {
 
 }",
@@ -1501,7 +1540,6 @@ exports[`transpiles empty cells 4`] = `
 exports[`transpiles empty cells 5`] = `
 {
   "autodisplay": false,
-  "autoview": false,
   "body": "() => {
 
 }",
@@ -1568,7 +1606,6 @@ return (
 exports[`transpiles node cells 1`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node $\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -1588,7 +1625,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 2`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node \\\\$\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -1608,7 +1644,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 3`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node \\\\\\\\$\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -1628,7 +1663,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 4`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node $\\\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -1648,7 +1682,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 5`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node \\\\$\\\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())

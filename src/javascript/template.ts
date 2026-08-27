@@ -110,8 +110,8 @@ export function transpileTemplate(input: string | Cell, tag = "", raw = false): 
     (raw ? escapeRawTemplateElements : escapeTemplateElements)(source, template);
     node = template;
   }
-  source.insertLeft(node.start, `${prefix}\``);
-  source.insertRight(node.end, `\`${suffix}`);
+  source.insertLeft(node.start, `${cell?.output ? `const ${cell.output} = ` : ""}${prefix}\``);
+  source.insertRight(node.end, `\`${suffix}${cell?.output ? ";" : ""}`);
   return String(source);
 }
 
@@ -139,11 +139,11 @@ function getDatabase(cell: Cell): string {
 }
 
 function getSqlPrefix(cell: Cell): string {
-  return `${getDatabase(cell)}.sql`;
+  return `${cell.hidden ? "" : cell.output ? "((_) => (display(Inputs.table(_)), _))(" : "Inputs.table("}await ${getDatabase(cell)}.sql`;
 }
 
 function getSqlSuffix(cell: Cell): string {
-  return cell.hidden ? "" : ".then(Inputs.table)";
+  return cell.hidden ? "" : ")";
 }
 
 function getSqlViewSuffix(cell: Cell): string {

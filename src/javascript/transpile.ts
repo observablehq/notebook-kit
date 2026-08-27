@@ -71,11 +71,6 @@ export function transpile(
           : transpileJavaScript(input, options);
   if (transpiled.output === undefined) transpiled.output = cell.output;
   if (cell.hidden) transpiled.autodisplay = false;
-  else if (mode !== "js" && mode !== "ts" && mode !== "ojs") {
-    transpiled.autodisplay = !!input;
-    transpiled.autoview = mode === "sql" && transpiled.autodisplay && !!transpiled.output;
-    if (transpiled.autoview) transpiled.output = `viewof$${transpiled.output}`;
-  }
   return transpiled;
 }
 

@@ -1,4 +1,5 @@
 import {expect, it} from "vitest";
+import {toCell} from "../lib/notebook.js";
 import {transpile} from "./transpile.js";
 
 it("transpiles JavaScript expressions", () => {
@@ -194,4 +195,9 @@ it("transpiles node cells", () => {
   expect(transpile("process.stdout.write(`Node \\\\${process.version}`);", "node")).toMatchSnapshot(); // prettier-ignore
   expect(transpile("process.stdout.write(`Node $\\{process.version}`);", "node")).toMatchSnapshot();
   expect(transpile("process.stdout.write(`Node \\$\\{process.version}`);", "node")).toMatchSnapshot(); // prettier-ignore
+});
+
+it("transpiles SQL cells", () => {
+  expect(transpile("SELECT 1 + 2", "sql")).toMatchSnapshot();
+  expect(transpile(toCell({id: 1, value: "SELECT 1 + 2", output: "three", mode: "sql"}))).toMatchSnapshot();
 });
