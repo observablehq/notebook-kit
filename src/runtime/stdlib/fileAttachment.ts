@@ -256,15 +256,16 @@ class FileAttachmentImpl extends AbstractFile {
 Object.defineProperty(FileAttachmentImpl, "name", {value: "FileAttachment"}); // prevent mangling
 FileAttachment.prototype = FileAttachmentImpl.prototype; // instanceof
 
-type FileResolver = (name: string) => {url: string; mimeType?: string} | string | null;
+type FileResolution = {url: string; mimeType?: string; lastModified?: number; size?: number};
+type FileResolver = (name: string) => FileResolution | string | null;
 
 export function fileAttachments(resolve: FileResolver): (name: string) => FileAttachment {
   function FileAttachment(name: string) {
     const result = resolve((name += ""));
     if (result == null) throw new Error(`File not found: ${name}`);
     if (typeof result === "object" && "url" in result) {
-      const {url, mimeType} = result;
-      return new FileAttachmentImpl(url, name, mimeType);
+      const {url, mimeType, lastModified, size} = result;
+      return new FileAttachmentImpl(url, name, mimeType, lastModified, size);
     }
     return new FileAttachmentImpl(result, name);
   }
