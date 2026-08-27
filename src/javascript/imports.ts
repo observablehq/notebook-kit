@@ -74,11 +74,13 @@ export function isTypeImport(node: AnyImportSpecifier | ImportDeclaration): bool
   return (node as TSImportSpecifier).importKind === "type";
 }
 
-function resolveImport(specifier: string): string {
+export function resolveImportDefault(specifier: string): string {
   return resolveObservableImport(resolveJsrImport(resolveNpmImport(specifier)));
 }
 
-export type RewriteImportOptions = {
+export type ImportOptions = {
+  /** Returns the URL for the given import specifier; defaults to resolveImportDefault. */
+  resolveImport?: (specifier: string) => string;
   /** If true, resolve local imports relative to document.baseURI. */
   resolveLocalImports?: boolean;
 };
@@ -86,7 +88,7 @@ export type RewriteImportOptions = {
 export function rewriteImportExpressions(
   output: Sourcemap,
   body: Node,
-  {resolveLocalImports}: RewriteImportOptions = {}
+  {resolveImport = resolveImportDefault, resolveLocalImports}: ImportOptions = {}
 ): void {
   function rewriteImportSource(source: StringLiteral, node: Node = source) {
     const value = getStringLiteralValue(source);
@@ -125,7 +127,7 @@ export function rewriteImportDeclarations(
   output: Sourcemap,
   body: Node,
   inputs: string[],
-  {resolveLocalImports}: RewriteImportOptions = {}
+  {resolveImport = resolveImportDefault, resolveLocalImports}: ImportOptions = {}
 ): void {
   const declarations: [ImportDeclaration, StringLiteral][] = [];
 
@@ -141,21 +143,19 @@ export function rewriteImportDeclarations(
 
   const specifiers: string[] = [];
   const imports: string[] = [];
-  for (const [node, source] of declarations) {
+  for (const [node, literal] of declarations) {
     output.delete(node.start, node.end + +(output.input[node.end] === "\n"));
     specifiers.push(rewriteImportSpecifiers(node));
-    const value = getStringLiteralValue(source);
+    const value = getStringLiteralValue(literal);
     const resolution = resolveImport(value);
+    const source =
+      resolveLocalImports && isLocalImport(resolution)
+        ? `new URL(${JSON.stringify(resolution)}, document.baseURI)`
+        : JSON.stringify(resolution);
     imports.push(
       isObservableImport(node, value)
-        ? renderObservableImport(resolution, node, inputs)
-        : renderImport(
-            resolveLocalImports && isLocalImport(resolution)
-              ? `new URL(${JSON.stringify(resolution)}, document.baseURI)`
-              : JSON.stringify(resolution),
-            node,
-            output.input
-          )
+        ? renderObservableImport(source, node, inputs)
+        : renderImport(source, node, output.input)
     );
   }
   if (declarations.length > 1) {

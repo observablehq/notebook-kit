@@ -9,7 +9,6 @@ exports[`erases ambient TypeScript declarations 1`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -24,7 +23,6 @@ exports[`erases ambient TypeScript declarations 2`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -39,7 +37,6 @@ exports[`erases ambient TypeScript declarations 3`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -136,7 +133,6 @@ x;
   "inputs": [
     "x",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -153,7 +149,6 @@ obj.value;
   "inputs": [
     "obj",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -170,7 +165,6 @@ exports[`strips TypeScript type syntax 3`] = `
   "inputs": [
     "value",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -187,7 +181,6 @@ identity(42);
   "inputs": [
     "identity",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -202,7 +195,6 @@ new Map();
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -218,7 +210,6 @@ return {f};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "f",
   ],
@@ -236,7 +227,6 @@ return {v};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "v",
   ],
@@ -254,7 +244,6 @@ return {obj};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "obj",
   ],
@@ -274,7 +263,6 @@ return {A};
   "inputs": [
     "B",
   ],
-  "output": undefined,
   "outputs": [
     "A",
   ],
@@ -293,7 +281,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -313,7 +300,6 @@ x + y
     "x",
     "y",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -332,7 +318,6 @@ await z
   "inputs": [
     "z",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -351,7 +336,6 @@ display(1), display(2)
   "inputs": [
     "display",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -367,7 +351,6 @@ return {x,y};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "x",
     "y",
@@ -388,7 +371,6 @@ x + y;
     "x",
     "y",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -405,7 +387,6 @@ await z;
   "inputs": [
     "z",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -425,7 +406,6 @@ return {data};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "data",
   ],
@@ -547,7 +527,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -573,7 +552,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -599,7 +577,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -625,7 +602,6 @@ return {red};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "red",
   ],
@@ -652,7 +628,6 @@ return {color,viewof$color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
     "viewof$color",
@@ -679,7 +654,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -705,7 +679,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -731,7 +704,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -757,7 +729,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -783,7 +754,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -809,7 +779,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -835,7 +804,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -862,7 +830,6 @@ return {foo,mutable$foo};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "foo",
     "mutable$foo",
@@ -890,7 +857,6 @@ return {bar,mutable$bar};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "bar",
     "mutable$bar",
@@ -919,7 +885,6 @@ return {figure,rotation,viewof$rotation};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "figure",
     "rotation",
@@ -949,11 +914,50 @@ return {figure,rot,viewof$rot};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "figure",
     "rot",
     "viewof$rot",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles SQL cells 1`] = `
+{
+  "autodisplay": true,
+  "body": "async (Inputs,db) => {
+return (
+Inputs.table(await db.sql\`SELECT 1 + 2\`)
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "Inputs",
+    "db",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles SQL cells 2`] = `
+{
+  "autodisplay": false,
+  "body": "async (display,Inputs,db) => {
+const three = ((_) => (display(Inputs.table(_)), _))(await db.sql\`SELECT 1 + 2\`);
+return {three};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "display",
+    "Inputs",
+    "db",
+  ],
+  "outputs": [
+    "three",
   ],
   "secrets": Set {},
 }
@@ -969,7 +973,6 @@ return {Foo};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "Foo",
   ],
@@ -988,7 +991,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1005,7 +1007,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1022,7 +1023,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1039,7 +1039,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1056,7 +1055,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1073,7 +1071,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1090,7 +1087,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1106,7 +1102,6 @@ return {foo};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "foo",
   ],
@@ -1128,7 +1123,6 @@ return {foo};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "foo",
   ],
@@ -1146,7 +1140,6 @@ const {} = await import("https://cdn.jsdelivr.net/npm/bar/+esm");
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1161,7 +1154,6 @@ exports[`transpiles TypeScript imports 3`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1181,7 +1173,6 @@ return {data};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "data",
   ],
@@ -1199,7 +1190,6 @@ return {x,y};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "x",
     "y",
@@ -1220,7 +1210,6 @@ x + (y);
     "x",
     "y",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1235,7 +1224,6 @@ exports[`transpiles TypeScript programs 3`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1251,7 +1239,6 @@ return {sum};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "sum",
   ],
@@ -1268,7 +1255,6 @@ exports[`transpiles TypeScript programs 5`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1283,7 +1269,6 @@ exports[`transpiles TypeScript programs 6`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1299,7 +1284,6 @@ return {Dict};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "Dict",
   ],
@@ -1319,7 +1303,6 @@ return {C};
   "inputs": [
     "display",
   ],
-  "output": undefined,
   "outputs": [
     "C",
   ],
@@ -1336,7 +1319,6 @@ exports[`transpiles TypeScript statements 1`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1351,7 +1333,6 @@ exports[`transpiles TypeScript statements 2`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1366,7 +1347,6 @@ exports[`transpiles TypeScript statements 3`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1381,7 +1361,6 @@ exports[`transpiles TypeScript statements 4`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1396,7 +1375,6 @@ exports[`transpiles TypeScript statements 5`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1411,7 +1389,6 @@ exports[`transpiles TypeScript statements 6`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1427,7 +1404,6 @@ return {d3};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "d3",
   ],
@@ -1444,7 +1420,6 @@ exports[`transpiles empty cells 1`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1453,14 +1428,12 @@ exports[`transpiles empty cells 1`] = `
 exports[`transpiles empty cells 2`] = `
 {
   "autodisplay": false,
-  "autoview": false,
   "body": "() => {
 
 }",
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1469,14 +1442,12 @@ exports[`transpiles empty cells 2`] = `
 exports[`transpiles empty cells 3`] = `
 {
   "autodisplay": false,
-  "autoview": false,
   "body": "() => {
 
 }",
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1485,14 +1456,12 @@ exports[`transpiles empty cells 3`] = `
 exports[`transpiles empty cells 4`] = `
 {
   "autodisplay": false,
-  "autoview": false,
   "body": "() => {
 
 }",
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1501,14 +1470,12 @@ exports[`transpiles empty cells 4`] = `
 exports[`transpiles empty cells 5`] = `
 {
   "autodisplay": false,
-  "autoview": false,
   "body": "() => {
 
 }",
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1525,7 +1492,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1542,7 +1508,6 @@ new URL("./test", document.baseURI).href
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1559,7 +1524,6 @@ return (
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1568,7 +1532,6 @@ return (
 exports[`transpiles node cells 1`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node $\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -1579,7 +1542,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1588,7 +1550,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 2`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node \\\\$\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -1599,7 +1560,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1608,7 +1568,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 3`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node \\\\\\\\$\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -1619,7 +1578,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1628,7 +1586,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 4`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node $\\\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -1639,7 +1596,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1648,7 +1604,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
 exports[`transpiles node cells 5`] = `
 {
   "autodisplay": true,
-  "autoview": false,
   "body": "(Interpreter) => {
 return (
 Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`Node \\\\$\\\\{process.version}\\\`);\`).then((file) => file.arrayBuffer())
@@ -1659,7 +1614,6 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1683,7 +1637,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -1709,7 +1662,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -1735,7 +1687,6 @@ return {Scrubber};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "Scrubber",
   ],
@@ -1761,7 +1712,6 @@ return {Scrubber};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "Scrubber",
   ],
@@ -1787,7 +1737,6 @@ return {viewof$rotation};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "viewof$rotation",
   ],
@@ -1806,7 +1755,6 @@ return {d3};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "d3",
   ],
@@ -1828,7 +1776,6 @@ return {_};
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [
     "_",
   ],
@@ -1846,7 +1793,6 @@ const [{}, {}] = await Promise.all([import("https://cdn.jsdelivr.net/npm/d3/+esm
   "databases": Set {},
   "files": Set {},
   "inputs": [],
-  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1870,7 +1816,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -1896,7 +1841,6 @@ return {color};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "color",
   ],
@@ -1922,7 +1866,6 @@ return {Scrubber};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "Scrubber",
   ],
@@ -1948,7 +1891,6 @@ return {Scrubber};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "Scrubber",
   ],
@@ -1974,7 +1916,6 @@ return {viewof$rotation};
   "inputs": [
     "@variable",
   ],
-  "output": undefined,
   "outputs": [
     "viewof$rotation",
   ],

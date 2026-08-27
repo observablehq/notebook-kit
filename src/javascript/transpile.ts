@@ -1,6 +1,7 @@
 import type {Cell} from "../lib/notebook.js";
 import {toCell} from "../lib/notebook.js";
 import {rewriteFileExpressions} from "./files.js";
+import type {ImportOptions} from "./imports.js";
 import {hasImportDeclaration} from "./imports.js";
 import {rewriteImportDeclarations, rewriteImportExpressions} from "./imports.js";
 import {transpileObservable} from "./observable.js";
@@ -33,12 +34,10 @@ export type TranspiledJavaScript = {
   secrets?: Set<string>;
 };
 
-export type TranspileOptions = {
-  /** If true, resolve local imports paths relative to document.baseURI. */
-  resolveLocalImports?: boolean;
+export interface TranspileOptions extends ImportOptions {
   /** If true, resolve file using import.meta.url (so Vite treats it as an asset). */
   resolveFiles?: boolean;
-};
+}
 
 /** @deprecated */
 export function transpile(
@@ -70,13 +69,7 @@ export function transpile(
         : mode !== "js"
           ? transpileJavaScript(transpileTemplate(cell), options)
           : transpileJavaScript(input, options);
-  if (transpiled.output === undefined) transpiled.output = cell.output;
   if (cell.hidden) transpiled.autodisplay = false;
-  else if (mode !== "js" && mode !== "ts" && mode !== "ojs") {
-    transpiled.autodisplay = !!input;
-    transpiled.autoview = mode === "sql" && transpiled.autodisplay && !!transpiled.output;
-    if (transpiled.autoview) transpiled.output = `viewof$${transpiled.output}`;
-  }
   return transpiled;
 }
 

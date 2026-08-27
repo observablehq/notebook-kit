@@ -30,7 +30,7 @@ export function renderObservableImport(
   inputs: string[]
 ): string {
   if (!inputs.includes("@variable")) inputs.push("@variable");
-  return `(import(${JSON.stringify(source)}).then((_) => {
+  return `(import(${source}).then((_) => {
   const module = __variable._module._runtime.module(_.default)${
     "injections" in node ? `.derive([${renderObservableInjections(node)}], __variable._module)` : ""
   };
