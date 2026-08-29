@@ -134,6 +134,10 @@ export function observable({
               }
               cell.mode = "js";
               cell.value = `FileAttachment(${JSON.stringify(relative(dir, cachePath))}).json().then(DatabaseClient.revive)${hidden ? "" : `.then(Inputs.table)${cell.output ? ".then(view)" : ""}`}`;
+              if (cell.output) {
+                cell.value = `const ${cell.output} = ${cell.value};`;
+                cell.output = undefined;
+              }
             }
           } else if (isInterpreter(mode)) {
             const {filename: sourcePath} = context;
@@ -161,6 +165,10 @@ export function observable({
             }
             cell.mode = "js";
             cell.value = `FileAttachment(${JSON.stringify(relative(sourceDir, cachePath))})${getInterpreterMethod(format)}`;
+            if (cell.output) {
+              cell.value = `const ${cell.output} = ${cell.value};`;
+              cell.output = undefined;
+            }
           }
           collectAssets(assets, div);
           if (pinned) {
