@@ -255,6 +255,7 @@ class FileAttachmentImpl extends AbstractFile {
 
 Object.defineProperty(FileAttachmentImpl, "name", {value: "FileAttachment"}); // prevent mangling
 FileAttachment.prototype = FileAttachmentImpl.prototype; // instanceof
+FileAttachment.inferTypes = inferTypes;
 
 type FileResolution = {url: string; mimeType?: string; lastModified?: number; size?: number};
 type FileResolver = (name: string) => FileResolution | string | null;
