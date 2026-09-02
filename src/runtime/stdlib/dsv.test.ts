@@ -31,6 +31,13 @@ describe("inferTypes", () => {
     assert.deepStrictEqual(inferType([".0", ".1", "2", "3", "4", "5", "2", "3", "x"]), [".0", ".1", "2", "3", "4", "5", "2", "3", "x"]); // prettier-ignore
     assert.deepStrictEqual(inferType([true, false, true, false, true, false, "pants on fire"].map(String)), ["true", "false", "true", "false", "true", "false", "pants on fire"]); // prettier-ignore
   });
+  it("ignores columns with non-string values", () => {
+    assert.deepStrictEqual(inferType(["foo", null, "42"] as string[]), ["foo", null, "42"]);
+  });
+  it("defaults columns to rows.columns", () => {
+    assert.deepStrictEqual(inferTypes(Object.assign([{foo: "42"}], {columns: []})), [{foo: "42"}]);
+    assert.deepStrictEqual(inferTypes(Object.assign([{foo: "42"}], {columns: ["foo" as const]})), [{foo: 42}]);
+  });
 });
 
 describe("coerceNumber", () => {

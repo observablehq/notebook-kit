@@ -22,25 +22,27 @@ const DATE_TEST = /^([-+]\d{2})?\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}([T ]
 const SAMPLE_SIZE = 100;
 
 export function inferTypes<T extends Record<string, string>>(
-  rows: T[],
-  columns: (keyof T)[]
+  rows: T[] & {columns?: (keyof T)[]},
+  columns = rows.columns
 ): Record<keyof T, unknown>[] {
   const output = rows as Record<keyof T, unknown>[];
   const n = rows.length;
   const k = Math.min(n, SAMPLE_SIZE);
-  for (const column of columns) {
+  outer: for (const column of columns!) {
     let booleans = 0;
     let numbers = 0;
     let dates = 0;
     let strings = 0;
 
     for (let i = 0; i < k; ++i) {
-      const value = rows[i][column]?.trim();
-      if (!value) continue;
+      const value = rows[i][column];
+      if (typeof value !== "string") continue outer;
+      const text = value.trim();
+      if (!text) continue;
       ++strings;
-      if (/^(true|false)$/i.test(value)) ++booleans;
-      else if (!isNaN(Number(value))) ++numbers;
-      else if (DATE_TEST.test(value)) ++dates;
+      if (/^(true|false)$/i.test(text)) ++booleans;
+      else if (!isNaN(Number(text))) ++numbers;
+      else if (DATE_TEST.test(text)) ++dates;
     }
 
     // Chose the non-string type with the greatest count that is also ≥90%; or
