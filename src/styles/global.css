@@ -133,6 +133,12 @@ h6,
   max-width: 640px;
 }
 
+.katex-display {
+  overflow-x: auto;
+  overscroll-behavior-x: none;
+  box-sizing: border-box;
+}
+
 blockquote,
 ol,
 ul {
