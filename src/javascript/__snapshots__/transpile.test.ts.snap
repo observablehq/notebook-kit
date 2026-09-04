@@ -926,15 +926,16 @@ return {figure,rot,viewof$rot};
 exports[`transpiles SQL cells 1`] = `
 {
   "autodisplay": true,
-  "body": "async (Inputs,db) => {
+  "body": "async (Inputs,DatabaseClient,db) => {
 return (
-Inputs.table(await db.sql\`SELECT 1 + 2\`)
+Inputs.table(await (await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`)
 )
 }",
   "databases": Set {},
   "files": Set {},
   "inputs": [
     "Inputs",
+    "DatabaseClient",
     "db",
   ],
   "outputs": [],
@@ -945,8 +946,8 @@ Inputs.table(await db.sql\`SELECT 1 + 2\`)
 exports[`transpiles SQL cells 2`] = `
 {
   "autodisplay": false,
-  "body": "async (display,Inputs,db) => {
-const three = ((_) => (display(Inputs.table(_)), _))(await db.sql\`SELECT 1 + 2\`);
+  "body": "async (display,Inputs,DatabaseClient,db) => {
+const three = ((_) => (display(Inputs.table(_)), _))(await (await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`);
 return {three};
 }",
   "databases": Set {},
@@ -954,6 +955,7 @@ return {three};
   "inputs": [
     "display",
     "Inputs",
+    "DatabaseClient",
     "db",
   ],
   "outputs": [

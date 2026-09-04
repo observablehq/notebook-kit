@@ -133,9 +133,11 @@ function getPrefix(cell: Cell): string {
 
 function getDatabase(cell: Cell): string {
   const {id, database = "var:db", since} = cell;
-  return database.startsWith("var:")
-    ? database.slice("var:".length)
-    : `DatabaseClient(${JSON.stringify(database)}, {id: ${id}${since === undefined ? "" : `, since: ${JSON.stringify(since)}`}})`;
+  if (database.startsWith("var:")) {
+    const name = database.slice("var:".length);
+    return `(await DatabaseClient.of(${name}, ${JSON.stringify(name)}))`;
+  }
+  return `DatabaseClient(${JSON.stringify(database)}, {id: ${id}${since === undefined ? "" : `, since: ${JSON.stringify(since)}`}})`;
 }
 
 function getSqlPrefix(cell: Cell): string {

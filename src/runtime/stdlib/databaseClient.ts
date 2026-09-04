@@ -77,6 +77,15 @@ class DatabaseClientImpl implements DatabaseClient {
   }
 }
 
+async function of(source: unknown, name: string): Promise<{sql: DatabaseClient["sql"]}> {
+  return source != null &&
+    typeof source === "object" &&
+    "sql" in source &&
+    typeof source["sql"] === "function"
+    ? (source as DatabaseClient)
+    : (await import("./duckdb.js")).DuckDBClient.of({[name]: source});
+}
+
 function revive({rows, schema, date, ...meta}: SerializableQueryResult): QueryResult {
   for (const column of schema) {
     switch (column.type) {
@@ -108,6 +117,7 @@ function asDate(value: string): Date {
   return new Date(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?$/.test(value) ? value + "Z" : value);
 }
 
+DatabaseClient.of = of;
 DatabaseClient.revive = revive;
 DatabaseClient.prototype = DatabaseClientImpl.prototype; // instanceof
 Object.defineProperty(DatabaseClientImpl, "name", {value: "DatabaseClient"}); // prevent mangling
