@@ -9,6 +9,7 @@ import {JSDOM} from "jsdom";
 import type {PluginOption, IndexHtmlTransformContext} from "vite";
 import {getQueryCachePath} from "../databases/index.js";
 import {getInterpreterCachePath, getInterpreterCommand} from "../interpreters/index.js";
+import {resolveNpmImport} from "../javascript/imports/npm.js";
 import {getInterpreterMethod, isInterpreter} from "../lib/interpreters.js";
 import type {Cell, Notebook} from "../lib/notebook.js";
 import {isDatabase} from "../lib/notebook.js";
@@ -57,6 +58,10 @@ export interface ObservableOptions {
   transformNotebook?: NotebookTransform;
 }
 
+export function resolveNpmId(source: string): {id: string; external: true} | null {
+  return source.startsWith("npm:") ? {id: resolveNpmImport(source), external: true} : null;
+}
+
 export function observable({
   window = new JSDOM().window,
   parser = new window.DOMParser(),
@@ -66,6 +71,8 @@ export function observable({
 }: ObservableOptions = {}): PluginOption {
   return {
     name: "observable",
+    enforce: "pre",
+    resolveId: resolveNpmId,
     buildStart() {
       this.addWatchFile(template);
     },
