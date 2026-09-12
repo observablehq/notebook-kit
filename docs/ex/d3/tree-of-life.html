@@ -1,46 +1,37 @@
 <!doctype html>
 <notebook theme="air">
   <title>Tree of Life</title>
-  <script id="1" type="application/vnd.observable.javascript">
-    md`# Tree of Life
+  <script id="1" type="text/markdown">
+    # Tree of Life
 
-    A phylogenetic tree inspired by [a figure from *Nature*](https://www.nature.com/articles/nature08656/figures/1) and [Jason Davies](https://www.jasondavies.com/tree-of-life/).`
+    A phylogenetic tree inspired by [a figure from *Nature*](https://www.nature.com/articles/nature08656/figures/1) and [Jason Davies](https://www.jasondavies.com/tree-of-life/).
   </script>
-  <script id="73" type="application/vnd.observable.javascript">
-    viewof showLength = {
-      const form = html`<form style="font: 12px var(--sans-serif); display: flex; flex-direction: column; justify-content: center; min-height: 33px;"><label style="display: flex; align-items: center;"><input type=checkbox name=i><span style="margin-left: 0.5em;">Show branch length</span>`;
-      const timeout = setTimeout(() => {
-        form.i.checked = true;
-        form.i.onclick();
-      }, 2000);
-      form.i.onclick = () => {
-        clearTimeout(timeout);
-        form.value = form.i.checked;
-        form.dispatchEvent(new CustomEvent("input"));
-      };
-      form.value = false;
-      return form;
-    }
+  <script id="73" type="module">
+    const toggle = Inputs.toggle({label: "Show branch length"});
+    const showLength = view(toggle);
+    setTimeout(() => {
+      toggle.value = true;
+      toggle.dispatchEvent(new CustomEvent("input"));
+    }, 2000);
   </script>
-  <script id="30" type="application/vnd.observable.javascript" pinned="">
-    chart = {
-      const root = d3.hierarchy(data, (d) => d.branchset)
-          .sum((d) => d.branchset ? 0 : 1)
-          .sort((a, b) => (a.value - b.value) || d3.ascending(a.data.length, b.data.length));
+  <script id="30" type="text/x-typescript" pinned="">
+    const root = d3.hierarchy(data, (d) => d.branchset)
+        .sum((d) => d.branchset ? 0 : 1)
+        .sort((a, b) => (a.value - b.value) || d3.ascending(a.data.length, b.data.length));
 
-      cluster(root);
-      setRadius(root, root.data.length = 0, innerRadius / maxLength(root));
-      setColor(root);
+    cluster(root);
+    setRadius(root, root.data.length = 0, innerRadius / maxLength(root));
+    setColor(root);
 
-      const svg = d3.create("svg")
-          .attr("viewBox", [-outerRadius, -outerRadius, width, width])
-          .attr("font-family", "sans-serif")
-          .attr("font-size", 10);
+    const svg = d3.create("svg")
+        .attr("viewBox", [-outerRadius, -outerRadius, width, width])
+        .attr("font-family", "sans-serif")
+        .attr("font-size", 10);
 
-      svg.append("g")
-          .call(legend);
+    svg.append("g")
+        .call(legend);
 
-      svg.append("style").text(`
+    svg.append("style").text(`
 
     .link--active {
       stroke: #000 !important;
@@ -57,82 +48,81 @@
 
     `);
 
-      const linkExtension = svg.append("g")
-          .attr("fill", "none")
-          .attr("stroke", "#000")
-          .attr("stroke-opacity", 0.25)
-        .selectAll("path")
-        .data(root.links().filter((d) => !d.target.children))
-        .join("path")
-          .each(function(d) { d.target.linkExtensionNode = this; })
-          .attr("d", linkExtensionConstant);
+    const linkExtension = svg.append("g")
+        .attr("fill", "none")
+        .attr("stroke", "#000")
+        .attr("stroke-opacity", 0.25)
+      .selectAll("path")
+      .data(root.links().filter((d) => !d.target.children))
+      .join("path")
+        .each(function(d) { d.target.linkExtensionNode = this; })
+        .attr("d", linkExtensionConstant);
 
-      const link = svg.append("g")
-          .attr("fill", "none")
-          .attr("stroke", "#000")
-        .selectAll("path")
-        .data(root.links())
-        .join("path")
-          .each(function(d) { d.target.linkNode = this; })
-          .attr("d", linkConstant)
-          .attr("stroke", (d) => d.target.color);
+    const link = svg.append("g")
+        .attr("fill", "none")
+        .attr("stroke", "#000")
+      .selectAll("path")
+      .data(root.links())
+      .join("path")
+        .each(function(d) { d.target.linkNode = this; })
+        .attr("d", linkConstant)
+        .attr("stroke", (d) => d.target.color);
 
-      svg.append("g")
-        .selectAll("text")
-        .data(root.leaves())
-        .join("text")
-          .attr("dy", ".31em")
-          .attr("transform", (d) => `rotate(${d.x - 90}) translate(${innerRadius + 4},0)${d.x < 180 ? "" : " rotate(180)"}`)
-          .attr("text-anchor", (d) => d.x < 180 ? "start" : "end")
-          .text((d) => d.data.name.replace(/_/g, " "))
-          .on("mouseover", mouseovered(true))
-          .on("mouseout", mouseovered(false));
+    svg.append("g")
+      .selectAll("text")
+      .data(root.leaves())
+      .join("text")
+        .attr("dy", ".31em")
+        .attr("transform", (d) => `rotate(${d.x - 90}) translate(${innerRadius + 4},0)${d.x < 180 ? "" : " rotate(180)"}`)
+        .attr("text-anchor", (d) => d.x < 180 ? "start" : "end")
+        .text((d) => d.data.name.replace(/_/g, " "))
+        .on("mouseover", mouseovered(true))
+        .on("mouseout", mouseovered(false));
 
-      function update(checked) {
+    function mouseovered(active) {
+      return function(event, d) {
+        d3.select(this).classed("label--active", active);
+        d3.select(d.linkExtensionNode).classed("link-extension--active", active).raise();
+        do d3.select(d.linkNode).classed("link--active", active).raise();
+        while (d = d.parent);
+      };
+    }
+
+    const chart = display(Object.assign(svg.node(), {
+      update(checked) {
         const t = d3.transition().duration(750);
         linkExtension.transition(t).attr("d", checked ? linkExtensionVariable : linkExtensionConstant);
         link.transition(t).attr("d", checked ? linkVariable : linkConstant);
       }
-
-      function mouseovered(active) {
-        return function(event, d) {
-          d3.select(this).classed("label--active", active);
-          d3.select(d.linkExtensionNode).classed("link-extension--active", active).raise();
-          do d3.select(d.linkNode).classed("link--active", active).raise();
-          while (d = d.parent);
-        };
-      }
-
-      return Object.assign(svg.node(), {update});
-    }
+    }));
   </script>
-  <script id="78" type="application/vnd.observable.javascript" pinned="">
-    update = chart.update(showLength)
+  <script id="78" type="module" pinned="" hidden="">
+    const update = chart.update(showLength);
   </script>
-  <script id="26" type="application/vnd.observable.javascript" pinned="">
-    cluster = d3.cluster()
+  <script id="26" type="module" pinned="">
+    const cluster = d3.cluster()
         .size([360, innerRadius])
-        .separation((a, b) => 1)
+        .separation((a, b) => 1);
   </script>
-  <script id="15" type="application/vnd.observable.javascript" pinned="">
-    color = d3.scaleOrdinal()
+  <script id="15" type="module" pinned="">
+    const color = d3.scaleOrdinal()
         .domain(["Bacteria", "Eukaryota", "Archaea"])
-        .range(d3.schemeCategory10)
+        .range(d3.schemeCategory10);
   </script>
-  <script id="67" type="application/vnd.observable.javascript" pinned="">
+  <script id="67" type="module" pinned="">
     // Compute the maximum cumulative length of any node in the tree.
     function maxLength(d) {
       return d.data.length + (d.children ? d3.max(d.children, maxLength) : 0);
     }
   </script>
-  <script id="64" type="application/vnd.observable.javascript" pinned="">
+  <script id="64" type="module" pinned="">
     // Set the radius of each node by recursively summing and scaling the distance from the root.
     function setRadius(d, y0, k) {
       d.radius = (y0 += d.data.length) * k;
       if (d.children) d.children.forEach((d) => setRadius(d, y0, k));
     }
   </script>
-  <script id="61" type="application/vnd.observable.javascript" pinned="">
+  <script id="61" type="module" pinned="">
     // Set the color of each node by recursively inheriting.
     function setColor(d) {
       var name = d.data.name;
@@ -140,27 +130,24 @@
       if (d.children) d.children.forEach(setColor);
     }
   </script>
-  <script id="119" type="application/vnd.observable.javascript" pinned="">
+  <script id="116" type="module" pinned="">
     function linkVariable(d) {
       return linkStep(d.source.x, d.source.radius, d.target.x, d.target.radius);
     }
-  </script>
-  <script id="122" type="application/vnd.observable.javascript" pinned="">
+
     function linkConstant(d) {
       return linkStep(d.source.x, d.source.y, d.target.x, d.target.y);
     }
-  </script>
-  <script id="116" type="application/vnd.observable.javascript" pinned="">
+
     function linkExtensionVariable(d) {
       return linkStep(d.target.x, d.target.radius, d.target.x, innerRadius);
     }
-  </script>
-  <script id="125" type="application/vnd.observable.javascript" pinned="">
+
     function linkExtensionConstant(d) {
       return linkStep(d.target.x, d.target.y, d.target.x, innerRadius);
     }
   </script>
-  <script id="46" type="application/vnd.observable.javascript" pinned="">
+  <script id="46" type="module" pinned="">
     function linkStep(startAngle, startRadius, endAngle, endRadius) {
       const c0 = Math.cos(startAngle = (startAngle - 90) / 180 * Math.PI);
       const s0 = Math.sin(startAngle);
@@ -171,8 +158,8 @@
           + "L" + endRadius * c1 + "," + endRadius * s1;
     }
   </script>
-  <script id="92" type="application/vnd.observable.javascript" pinned="">
-    legend = (svg) => {
+  <script id="92" type="module" pinned="">
+    function legend(svg) {
       const g = svg
         .selectAll("g")
         .data(color.domain())
@@ -191,19 +178,15 @@
           .text((d) => d);
     }
   </script>
-  <script id="38" type="application/vnd.observable.javascript" pinned="">
-    data = parseNewick(await FileAttachment("data/life.txt").text())
+  <script id="38" type="module" pinned="">
+    const data = display(parseNewick(await FileAttachment("data/life.txt").text()))
   </script>
-  <script id="8" type="application/vnd.observable.javascript" pinned="">
-    width = 954
+  <script id="5" type="module" pinned="">
+    const width = 954;
+    const outerRadius = width / 2;
+    const innerRadius = outerRadius - 170;
   </script>
-  <script id="5" type="application/vnd.observable.javascript" pinned="">
-    outerRadius = width / 2
-  </script>
-  <script id="19" type="application/vnd.observable.javascript" pinned="">
-    innerRadius = outerRadius - 170
-  </script>
-  <script id="34" type="application/vnd.observable.javascript" pinned="">
+  <script id="34" type="module" pinned="">
     // https://github.com/jasondavies/newick.js
     function parseNewick(a){for(var e=[],r={},s=a.split(/\s*(;|\(|\)|,|:)\s*/),t=0;t<s.length;t++){var n=s[t];switch(n){case"(":var c={};r.branchset=[c],e.push(r),r=c;break;case",":var c={};e[e.length-1].branchset.push(c),r=c;break;case")":r=e.pop();break;case":":break;default:var h=s[t-1];")"==h||"("==h||","==h?r.name=n:":"==h&&(r.length=parseFloat(n))}}return r}
   </script>
