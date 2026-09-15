@@ -8,6 +8,7 @@ import {Mutable} from "./mutable.js";
 import * as Promises from "./promises/index.js";
 import * as recommendedLibraries from "./recommendedLibraries.js";
 import * as sampleDatasets from "./sampleDatasets.js";
+import {sql} from "./sql.js";
 
 export const root = document.querySelector("main") ?? document.body;
 
@@ -23,6 +24,7 @@ export const library = {
   Promises: () => Promises, // deprecated!
   Files: () => Files, // deprecated!
   DOM: () => DOM, // deprecated!
+  sql: () => sql,
   ...recommendedLibraries,
   ...sampleDatasets
 };

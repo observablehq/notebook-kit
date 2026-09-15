@@ -926,15 +926,16 @@ return {figure,rot,viewof$rot};
 exports[`transpiles SQL cells 1`] = `
 {
   "autodisplay": true,
-  "body": "async (Inputs,db) => {
+  "body": "async (Inputs,DatabaseClient,db) => {
 return (
-Inputs.table(await db.sql\`SELECT 1 + 2\`)
+Inputs.table(await (await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`)
 )
 }",
   "databases": Set {},
   "files": Set {},
   "inputs": [
     "Inputs",
+    "DatabaseClient",
     "db",
   ],
   "outputs": [],
@@ -944,21 +945,42 @@ Inputs.table(await db.sql\`SELECT 1 + 2\`)
 
 exports[`transpiles SQL cells 2`] = `
 {
-  "autodisplay": false,
-  "body": "async (display,Inputs,db) => {
-const three = ((_) => (display(Inputs.table(_)), _))(await db.sql\`SELECT 1 + 2\`);
-return {three};
+  "autodisplay": true,
+  "body": "async (display,Inputs,DatabaseClient,db) => {
+return (
+((_) => (display(Inputs.table(_)), _))(await (await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`)
+)
 }",
   "databases": Set {},
   "files": Set {},
   "inputs": [
     "display",
     "Inputs",
+    "DatabaseClient",
     "db",
   ],
-  "outputs": [
-    "three",
+  "output": "three",
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles SQL cells 3`] = `
+{
+  "autodisplay": false,
+  "body": "async (DatabaseClient,db) => {
+return (
+await (await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "inputs": [
+    "DatabaseClient",
+    "db",
   ],
+  "output": "three",
+  "outputs": [],
   "secrets": Set {},
 }
 `;

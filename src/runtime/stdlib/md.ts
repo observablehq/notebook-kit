@@ -1,13 +1,14 @@
-import slugify from "@sindresorhus/slugify";
+import {slugifyWithCounter} from "@sindresorhus/slugify";
 import MarkdownIt from "markdown-it";
 import MarkdownItAnchor from "markdown-it-anchor";
 import type {TemplateRenderer} from "./template.js";
 
 const mi = MarkdownIt({html: true, linkify: true, typographer: true});
+const slugify = slugifyWithCounter();
 
 mi.use(MarkdownItAnchor, {
   level: [2, 3],
-  slugify: (s) => slugify(s),
+  slugify: (s) => slugify(s).replace(/^(?=\d)/, "-"),
   permalink: MarkdownItAnchor.permalink.headerLink({class: ""})
 });
 
@@ -49,6 +50,7 @@ export function MarkdownRenderer({
     }
 
     // Render the text.
+    slugify.reset();
     const root = document.createElement("div");
     root.innerHTML = mi.render(source);
 

@@ -1,5 +1,6 @@
 import {expect, it} from "vitest";
 import {parseTemplate, transpileTemplate} from "./template.js";
+import type {CellSpec} from "../lib/notebook.js";
 import {toCell} from "../lib/notebook.js";
 
 function md(value: string): string {
@@ -12,6 +13,10 @@ function html(value: string): string {
 
 function node(value: string): string {
   return transpileTemplate(toCell({id: 1, mode: "node", value}));
+}
+
+function sql(value: string, spec?: Partial<CellSpec>): string {
+  return transpileTemplate(toCell({id: 1, mode: "sql", value, ...spec}));
 }
 
 it("parses a simple template", () => {
@@ -76,4 +81,16 @@ it("transpiles a html template with backslashes", () => {
 
 it("transpiles a node template with backslashes", () => {
   expect(node(`Hello, \\world\\!`)).toMatchSnapshot();
+});
+
+it("transpiles a sql template", () => {
+  expect(sql(`SELECT 1`, {database: "db"})).toMatchSnapshot();
+});
+
+it("transpiles a sql template reference a variable database", () => {
+  expect(sql(`SELECT 1`, {database: "var:db"})).toMatchSnapshot();
+});
+
+it("transpiles a hidden sql template", () => {
+  expect(sql(`SELECT 1`, {database: "db", hidden: true})).toMatchSnapshot();
 });

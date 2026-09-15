@@ -16,6 +16,7 @@ export type * from "./stdlib/fileAttachment.js";
 export {FileAttachment, requireFileRegistration, registerFile} from "./stdlib/fileAttachment.js";
 export type * from "./stdlib/interpreter.js";
 export {Interpreter} from "./stdlib/interpreter.js";
+export {sql} from "./stdlib/sql.js";
 
 export class NotebookRuntime {
   readonly runtime: Runtime & {fileAttachments: typeof fileAttachments};

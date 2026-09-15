@@ -200,4 +200,5 @@ it("transpiles node cells", () => {
 it("transpiles SQL cells", () => {
   expect(transpile("SELECT 1 + 2", "sql")).toMatchSnapshot();
   expect(transpile(toCell({id: 1, value: "SELECT 1 + 2", output: "three", mode: "sql"}))).toMatchSnapshot();
+  expect(transpile(toCell({id: 1, value: "SELECT 1 + 2", output: "three", mode: "sql", hidden: true}))).toMatchSnapshot(); // prettier-ignore
 });

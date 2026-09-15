@@ -164,8 +164,8 @@ export abstract class AbstractFile implements FileAttachment {
     });
   }
   async arrow(): Promise<any> {
-    const [Arrow, response] = await Promise.all([import("https://cdn.jsdelivr.net/npm/apache-arrow@17.0.0/+esm"), fetchFile(this)]); // prettier-ignore
-    return Arrow.tableFromIPC(response);
+    const [Flechette, buffer] = await Promise.all([import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm"), this.arrayBuffer()]); // prettier-ignore
+    return Flechette.tableFromIPC(buffer, {useDate: true});
   }
   async arquero(options?: any): Promise<any> {
     let request: Promise<unknown>;
@@ -199,8 +199,8 @@ export abstract class AbstractFile implements FileAttachment {
     return aq[from](body, options);
   }
   async parquet() {
-    const [Arrow, Parquet, buffer] = await Promise.all([import("https://cdn.jsdelivr.net/npm/apache-arrow@17.0.0/+esm"), import("https://cdn.jsdelivr.net/npm/parquet-wasm/+esm").then(async (Parquet) => (await Parquet.default("https://cdn.jsdelivr.net/npm/parquet-wasm/esm/parquet_wasm_bg.wasm"), Parquet)), this.arrayBuffer()]); // prettier-ignore
-    return Arrow.tableFromIPC(Parquet.readParquet(new Uint8Array(buffer)).intoIPCStream());
+    const [Flechette, Parquet, buffer] = await Promise.all([import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm"), import("https://cdn.jsdelivr.net/npm/parquet-wasm/+esm").then(async (Parquet) => (await Parquet.default("https://cdn.jsdelivr.net/npm/parquet-wasm/esm/parquet_wasm_bg.wasm"), Parquet)), this.arrayBuffer()]); // prettier-ignore
+    return Flechette.tableFromIPC(Parquet.readParquet(new Uint8Array(buffer)).intoIPCStream(), {useDate: true}); // prettier-ignore
   }
   async zip() {
     const [{ZipArchive}, buffer] = await Promise.all([import("./zip.js"), this.arrayBuffer()]);
@@ -256,15 +256,16 @@ class FileAttachmentImpl extends AbstractFile {
 Object.defineProperty(FileAttachmentImpl, "name", {value: "FileAttachment"}); // prevent mangling
 FileAttachment.prototype = FileAttachmentImpl.prototype; // instanceof
 
-type FileResolver = (name: string) => {url: string; mimeType?: string} | string | null;
+type FileResolution = {url: string; mimeType?: string; lastModified?: number; size?: number};
+type FileResolver = (name: string) => FileResolution | string | null;
 
 export function fileAttachments(resolve: FileResolver): (name: string) => FileAttachment {
   function FileAttachment(name: string) {
     const result = resolve((name += ""));
     if (result == null) throw new Error(`File not found: ${name}`);
     if (typeof result === "object" && "url" in result) {
-      const {url, mimeType} = result;
-      return new FileAttachmentImpl(url, name, mimeType);
+      const {url, mimeType, lastModified, size} = result;
+      return new FileAttachmentImpl(url, name, mimeType, lastModified, size);
     }
     return new FileAttachmentImpl(result, name);
   }
