@@ -1,5 +1,5 @@
 import type {Module, Variable, VariableDefinition} from "@observablehq/runtime";
-import type {DisplayState} from "./display.js";
+import type {DisplayState, DisplayMode} from "./display.js";
 import {clear, display, observe} from "./display.js";
 import {input} from "./stdlib/generators/index.js";
 import {Mutator} from "./stdlib/mutable.js";
@@ -28,6 +28,8 @@ export type Definition = {
   automutable?: boolean;
   /** whether to define the display and view builtins; defaults to true */
   display?: boolean;
+  /** whether to use the default inspector, or the special table display (for SQL cells) */
+  displayMode?: DisplayMode;
   /** an asset mapping to apply to any autodisplayed assets (e.g., images and videos) */
   assets?: Map<string, string>;
 };
@@ -38,7 +40,7 @@ export function define(
   definition: Definition,
   observer = observe
 ): void {
-  const {id, body, inputs = [], outputs = [], output} = definition;
+  const {id, body, inputs = [], outputs = [], output, displayMode} = definition;
   const {autodisplay, autoview, automutable, display: defineDisplay = true} = definition;
   const variables = state.variables;
   const v = main.variable(observer(state, definition), {shadow: {}});
@@ -56,7 +58,7 @@ export function define(
           else if (state.variables[0] !== v) throw new Error("stale display");
           else if (version > displayVersion) clear(state);
           displayVersion = version;
-          display(state, value, output);
+          display(state, value, output, displayMode);
           return value;
         };
       }

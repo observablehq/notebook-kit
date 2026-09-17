@@ -2,6 +2,8 @@ import type {Definition} from "./define.js";
 import {inspect, inspectError, getExpanded} from "./inspect.js";
 import {mapAssets} from "./stdlib/assets.js";
 
+export type DisplayMode = "table" | "default";
+
 export type DisplayState = {
   /** the HTML element in which to render this cell’s display */
   root: HTMLDivElement;
@@ -11,10 +13,28 @@ export type DisplayState = {
   expanded: (number[][] | undefined)[];
 };
 
-export function display(state: DisplayState, value: unknown, name?: string): void {
+export function display(
+  state: DisplayState,
+  value: unknown,
+  name?: string,
+  mode?: DisplayMode
+): void {
+  return mode === "table" ? displayTable(state, value) : displayDefault(state, value, name);
+}
+
+function displayDefault(state: DisplayState, value: unknown, name?: string) {
   const {root, expanded} = state;
   const node = isDisplayable(value, root) ? value : inspect(value, expanded[root.childNodes.length], name); // prettier-ignore
   displayNode(state, node);
+}
+
+function displayTable(state: DisplayState, value: unknown) {
+  const placeholder = document.createComment("table");
+  displayNode(state, placeholder);
+  import("./stdlib/inputs.js").then(({table}) => {
+    if (!placeholder.parentNode) return; // don’t bother rendering if detached
+    placeholder.replaceWith(table(value));
+  });
 }
 
 function displayNode(state: DisplayState, node: Node): void {
@@ -49,7 +69,10 @@ export function clear(state: DisplayState): void {
   while (state.root.lastChild) state.root.lastChild.remove();
 }
 
-export function observe(state: DisplayState, {autodisplay, assets, output}: Definition) {
+export function observe(
+  state: DisplayState,
+  {autodisplay, assets, output: name, displayMode: mode}: Definition
+) {
   return {
     _error: false,
     _node: state.root, // _node for visibility promise
@@ -63,7 +86,7 @@ export function observe(state: DisplayState, {autodisplay, assets, output}: Defi
       if (autodisplay) {
         if (assets && value instanceof Element) mapAssets(value, assets);
         clear(state);
-        display(state, value, output);
+        display(state, value, name, mode);
       } else if (state.autoclear) {
         clear(state);
       }
@@ -72,7 +95,7 @@ export function observe(state: DisplayState, {autodisplay, assets, output}: Defi
       console.error(error);
       this._error = true;
       clear(state);
-      displayError(state, error, output);
+      displayError(state, error, name);
     }
   };
 }

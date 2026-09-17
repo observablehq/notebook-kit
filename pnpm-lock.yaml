@@ -45,8 +45,8 @@ importers:
         specifier: ^6.1.0
         version: 6.1.0
       '@observablehq/runtime':
-        specifier: ^6.0.0
-        version: 6.0.0
+        specifier: ^6.0.1
+        version: 6.0.1
       '@sindresorhus/slugify':
         specifier: ^2.2.1
         version: 2.2.1
@@ -745,8 +745,8 @@ packages:
     resolution: {integrity: sha512-S9qfCrAMrL2J229FwMGbyzPskCMqvPkodkn4MJ2r012Bc4yqaNjl8HyT/dKY1zjOwsSrryFQoCiwvWxS8IeASg==}
     engines: {node: '>=14.5.0'}
 
-  '@observablehq/runtime@6.0.0':
-    resolution: {integrity: sha512-t3UXP69O0JK20HY/neF4/DDDSDorwo92As806Y1pNTgTmj1NtoPyVpesYzfH31gTFOFrXC2cArV+wLpebMk9eA==}
+  '@observablehq/runtime@6.0.1':
+    resolution: {integrity: sha512-FDPxasOwRnRqb6gzZKXk4zQNLj0HIaYrYnoGv+PVuklSuH5MK553I9GrtuRtvTSqRKmNwBeVAhNcEeGMNYHRYQ==}
 
   '@oxc-project/types@0.132.0':
     resolution: {integrity: sha512-FESMOxil5Se014ui/Eq8fT5uHJo6nIRwH0PfJrZJXs6Gek3ZVFOrpUv3YIZT20m+extU98Hg1Ym72U58rlsxUQ==}
@@ -3761,7 +3761,7 @@ snapshots:
       acorn: 8.16.0
       acorn-walk: 8.3.5
 
-  '@observablehq/runtime@6.0.0': {}
+  '@observablehq/runtime@6.0.1': {}
 
   '@oxc-project/types@0.132.0': {}
 

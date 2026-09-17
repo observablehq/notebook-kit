@@ -1,5 +1,4 @@
 declare module "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm";
-declare module "https://cdn.jsdelivr.net/npm/@observablehq/inputs/+esm";
 declare module "https://cdn.jsdelivr.net/npm/@observablehq/plot/+esm";
 declare module "https://cdn.jsdelivr.net/npm/@viz-js/viz/+esm";
 declare module "https://cdn.jsdelivr.net/npm/apache-arrow@17.0.0/+esm";

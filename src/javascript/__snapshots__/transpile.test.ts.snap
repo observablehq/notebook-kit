@@ -926,18 +926,18 @@ return {figure,rot,viewof$rot};
 exports[`transpiles SQL cells 1`] = `
 {
   "autodisplay": true,
-  "body": "async (Inputs,DatabaseClient,db) => {
+  "body": "async (DatabaseClient,db) => {
 return (
-Inputs.table(await (await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`)
+(await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`
 )
 }",
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "Inputs",
     "DatabaseClient",
     "db",
   ],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -946,16 +946,14 @@ Inputs.table(await (await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`)
 exports[`transpiles SQL cells 2`] = `
 {
   "autodisplay": true,
-  "body": "async (display,Inputs,DatabaseClient,db) => {
+  "body": "async (DatabaseClient,db) => {
 return (
-((_) => (display(Inputs.table(_)), _))(await (await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`)
+(await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`
 )
 }",
   "databases": Set {},
   "files": Set {},
   "inputs": [
-    "display",
-    "Inputs",
     "DatabaseClient",
     "db",
   ],
@@ -970,7 +968,7 @@ exports[`transpiles SQL cells 3`] = `
   "autodisplay": false,
   "body": "async (DatabaseClient,db) => {
 return (
-await (await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`
+(await DatabaseClient.of(db, "db")).sql\`SELECT 1 + 2\`
 )
 }",
   "databases": Set {},
@@ -1456,6 +1454,7 @@ exports[`transpiles empty cells 2`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1470,6 +1469,7 @@ exports[`transpiles empty cells 3`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1484,6 +1484,7 @@ exports[`transpiles empty cells 4`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1498,6 +1499,7 @@ exports[`transpiles empty cells 5`] = `
   "databases": Set {},
   "files": Set {},
   "inputs": [],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1564,6 +1566,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1582,6 +1585,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1600,6 +1604,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1618,6 +1623,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }
@@ -1636,6 +1642,7 @@ Interpreter("node", {id: -1, format: "buffer"}).run(\`process.stdout.write(\\\`N
   "inputs": [
     "Interpreter",
   ],
+  "output": undefined,
   "outputs": [],
   "secrets": Set {},
 }

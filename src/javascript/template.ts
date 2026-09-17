@@ -141,11 +141,7 @@ function getDatabase(cell: Cell): string {
 }
 
 function getSqlPrefix(cell: Cell): string {
-  return `${cell.hidden ? "" : cell.output ? "((_) => (display(Inputs.table(_)), _))(" : "Inputs.table("}await ${getDatabase(cell)}.sql`;
-}
-
-function getSqlSuffix(cell: Cell): string {
-  return cell.hidden ? "" : ")";
+  return `${getDatabase(cell)}.sql`;
 }
 
 function getSqlViewSuffix(cell: Cell): string {
@@ -158,13 +154,11 @@ function getInterpreterPrefix(cell: Cell): string {
 }
 
 function getSuffix(cell: Cell): string {
-  return cell.mode === "sql"
-    ? getSqlSuffix(cell)
-    : cell.mode === "sql.view"
-      ? getSqlViewSuffix(cell)
-      : isInterpreter(cell.mode)
-        ? getInterpreterSuffix(cell)
-        : "";
+  return cell.mode === "sql.view"
+    ? getSqlViewSuffix(cell)
+    : isInterpreter(cell.mode)
+      ? getInterpreterSuffix(cell)
+      : "";
 }
 
 function getInterpreterSuffix(cell: Cell): string {

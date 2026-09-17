@@ -123,7 +123,7 @@ Node {
 }
 `;
 
-exports[`transpiles a hidden sql template 1`] = `"await DatabaseClient("db", {id: 1}).sql\`SELECT 1\`"`;
+exports[`transpiles a hidden sql template 1`] = `"DatabaseClient("db", {id: 1}).sql\`SELECT 1\`"`;
 
 exports[`transpiles a html template with an interpolated expression 1`] = `"htl.html\`Hello, \${"world"}!\`"`;
 
@@ -143,9 +143,9 @@ exports[`transpiles a simple html template 1`] = `"htl.html\`Hello, world!\`"`;
 
 exports[`transpiles a simple markdown template 1`] = `"md\`Hello, world!\`"`;
 
-exports[`transpiles a sql template 1`] = `"Inputs.table(await DatabaseClient("db", {id: 1}).sql\`SELECT 1\`)"`;
+exports[`transpiles a sql template 1`] = `"DatabaseClient("db", {id: 1}).sql\`SELECT 1\`"`;
 
-exports[`transpiles a sql template reference a variable database 1`] = `"Inputs.table(await (await DatabaseClient.of(db, "db")).sql\`SELECT 1\`)"`;
+exports[`transpiles a sql template reference a variable database 1`] = `"(await DatabaseClient.of(db, "db")).sql\`SELECT 1\`"`;
 
 exports[`transpiles an empty html template 1`] = `""`;
 

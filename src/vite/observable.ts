@@ -11,7 +11,6 @@ import {getQueryCachePath} from "../databases/index.js";
 import {getInterpreterCachePath, getInterpreterCommand} from "../interpreters/index.js";
 import {getInterpreterMethod, isInterpreter} from "../lib/interpreters.js";
 import type {Cell, Notebook} from "../lib/notebook.js";
-import {isDatabase} from "../lib/notebook.js";
 import {deserialize} from "../lib/serialize.js";
 import {Sourcemap} from "../javascript/sourcemap.js";
 import {transpile} from "../javascript/transpile.js";
@@ -115,7 +114,7 @@ export function observable({
             const template = parseTemplate(value);
             if (!template.expressions.length && !cell.output) statics.add(cell);
             div.innerHTML = stripExpressions(template, value);
-          } else if (isDatabase(mode) && cell.database && !cell.database.startsWith("var:")) {
+          } else if (mode === "sql" && cell.database && !cell.database.startsWith("var:")) {
             const template = parseTemplate(value);
             if (!template.expressions.length) {
               const dir = dirname(context.filename);
@@ -232,7 +231,8 @@ define(
     inputs: ${JSON.stringify(transpiled.inputs)},
     outputs: ${JSON.stringify(transpiled.outputs)},
     output: ${JSON.stringify(transpiled.output)},
-    display: ${cell.mode === "js" || cell.mode === "ts" || cell.mode === "sql"},
+    display: ${cell.mode === "js" || cell.mode === "ts"},
+    displayMode: ${JSON.stringify(cell.mode === "sql" ? "table" : "default")},
     assets: ${assets.size > 0 ? "assets" : "undefined"},
     autodisplay: ${transpiled.autodisplay},
     autoview: ${transpiled.autoview},
