@@ -135,8 +135,7 @@ h6,
 
 .katex-display {
   overflow-x: auto;
-  overscroll-behavior-x: none;
-  box-sizing: border-box;
+  overflow-y: hidden;
 }
 
 blockquote,
