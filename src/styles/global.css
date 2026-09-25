@@ -249,6 +249,10 @@ thead tr {
   border-bottom: solid 1px var(--theme-foreground-fainter);
 }
 
+tfoot tr {
+  border-top: solid 1px var(--theme-foreground-fainter);
+}
+
 figure,
 table {
   margin: 1rem 0;
