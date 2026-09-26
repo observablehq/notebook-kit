@@ -91,9 +91,11 @@ export function rewriteImportExpressions(
   output: Sourcemap,
   body: Node,
   {resolveImport = resolveImportDefault, resolveLocalImports}: ImportOptions = {}
-): void {
+): Set<string> {
+  const sources = new Set<string>();
   function rewriteImportSource(source: StringLiteral, node: Node = source) {
     const value = getStringLiteralValue(source);
+    sources.add(value);
     const resolution = resolveImport(value);
     output.replaceLeft(
       node.start,
@@ -122,6 +124,7 @@ export function rewriteImportExpressions(
       }
     }
   });
+  return sources;
 }
 
 /** Note: mutates inputs! */
@@ -134,7 +137,8 @@ export function rewriteImportDeclarations(
     resolveLocalImports,
     renameObservableImport = dedollar
   }: ImportOptions = {}
-): void {
+): Set<string> {
+  const sources = new Set<string>();
   const declarations: [ImportDeclaration, StringLiteral][] = [];
 
   simple(body, {
@@ -153,6 +157,7 @@ export function rewriteImportDeclarations(
     output.delete(node.start, node.end + +(output.input[node.end] === "\n"));
     specifiers.push(rewriteImportSpecifiers(node));
     const value = getStringLiteralValue(literal);
+    sources.add(value);
     const resolution = resolveImport(value);
     const source =
       resolveLocalImports && isLocalImport(resolution)
@@ -169,6 +174,8 @@ export function rewriteImportDeclarations(
   } else if (declarations.length === 1) {
     output.insertLeft(0, `const ${specifiers[0]} = await ${imports[0]};\n`);
   }
+
+  return sources;
 }
 
 function renderImport(source: string, node: ImportDeclaration, input: string): string {
