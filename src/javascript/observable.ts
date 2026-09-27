@@ -62,7 +62,7 @@ function transpileObservableImport(
   const declarations: Identifier[] = flatMapImportSpecifiers(cell.body, (s) => s.local);
   const outputs = Array.from(new Set(declarations.map(asDeclaration)));
   transformObservableImport(cell.body);
-  rewriteImportDeclarations(output, cell.body, inputs, options);
+  const imports = rewriteImportDeclarations(output, cell.body, inputs, options);
   output.insertLeft(0, `async (__variable) => {\n`);
   if (outputs.length > 0) output.insertRight(input.length, `\nreturn {${outputs}};`);
   output.insertRight(input.length, "\n}");
@@ -74,7 +74,8 @@ function transpileObservableImport(
     autodisplay: false,
     files: new Set(),
     secrets: new Set(),
-    databases: new Set()
+    databases: new Set(),
+    imports
   };
 }
 

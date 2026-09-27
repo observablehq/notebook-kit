@@ -32,6 +32,8 @@ export type TranspiledJavaScript = {
   databases?: Set<string>;
   /** the names of any referenced secrets */
   secrets?: Set<string>;
+  /** the module specifiers of any (statically analyzable) imports */
+  imports?: Set<string>;
 };
 
 export interface TranspileOptions extends ImportOptions {
@@ -103,8 +105,8 @@ function transpileCell(
   if (hasImportDeclaration(cell.body)) async = true;
   const outputs = Array.from(new Set(cell.declarations?.map((r) => r.name)));
   output.trim();
-  rewriteImportDeclarations(output, cell.body, inputs, options);
-  rewriteImportExpressions(output, cell.body, options);
+  const importDeclarations = rewriteImportDeclarations(output, cell.body, inputs, options);
+  const importExpressions = rewriteImportExpressions(output, cell.body, options);
   if (options?.resolveFiles) rewriteFileExpressions(output, cell.body);
   if (cell.expression) output.insertLeft(0, `return (\n`);
   output.insertLeft(0, `${async ? "async " : ""}(${inputs.map(deat)}) => {\n`);
@@ -116,7 +118,8 @@ function transpileCell(
   const files = new Set(cell.files.map((f) => f.argument));
   const databases = new Set(cell.databases.map((f) => f.argument));
   const secrets = new Set(cell.secrets.map((f) => f.argument));
-  return {body, inputs, outputs, autodisplay, files, databases, secrets};
+  const imports = new Set([...importDeclarations, ...importExpressions]);
+  return {body, inputs, outputs, autodisplay, files, databases, secrets, imports};
 }
 
 function deat(input: string): string {
