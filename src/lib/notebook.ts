@@ -120,7 +120,7 @@ export function toCell({
   hidden = false,
   output,
   format = isInterpreter(mode) ? "buffer" : undefined,
-  database = isDatabase(mode) ? "var:db" : undefined,
+  database,
   since
 }: CellSpec): Cell {
   return {
