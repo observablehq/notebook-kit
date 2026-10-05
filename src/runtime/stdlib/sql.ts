@@ -227,7 +227,7 @@ function withViews(
   istrings: readonly string[],
   iparams: unknown[],
   views: Record<string, SqlFragment>,
-  iquote: (name: string) => string
+  iquote: Quote
 ): [readonly string[], unknown[]] {
   const entries = Object.entries(views);
   if (!entries.length) return [istrings, iparams];
