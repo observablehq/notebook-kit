@@ -27,14 +27,24 @@ sql.ident = function ident(name: string): SqlVariant {
     get bigquery() {
       return sql([tquote(name)]);
     },
+    get mysql() {
+      return sql([tquote(name)]);
+    },
     get default() {
       return sql([dquote(name)]);
     }
   });
 };
 
-sql.text = function text(value: string): SqlFragment {
-  return sql([squote(value)]);
+sql.text = function text(value: string): SqlVariant {
+  return new SqlVariant({
+    get mysql() {
+      return sql([squote(value.replace(/\\/g, "\\\\"))]);
+    },
+    get default() {
+      return sql([squote(value)]);
+    }
+  });
 };
 
 class SqlFragment {
@@ -290,6 +300,7 @@ function getIquote(dialect?: SqlDialect): (name: string) => string {
   switch (dialect) {
     case "databricks":
     case "bigquery":
+    case "mysql":
       return tquote;
     default:
       return dquote;

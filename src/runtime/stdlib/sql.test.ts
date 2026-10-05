@@ -91,6 +91,15 @@ SELECT * FROM \`_1\` UNION ALL SELECT * FROM \`_2\``
       )
     );
   });
+  test("quotes view names with backticks for mysql", () => {
+    const view = sql.view`SELECT * FROM ${sql.ident("purchases")}`;
+    assert.strictEqual(
+      String(sql`SELECT * FROM ${view}`.flat("mysql")),
+      `WITH
+\`_1\` AS (SELECT * FROM \`purchases\`)
+SELECT * FROM \`_1\``
+    );
+  });
   test("combines with an existing WITH clause", () => {
     const view = sql.view`SELECT * FROM PURCHASES`;
     assert.deepStrictEqual(
@@ -374,12 +383,15 @@ describe("sql.ident(name)", () => {
   test("quotes a name", () => {
     assert.deepStrictEqual(sql.ident("foo").toDialect(), sql`"foo"`);
     assert.deepStrictEqual(sql.ident("foo").toDialect("databricks"), sql`\`foo\``);
+    assert.deepStrictEqual(sql.ident("foo").toDialect("mysql"), sql`\`foo\``);
   });
   test("quotes a name with quotes", () => {
     assert.deepStrictEqual(sql.ident('fo"c"sle').toDialect(), sql`"fo""c""sle"`);
     assert.deepStrictEqual(sql.ident('fo"c"sle').toDialect("databricks"), sql`\`fo"c"sle\``);
+    assert.deepStrictEqual(sql.ident('fo"c"sle').toDialect("mysql"), sql`\`fo"c"sle\``);
     assert.deepStrictEqual(sql.ident("fo`c`sle").toDialect(), sql`"fo\`c\`sle"`);
     assert.deepStrictEqual(sql.ident("fo`c`sle").toDialect("databricks"), sql`\`fo\`\`c\`\`sle\``);
+    assert.deepStrictEqual(sql.ident("fo`c`sle").toDialect("mysql"), sql`\`fo\`\`c\`\`sle\``);
   });
 });
 
@@ -387,10 +399,20 @@ describe("sql.text(value)", () => {
   test("quotes a value", () => {
     assert.deepStrictEqual(sql.text("foo").toDialect(), sql`'foo'`);
     assert.deepStrictEqual(sql.text("foo").toDialect("databricks"), sql`'foo'`);
+    assert.deepStrictEqual(sql.text("foo").toDialect("mysql"), sql`'foo'`);
   });
   test("quotes a value with quotes", () => {
     assert.deepStrictEqual(sql.text("fo'c'sle").toDialect(), sql`'fo''c''sle'`);
     assert.deepStrictEqual(sql.text("fo'c'sle").toDialect("databricks"), sql`'fo''c''sle'`);
+    assert.deepStrictEqual(sql.text("fo'c'sle").toDialect("mysql"), sql`'fo''c''sle'`);
+  });
+  test("escapes backslashes for mysql", () => {
+    const value = "\\' OR 1=1 #";
+    assert.strictEqual(String(sql.text(value).toDialect()), "'\\'' OR 1=1 #'");
+    assert.strictEqual(String(sql.text(value).toDialect("mysql")), "'\\\\'' OR 1=1 #'");
+  });
+  test("is resolved when interpolated", () => {
+    assert.strictEqual(String(sql`WHERE name = ${sql.text("O'Neil")}`.flat("mysql")), "WHERE name = 'O''Neil'"); // prettier-ignore
   });
 });
 
