@@ -279,14 +279,15 @@ type Quote = (value: string) => string;
 
 /** Identifier quoting, by dialect. */
 const iquotes = new Map<SqlDialect | "default", Quote>([
+  ["bigquery", btquote],
   ["databricks", tquote],
-  ["bigquery", tquote],
   ["mysql", tquote],
   ["default", dquote]
 ]);
 
 /** String literal quoting, by dialect. */
 const squotes = new Map<SqlDialect | "default", Quote>([
+  ["bigquery", bsquote],
   ["mysql", (value) => squote(value.replace(/\\/g, "\\\\"))],
   ["default", squote]
 ]);
@@ -313,7 +314,22 @@ function tquote(name: string): string {
   return `\`${name.replace(/`/g, "``")}\``;
 }
 
+/** Quotes the specified name with backticks, escaping with backslashes. */
+function btquote(name: string): string {
+  return `\`${name.replace(/[\\`\n\r]/g, bescape)}\``;
+}
+
 /** Quotes the specified name with single quotes. */
 function squote(name: string): string {
   return `'${name.replace(/'/g, "''")}'`;
+}
+
+/** Quotes the specified value with single quotes, escaping with backslashes. */
+function bsquote(value: string): string {
+  return `'${value.replace(/[\\'\n\r]/g, bescape)}'`;
+}
+
+/** Escapes the specified character with a backslash. */
+function bescape(c: string): string {
+  return c === "\n" ? "\\n" : c === "\r" ? "\\r" : `\\${c}`;
 }

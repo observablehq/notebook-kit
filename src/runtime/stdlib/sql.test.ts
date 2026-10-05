@@ -393,6 +393,13 @@ describe("sql.ident(name)", () => {
     assert.deepStrictEqual(sql.ident("fo`c`sle").toDialect("databricks"), sql`\`fo\`\`c\`\`sle\``);
     assert.deepStrictEqual(sql.ident("fo`c`sle").toDialect("mysql"), sql`\`fo\`\`c\`\`sle\``);
   });
+  test("escapes backslashes for bigquery", () => {
+    assert.strictEqual(String(sql.ident("foo").toDialect("bigquery")), "`foo`");
+    assert.strictEqual(String(sql.ident('fo"c"sle').toDialect("bigquery")), '`fo"c"sle`');
+    assert.strictEqual(String(sql.ident("fo`c`sle").toDialect("bigquery")), "`fo\\`c\\`sle`");
+    assert.strictEqual(String(sql.ident("a\\b").toDialect("bigquery")), "`a\\\\b`");
+    assert.strictEqual(String(sql.ident("a\nb\rc").toDialect("bigquery")), "`a\\nb\\rc`");
+  });
 });
 
 describe("sql.text(value)", () => {
@@ -411,8 +418,15 @@ describe("sql.text(value)", () => {
     assert.strictEqual(String(sql.text(value).toDialect()), "'\\'' OR 1=1 #'");
     assert.strictEqual(String(sql.text(value).toDialect("mysql")), "'\\\\'' OR 1=1 #'");
   });
+  test("escapes backslashes for bigquery", () => {
+    assert.strictEqual(String(sql.text("foo").toDialect("bigquery")), "'foo'");
+    assert.strictEqual(String(sql.text("fo'c'sle").toDialect("bigquery")), "'fo\\'c\\'sle'");
+    assert.strictEqual(String(sql.text("\\' OR 1=").toDialect("bigquery")), "'\\\\\\' OR 1='");
+    assert.strictEqual(String(sql.text("a\nb\rc").toDialect("bigquery")), "'a\\nb\\rc'");
+  });
   test("is resolved when interpolated", () => {
     assert.strictEqual(String(sql`WHERE name = ${sql.text("O'Neil")}`.flat("mysql")), "WHERE name = 'O''Neil'"); // prettier-ignore
+    assert.strictEqual(String(sql`WHERE name = ${sql.text("O'Neil")}`.flat("bigquery")), "WHERE name = 'O\\'Neil'"); // prettier-ignore
   });
 });
 
