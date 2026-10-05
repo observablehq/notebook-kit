@@ -298,9 +298,7 @@ const squotes = new Map<SqlDialect | "default", Quote>([
 
 /** Returns a variant of the specified value quoted for each dialect. */
 function quoted(value: string, quotes: Map<SqlDialect | "default", Quote>): SqlVariant {
-  return new SqlVariant(
-    Object.fromEntries(Array.from(quotes, ([dialect, quote]) => [dialect, sql([quote(value)])]))
-  );
+  return new SqlVariant(Object.fromEntries(Array.from(quotes, ([d, q]) => [d, sql([q(value)])])));
 }
 
 /** Quotes the specified SQL identifier. */
