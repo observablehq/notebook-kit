@@ -334,11 +334,11 @@ function squote(name: string): string {
 }
 
 /** Quotes the specified value with single quotes, escaping with backslashes. */
-function bsquote(value: string): string {
-  return `'${value.replace(/[\\'\n\r]/g, bescape)}'`;
+function bsquote(name: string): string {
+  return `'${name.replace(/[\\'\n\r]/g, bescape)}'`;
 }
 
 /** Escapes the specified character with a backslash. */
-function bescape(c: string): string {
-  return c === "\n" ? "\\n" : c === "\r" ? "\\r" : `\\${c}`;
+function bescape(char: string): string {
+  return char === "\n" ? "\\n" : char === "\r" ? "\\r" : `\\${char}`;
 }
