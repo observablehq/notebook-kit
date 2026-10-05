@@ -91,6 +91,15 @@ SELECT * FROM \`_1\` UNION ALL SELECT * FROM \`_2\``
       )
     );
   });
+  test("quotes view names with brackets for mssql", () => {
+    const view = sql.view`SELECT * FROM PURCHASES`;
+    assert.strictEqual(
+      String(sql`SELECT * FROM ${view}`.flat("mssql")),
+      `WITH
+[_1] AS (SELECT * FROM PURCHASES)
+SELECT * FROM [_1]`
+    );
+  });
   test("quotes view names with backticks for mysql", () => {
     const view = sql.view`SELECT * FROM ${sql.ident("purchases")}`;
     assert.strictEqual(
@@ -400,6 +409,11 @@ describe("sql.ident(name)", () => {
     assert.strictEqual(String(sql.ident("a\\b").toDialect("bigquery")), "`a\\\\b`");
     assert.strictEqual(String(sql.ident("a\nb\rc").toDialect("bigquery")), "`a\\nb\\rc`");
   });
+  test("quotes a name with brackets for mssql", () => {
+    assert.strictEqual(String(sql.ident("foo").toDialect("mssql")), "[foo]");
+    assert.strictEqual(String(sql.ident('fo"c"sle').toDialect("mssql")), '[fo"c"sle]');
+    assert.strictEqual(String(sql.ident("fo]c[sle").toDialect("mssql")), "[fo]]c[sle]");
+  });
 });
 
 describe("sql.text(value)", () => {
@@ -432,6 +446,15 @@ describe("sql.text(value)", () => {
     assert.strictEqual(String(sql.text("fo'c'sle").toDialect("snowflake")), "'fo\\'c\\'sle'");
     assert.strictEqual(String(sql.text("\\' OR 1=").toDialect("snowflake")), "'\\\\\\' OR 1='");
     assert.strictEqual(String(sql.text("a\nb\rc").toDialect("snowflake")), "'a\\nb\\rc'");
+  });
+  test("quotes a unicode value for mssql", () => {
+    assert.strictEqual(String(sql.text("fo'c'sle").toDialect("mssql")), "N'fo''c''sle'");
+    assert.strictEqual(String(sql.text("Ж 東京").toDialect("mssql")), "N'Ж 東京'");
+    assert.strictEqual(String(sql.text("a\\b").toDialect("mssql")), "N'a\\b'");
+  });
+  test("keeps a backslash before a line break for mssql", () => {
+    assert.strictEqual(String(sql.text("a\\\nb").toDialect("mssql")), "N'a\\\\\n\nb'");
+    assert.strictEqual(String(sql.text("a\\\r\nb").toDialect("mssql")), "N'a\\\\\n\r\nb'");
   });
   test("is resolved when interpolated", () => {
     assert.strictEqual(String(sql`WHERE name = ${sql.text("O'Neil")}`.flat("mysql")), "WHERE name = 'O''Neil'"); // prettier-ignore

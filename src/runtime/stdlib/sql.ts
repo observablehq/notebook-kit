@@ -281,6 +281,7 @@ type Quote = (value: string) => string;
 const iquotes = new Map<SqlDialect | "default", Quote>([
   ["bigquery", btquote],
   ["databricks", tquote],
+  ["mssql", brquote],
   ["mysql", tquote],
   ["default", dquote]
 ]);
@@ -289,6 +290,7 @@ const iquotes = new Map<SqlDialect | "default", Quote>([
 const squotes = new Map<SqlDialect | "default", Quote>([
   ["bigquery", bsquote],
   ["databricks", bsquote],
+  ["mssql", (value) => `N${squote(value.replace(/\\(?=\r?\n)/g, "\\\\\n"))}`],
   ["mysql", (value) => squote(value.replace(/\\/g, "\\\\"))],
   ["snowflake", bsquote],
   ["default", squote]
@@ -314,6 +316,11 @@ function dquote(name: string): string {
 /** Quotes the specified name with backticks. */
 function tquote(name: string): string {
   return `\`${name.replace(/`/g, "``")}\``;
+}
+
+/** Quotes the specified name with square brackets. */
+function brquote(name: string): string {
+  return `[${name.replace(/]/g, "]]")}]`;
 }
 
 /** Quotes the specified name with backticks, escaping with backslashes. */
