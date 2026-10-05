@@ -304,8 +304,8 @@ function quoted(value: string, quotes: Map<SqlDialect | "default", Quote>): SqlV
 }
 
 /** Quotes the specified SQL identifier. */
-function getIquote(dialect?: SqlDialect): Quote {
-  return iquotes.get(dialect ?? "default") ?? iquotes.get("default")!;
+function getIquote(dialect: SqlDialect | "default" = "default"): Quote {
+  return iquotes.get(dialect) ?? iquotes.get("default")!;
 }
 
 /** Quotes the specified name with double quotes. */
