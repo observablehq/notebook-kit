@@ -154,6 +154,12 @@ class SqlVariant {
   }
 }
 
+// prevent mangling
+Object.defineProperty(SqlFragment, "name", {value: "SqlFragment"});
+Object.defineProperty(SqlView, "name", {value: "SqlView"});
+Object.defineProperty(BoundSqlView, "name", {value: "BoundSqlView"});
+Object.defineProperty(SqlVariant, "name", {value: "SqlVariant"});
+
 sql.Fragment = SqlFragment;
 sql.View = SqlView;
 sql.Variant = SqlVariant;
