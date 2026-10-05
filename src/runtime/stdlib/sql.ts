@@ -20,31 +20,11 @@ sql.variant = function variant(
 };
 
 sql.ident = function ident(name: string): SqlVariant {
-  return new SqlVariant({
-    get databricks() {
-      return sql([tquote(name)]);
-    },
-    get bigquery() {
-      return sql([tquote(name)]);
-    },
-    get mysql() {
-      return sql([tquote(name)]);
-    },
-    get default() {
-      return sql([dquote(name)]);
-    }
-  });
+  return quoted(name, iquotes);
 };
 
 sql.text = function text(value: string): SqlVariant {
-  return new SqlVariant({
-    get mysql() {
-      return sql([squote(value.replace(/\\/g, "\\\\"))]);
-    },
-    get default() {
-      return sql([squote(value)]);
-    }
-  });
+  return quoted(value, squotes);
 };
 
 class SqlFragment {
@@ -295,16 +275,32 @@ function findUndernames(
   return names;
 }
 
+type Quote = (value: string) => string;
+
+/** Identifier quoting, by dialect. */
+const iquotes = new Map<SqlDialect | "default", Quote>([
+  ["databricks", tquote],
+  ["bigquery", tquote],
+  ["mysql", tquote],
+  ["default", dquote]
+]);
+
+/** String literal quoting, by dialect. */
+const squotes = new Map<SqlDialect | "default", Quote>([
+  ["mysql", (value) => squote(value.replace(/\\/g, "\\\\"))],
+  ["default", squote]
+]);
+
+/** Returns a variant of the specified value quoted for each dialect. */
+function quoted(value: string, quotes: Map<SqlDialect | "default", Quote>): SqlVariant {
+  return new SqlVariant(
+    Object.fromEntries(Array.from(quotes, ([dialect, quote]) => [dialect, sql([quote(value)])]))
+  );
+}
+
 /** Quotes the specified SQL identifier. */
-function getIquote(dialect?: SqlDialect): (name: string) => string {
-  switch (dialect) {
-    case "databricks":
-    case "bigquery":
-    case "mysql":
-      return tquote;
-    default:
-      return dquote;
-  }
+function getIquote(dialect?: SqlDialect): Quote {
+  return iquotes.get(dialect ?? "default") ?? iquotes.get("default")!;
 }
 
 /** Quotes the specified name with double quotes. */
