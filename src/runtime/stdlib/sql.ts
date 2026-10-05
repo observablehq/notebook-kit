@@ -290,6 +290,7 @@ const squotes = new Map<SqlDialect | "default", Quote>([
   ["bigquery", bsquote],
   ["databricks", bsquote],
   ["mysql", (value) => squote(value.replace(/\\/g, "\\\\"))],
+  ["snowflake", bsquote],
   ["default", squote]
 ]);
 

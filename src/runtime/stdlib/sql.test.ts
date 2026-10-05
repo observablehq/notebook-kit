@@ -428,6 +428,11 @@ describe("sql.text(value)", () => {
     assert.strictEqual(String(sql.text("\\' OR 1=").toDialect("databricks")), "'\\\\\\' OR 1='");
     assert.strictEqual(String(sql.text("a\nb\rc").toDialect("databricks")), "'a\\nb\\rc'");
   });
+  test("escapes backslashes for snowflake", () => {
+    assert.strictEqual(String(sql.text("fo'c'sle").toDialect("snowflake")), "'fo\\'c\\'sle'");
+    assert.strictEqual(String(sql.text("\\' OR 1=").toDialect("snowflake")), "'\\\\\\' OR 1='");
+    assert.strictEqual(String(sql.text("a\nb\rc").toDialect("snowflake")), "'a\\nb\\rc'");
+  });
   test("is resolved when interpolated", () => {
     assert.strictEqual(String(sql`WHERE name = ${sql.text("O'Neil")}`.flat("mysql")), "WHERE name = 'O''Neil'"); // prettier-ignore
     assert.strictEqual(String(sql`WHERE name = ${sql.text("O'Neil")}`.flat("bigquery")), "WHERE name = 'O\\'Neil'"); // prettier-ignore
