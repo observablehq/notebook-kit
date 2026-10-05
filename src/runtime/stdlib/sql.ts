@@ -288,6 +288,7 @@ const iquotes = new Map<SqlDialect | "default", Quote>([
 /** String literal quoting, by dialect. */
 const squotes = new Map<SqlDialect | "default", Quote>([
   ["bigquery", bsquote],
+  ["databricks", bsquote],
   ["mysql", (value) => squote(value.replace(/\\/g, "\\\\"))],
   ["default", squote]
 ]);
