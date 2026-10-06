@@ -20,21 +20,11 @@ sql.variant = function variant(
 };
 
 sql.ident = function ident(name: string): SqlVariant {
-  return new SqlVariant({
-    get databricks() {
-      return sql([tquote(name)]);
-    },
-    get bigquery() {
-      return sql([tquote(name)]);
-    },
-    get default() {
-      return sql([dquote(name)]);
-    }
-  });
+  return quoted(name, iquotes);
 };
 
-sql.text = function text(value: string): SqlFragment {
-  return sql([squote(value)]);
+sql.text = function text(value: string): SqlVariant {
+  return quoted(value, squotes);
 };
 
 class SqlFragment {
@@ -237,7 +227,7 @@ function withViews(
   istrings: readonly string[],
   iparams: unknown[],
   views: Record<string, SqlFragment>,
-  iquote: (name: string) => string
+  iquote: Quote
 ): [readonly string[], unknown[]] {
   const entries = Object.entries(views);
   if (!entries.length) return [istrings, iparams];
@@ -285,15 +275,35 @@ function findUndernames(
   return names;
 }
 
+type Quote = (value: string) => string;
+
+/** Identifier quoting, by dialect. */
+const iquotes = new Map<SqlDialect | "default", Quote>([
+  ["bigquery", btquote],
+  ["databricks", tquote],
+  ["mssql", brquote],
+  ["mysql", tquote],
+  ["default", dquote]
+]);
+
+/** String literal quoting, by dialect. */
+const squotes = new Map<SqlDialect | "default", Quote>([
+  ["bigquery", bsquote],
+  ["databricks", bsquote],
+  ["mssql", (value) => `N${squote(value.replace(/\\(?=\r?\n)/g, "\\\\\n"))}`],
+  ["mysql", (value) => squote(value.replace(/\\/g, "\\\\"))],
+  ["snowflake", bsquote],
+  ["default", squote]
+]);
+
+/** Returns a variant of the specified value quoted for each dialect. */
+function quoted(value: string, quotes: Map<SqlDialect | "default", Quote>): SqlVariant {
+  return new SqlVariant(Object.fromEntries(Array.from(quotes, ([d, q]) => [d, sql([q(value)])])));
+}
+
 /** Quotes the specified SQL identifier. */
-function getIquote(dialect?: SqlDialect): (name: string) => string {
-  switch (dialect) {
-    case "databricks":
-    case "bigquery":
-      return tquote;
-    default:
-      return dquote;
-  }
+function getIquote(dialect: SqlDialect | "default" = "default"): Quote {
+  return iquotes.get(dialect) ?? iquotes.get("default")!;
 }
 
 /** Quotes the specified name with double quotes. */
@@ -306,7 +316,27 @@ function tquote(name: string): string {
   return `\`${name.replace(/`/g, "``")}\``;
 }
 
+/** Quotes the specified name with square brackets. */
+function brquote(name: string): string {
+  return `[${name.replace(/]/g, "]]")}]`;
+}
+
+/** Quotes the specified name with backticks, escaping with backslashes. */
+function btquote(name: string): string {
+  return `\`${name.replace(/[\\`\n\r]/g, bescape)}\``;
+}
+
 /** Quotes the specified name with single quotes. */
 function squote(name: string): string {
   return `'${name.replace(/'/g, "''")}'`;
+}
+
+/** Quotes the specified value with single quotes, escaping with backslashes. */
+function bsquote(name: string): string {
+  return `'${name.replace(/[\\'\n\r]/g, bescape)}'`;
+}
+
+/** Escapes the specified character with a backslash. */
+function bescape(char: string): string {
+  return char === "\n" ? "\\n" : char === "\r" ? "\\r" : `\\${char}`;
 }
