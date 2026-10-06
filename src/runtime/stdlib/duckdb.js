@@ -1,4 +1,5 @@
 import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm";
+import {sql} from "./sql.js";
 
 // Adapted from https://observablehq.com/@cmudig/duckdb-client
 // Copyright 2021 CMU Data Interaction Group
@@ -137,8 +138,9 @@ export class DuckDBClient {
     }
   }
 
-  async sql(strings, ...args) {
-    return await this.query(strings.join("?"), args);
+  async sql(strings, ...params) {
+    ({strings, params} = sql.call(null, strings, ...params).flat(this.dialect));
+    return await this.query(strings.join("?"), params);
   }
 
   queryTag(strings, ...params) {
