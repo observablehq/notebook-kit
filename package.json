@@ -5,7 +5,7 @@
     "type": "git",
     "url": "git+https://github.com/observablehq/notebook-kit.git"
   },
-  "version": "2.6.6",
+  "version": "2.7.0",
   "type": "module",
   "scripts": {
     "test": "TZ=America/Los_Angeles vitest",
@@ -34,6 +34,10 @@
     "./runtime": {
       "types": "./dist/src/runtime/index.d.ts",
       "import": "./dist/src/runtime/index.js"
+    },
+    "./sql": {
+      "types": "./dist/src/runtime/stdlib/sql.d.ts",
+      "import": "./dist/src/runtime/stdlib/sql.js"
     },
     "./vite": {
       "types": "./dist/src/vite/index.d.ts",
