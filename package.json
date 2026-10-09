@@ -35,6 +35,10 @@
       "types": "./dist/src/runtime/index.d.ts",
       "import": "./dist/src/runtime/index.js"
     },
+    "./sql": {
+      "types": "./dist/src/runtime/stdlib/sql.d.ts",
+      "import": "./dist/src/runtime/stdlib/sql.js"
+    },
     "./vite": {
       "types": "./dist/src/vite/index.d.ts",
       "import": "./dist/src/vite/index.js"
