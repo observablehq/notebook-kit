@@ -1,5 +1,5 @@
 <!doctype html>
-<notebook theme="light-dark(air, midnight)">
+<notebook theme="light-dark(air, midnight)" toc>
   <title>Observable Notebook Kit</title>
   <script id="1" type="text/markdown">
     # Observable Notebook Kit
@@ -242,6 +242,7 @@
 
     - `theme` - the theme
     - `readonly` - if present, disallow editing
+    - `toc` - if present, show a table of contents
   </script>
   <script id="57" type="text/markdown">
     The `theme` attribute may have one of the following values:
@@ -266,6 +267,24 @@
 
     ```html
     <notebook theme="light-dark(cotton, slate)">
+    ```
+  </script>
+  <script id="92" type="text/markdown">
+    If the `toc` attribute is present, a table of contents lists the notebook’s second- and third-level headings, highlighting the current section. The table of contents floats at the edge of the window; when it would cover a chart, image, table, code block, or aside, it collapses to marks that you can hover, tap, or focus to expand. It is hidden on narrow windows, such as on phones.
+
+    ```html
+    <notebook theme="air" toc>
+    ```
+
+    The `toc` attribute may also have any of the following values, separated by spaces:
+
+    - `left` - show the table of contents on the left
+    - `right` - show the table of contents on the right (default)
+    - `column` - make room for the table of contents instead of floating
+    - `marks` - always collapse the table of contents to marks
+
+    ```html
+    <notebook theme="air" toc="column left">
     ```
   </script>
   <script id="56" type="text/markdown">

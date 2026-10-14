@@ -57,3 +57,7 @@ aside code {
     width: 12rem;
   }
 }
+
+:root:not(.scrolled2) #observablehq-toc {
+  visibility: hidden; /* avoid the title banner */
+}

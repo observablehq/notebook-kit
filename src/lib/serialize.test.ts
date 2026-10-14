@@ -156,6 +156,49 @@ test("deserializes a light-dark() theme attribute with inverted preference", () 
   assert.deepStrictEqual(notebook.theme, {dark: "air", light: "near-midnight"});
 });
 
+test("deserializes a missing toc attribute as no table of contents", () => {
+  const notebook = deserialize(`<!doctype html><notebook theme="slate"></notebook>`);
+  assert.strictEqual(notebook.toc, undefined);
+});
+
+test("deserializes a bare toc attribute as a float on the right", () => {
+  const notebook = deserialize(`<!doctype html><notebook toc></notebook>`);
+  assert.deepStrictEqual(notebook.toc, {style: "float", side: "right"});
+});
+
+test("deserializes toc words in any order", () => {
+  assert.deepStrictEqual(deserialize(`<notebook toc="marks left"></notebook>`).toc, {style: "marks", side: "left"}); // prettier-ignore
+  assert.deepStrictEqual(deserialize(`<notebook toc="left marks"></notebook>`).toc, {style: "marks", side: "left"}); // prettier-ignore
+  assert.deepStrictEqual(deserialize(`<notebook toc="column"></notebook>`).toc, {style: "column", side: "right"}); // prettier-ignore
+});
+
+test("deserializes toc words, ignoring unknown words and keeping the last of each kind", () => {
+  const notebook = deserialize(`<notebook toc="wobble column marks right left"></notebook>`);
+  assert.deepStrictEqual(notebook.toc, {style: "marks", side: "left"});
+});
+
+test("deserializes toc words, lower-casing and ignoring whitespace", () => {
+  const notebook = deserialize(`<notebook toc="  Column\n LEFT "></notebook>`);
+  assert.deepStrictEqual(notebook.toc, {style: "column", side: "left"});
+});
+
+test("serializes toc words in their shortest form", () => {
+  const notebook = deserialize(`<notebook toc="LEFT  wobble column"></notebook>`);
+  const html = serialize(notebook);
+  assert.ok(html.includes(`<notebook theme="air" toc="column left">`));
+  assert.deepStrictEqual(deserialize(html), notebook);
+});
+
+test("serializes a default toc as an empty attribute", () => {
+  const html = serialize(deserialize(`<notebook toc="right"></notebook>`));
+  assert.ok(html.includes(`<notebook theme="air" toc="">`));
+});
+
+test("serializes no toc attribute without a table of contents", () => {
+  const html = serialize(toNotebook({}));
+  assert.ok(!html.includes("toc"));
+});
+
 test("deserialization populates missing ids", () => {
   const notebook1 = toNotebook({
     cells: [

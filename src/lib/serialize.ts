@@ -1,4 +1,4 @@
-import type {CellSpec, Cell, Notebook} from "./notebook.js";
+import type {CellSpec, Cell, Notebook, NotebookToc} from "./notebook.js";
 import {toNotebook} from "./notebook.js";
 import {isEmpty} from "./text.js";
 
@@ -8,6 +8,7 @@ export function serialize(notebook: Notebook, {document = globalThis.document} =
   const _notebook = document.createElement("notebook");
   _notebook.setAttribute("theme", serializeTheme(notebook.theme));
   if (notebook.readOnly) _notebook.setAttribute("readonly", "");
+  if (notebook.toc) _notebook.setAttribute("toc", serializeToc(notebook.toc));
   _notebook.appendChild(document.createTextNode("\n  "));
   const _title = document.createElement("title");
   _title.textContent = notebook.title;
@@ -34,6 +35,7 @@ export function deserialize(data: string, {parser = new DOMParser()} = {}): Note
   const _notebook = document.querySelector("notebook");
   const theme = deserializeTheme(_notebook?.getAttribute("theme"));
   const readOnly = _notebook?.hasAttribute("readonly");
+  const toc = deserializeToc(_notebook?.getAttribute("toc"));
   const title = document.querySelector("title")?.textContent ?? undefined;
   let maxCellId = 0;
   const cellIds = new Set<number>();
@@ -54,7 +56,7 @@ export function deserialize(data: string, {parser = new DOMParser()} = {}): Note
       return {id, mode, value, pinned, hidden, format, output, database};
     }
   );
-  return toNotebook({title, theme, readOnly, cells});
+  return toNotebook({title, theme, readOnly, toc, cells});
 }
 
 function serializeMode(mode: Cell["mode"]): string {
@@ -146,6 +148,21 @@ function deserializeTheme(theme: string | null | undefined): Notebook["theme"] {
     return {light, dark} as Notebook["theme"];
   }
   return theme as Notebook["theme"];
+}
+
+function serializeToc({style, side}: NotebookToc): string {
+  return [style === "float" ? "" : style, side === "right" ? "" : side].filter(Boolean).join(" ");
+}
+
+function deserializeToc(toc: string | null | undefined): NotebookToc | undefined {
+  if (toc == null) return;
+  let style: NotebookToc["style"] = "float";
+  let side: NotebookToc["side"] = "right";
+  for (const word of toc.toLowerCase().split(/\s+/)) {
+    if (word === "column" || word === "marks") style = word;
+    else if (word === "left" || word === "right") side = word;
+  }
+  return {style, side};
 }
 
 function dedent(text: string): string {

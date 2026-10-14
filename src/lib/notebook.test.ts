@@ -6,7 +6,8 @@ test("converts a notebook spec to a notebook", () => {
     title: "Untitled",
     theme: "air",
     cells: [],
-    readOnly: false
+    readOnly: false,
+    toc: undefined
   });
 });
 

@@ -97,6 +97,14 @@ export function observable({
 
         let cells = document.querySelector("main");
         cells ??= document.body.appendChild(document.createElement("main"));
+        if (notebook.toc) {
+          const nav = document.createElement("nav");
+          nav.id = "observablehq-toc";
+          nav.dataset.style = notebook.toc.style;
+          nav.dataset.side = notebook.toc.side;
+          nav.tabIndex = -1;
+          cells.before(nav);
+        }
         for (const cell of notebook.cells) {
           const {id, mode, pinned, hidden, format, value} = cell;
           const contents = document.createDocumentFragment();
@@ -198,7 +206,12 @@ export function observable({
 @import url("observable:styles/theme-${notebook.theme.dark}.css") (prefers-color-scheme: dark);`
           }
 </style><script type="module">
-import {define} from "observable:runtime";${Array.from(assets)
+import {define} from "observable:runtime";${
+            notebook.toc
+              ? `
+import {toc} from "observable:runtime/toc";`
+              : ""
+          }${Array.from(assets)
             .map(
               (asset, i) => `
 import asset${i + 1} from ${JSON.stringify(`${asset}?url`)};`
@@ -240,7 +253,13 @@ define(
   }
 );`;
   })
-  .join("")}
+  .join("")}${
+            notebook.toc
+              ? `
+
+toc(document.getElementById("observablehq-toc"));`
+              : ""
+          }
 </script>` +
           output.slice(i)
         );

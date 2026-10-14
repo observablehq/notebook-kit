@@ -51,6 +51,13 @@ export type LightDarkNotebookTheme = {
   dark: NotebookTheme;
 };
 
+export type NotebookToc = {
+  /** how to show the table of contents; defaults to "float" */
+  style: "float" | "column" | "marks";
+  /** which side of the window to show it on; defaults to "right" */
+  side: "left" | "right";
+};
+
 export interface NotebookSpec {
   /** the notebook’s cells, in top-to-bottom document order */
   cells?: CellSpec[];
@@ -60,6 +67,8 @@ export interface NotebookSpec {
   theme?: NotebookTheme | LightDarkNotebookTheme;
   /** if true, don’t allow editing */
   readOnly?: boolean;
+  /** if present, show a table of contents */
+  toc?: NotebookToc;
 }
 
 export interface Notebook extends NotebookSpec {
@@ -102,13 +111,15 @@ export function toNotebook({
   cells = [],
   title = "Untitled",
   theme = "air",
-  readOnly = false
+  readOnly = false,
+  toc
 }: NotebookSpec): Notebook {
   return {
     cells: cells.map(toCell),
     title,
     theme,
-    readOnly
+    readOnly,
+    toc
   };
 }
 
