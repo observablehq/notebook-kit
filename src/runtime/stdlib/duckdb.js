@@ -167,6 +167,14 @@ export class DuckDBClient {
     );
   }
 
+  static async from(files, config) {
+    const db = await DuckDBClient.of({}, config);
+    for (const {name, url} of files) {
+      await db._db.registerFileURL(name, new URL(url, location).href, 4); // HTTP
+    }
+    return db;
+  }
+
   static async of(sources = {}, config = {}) {
     const db = await createDuckDB();
     if (config.query?.castDecimalToDouble === undefined) {
