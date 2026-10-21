@@ -10,6 +10,7 @@ import type {DuckDBConfig} from "./duckdb.js";
 import type {SQLiteConfig} from "./sqlite.js";
 import type {SnowflakeConfig} from "./snowflake.js";
 import type {PostgresConfig} from "./postgres.js";
+import type {MSSQLConfig} from "./mssql.js";
 
 export type DatabaseConfig =
   | BigQueryConfig
@@ -17,7 +18,8 @@ export type DatabaseConfig =
   | DuckDBConfig
   | SQLiteConfig
   | SnowflakeConfig
-  | PostgresConfig;
+  | PostgresConfig
+  | MSSQLConfig;
 
 export type QueryTemplateFunction = (
   strings: readonly string[],
@@ -49,6 +51,7 @@ export async function getDatabaseConfig(
     if (databaseName === "postgres") config = {type: "postgres"};
     else if (databaseName === "duckdb") config = {type: "duckdb"};
     else if (databaseName === "sqlite") config = {type: "sqlite"};
+    else if (databaseName === "mssql") config = {type: "mssql"};
     else if (/\.duckdb$/i.test(databaseName)) config = {type: "duckdb", path: databaseName};
     else if (/\.db$/i.test(databaseName)) config = {type: "sqlite", path: databaseName};
     else throw new Error(`database not found: ${databaseName}`);
@@ -70,6 +73,8 @@ export async function getDatabase(config: DatabaseConfig): Promise<QueryTemplate
       return (await import("./snowflake.js")).default(config);
     case "postgres":
       return (await import("./postgres.js")).default(config);
+    case "mssql":
+      return (await import("./mssql.js")).default(config);
     default:
       throw new Error(`unsupported database type: ${config["type"]}`);
   }
