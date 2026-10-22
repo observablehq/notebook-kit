@@ -1,0 +1,810 @@
+<!doctype html>
+<notebook theme="light-dark(air, midnight)">
+  <title>Observable Notebooks Standard library (2026)</title>
+  <script id="1" type="text/markdown">
+    # Observable Notebooks<br> <span style="color: var(--theme-foreground-faint);">Standard library (2026)</span>
+
+    <link rel="stylesheet" href="./style.css">
+
+    <style>
+
+    .info {
+      max-width: 640px;
+      margin: 1rem 0;
+      padding: 0.75rem 1rem;
+      border-left: solid 4px var(--theme-foreground-focus);
+      border-radius: 4px;
+      background: var(--theme-background-alt);
+    }
+
+    .info > :first-child {
+      margin-top: 0;
+    }
+
+    .info > :last-child {
+      margin-bottom: 0;
+    }
+
+    </style>
+  </script>
+  <script id="2" type="text/markdown">
+    Observable's **standard library** is the set of built-ins that cells can use without importing them: functions such as `display` and `FileAttachment`, reactive values such as `width` and `now`, libraries such as `Plot` and `d3`, and sample datasets such as `penguins`.
+  </script>
+  <script id="3" type="text/markdown">
+    Built-ins are loaded only when a cell uses them. Built-in names are not reserved: a top-level variable with the same name, such as `import * as d3 from "npm:d3@7"`, replaces the built-in in the whole notebook.
+  </script>
+  <script id="4" type="text/markdown">
+    This page documents the standard library (version 2026), as implemented by [Notebook Kit](./kit) in [`src/runtime/stdlib`](https://github.com/observablehq/notebook-kit/tree/main/src/runtime/stdlib). For the previous version (2018), see [@observablehq/stdlib](https://github.com/observablehq/stdlib). For the hosted version, see the [@observablehq/stdlib](https://observablehq.com/@observablehq/stdlib) notebook.
+
+    - [Display](#display) - `display` and `view`
+    - [Reactive values](#reactive-values) - `width`, `dark`, and `now`
+    - [Cell lifecycle](#cell-lifecycle) - `invalidation` and `visibility`
+    - [Generators](#generators) - reactive values
+    - [Mutable](#mutable) - values that change when assigned
+    - [Files](#files) - `FileAttachment`
+    - [SQL and databases](#sql-and-databases) - `DatabaseClient`, `DuckDBClient`, and `sql`
+    - [Data loaders](#data-loaders) - `Interpreter`
+    - [Markup](#markup) - `md`, `html`, `svg`, `tex`, `dot`, and `mermaid`
+    - [Recommended libraries](#recommended-libraries)
+    - [Sample datasets](#sample-datasets)
+    - [Deprecated](#deprecated) - `DOM`, `Files`, and `Promises`
+    - [Differences from the 2018 version](#differences-from-the-standard-library-2018)
+  </script>
+  <script id="5" type="text/markdown">
+    ---
+
+    ## Display
+
+    ### display(*value*)
+
+    Displays *value* in the current cell, and returns it. If *value* is a DOM element or a text node, it is inserted into the page; otherwise, it is shown with the _inspector_, which is useful for debugging. A cell can call `display` several times; each call appends to the cell's output.
+  </script>
+  <script id="6" type="module" pinned="">
+    for (let i = 1; i <= 3; ++i) {
+      display(i ** 2);
+    }
+  </script>
+  <script id="7" type="text/markdown">
+    Each JavaScript and TypeScript cell has its own `display`. When a cell runs again, its previous output is cleared at the first call to `display`.
+
+    An _expression_ cell (a single expression without a trailing semicolon) displays its value implicitly -- unless it references `display` or `view`.
+  </script>
+  <script id="8" type="text/markdown">
+    ### view(*element*)
+
+    Displays the input *element*. Assigned to a top-level variable, the result is the input's current value: cells that use it run again when the input changes (see [`Generators.input`](#generators-input-element)).
+  </script>
+  <script id="9" type="module" pinned="">
+    const n = view(Inputs.range([1, 10], {step: 1, value: 3, label: "n"}));
+  </script>
+  <script id="10" type="module" pinned="">
+    "★".repeat(n)
+  </script>
+  <script id="11" type="text/markdown">
+    In Observable JavaScript, use `viewof` instead: `viewof n = Inputs.range([1, 10])`.
+  </script>
+  <script id="12" type="text/markdown">
+    ---
+
+    ## Reactive values
+
+    `width`, `dark`, and `now` change over time.
+
+    ### width
+
+    The width of the `main` element (the notebook's content area), in pixels. Pass it to charts so that they fill the available width.
+  </script>
+  <script id="13" type="module" pinned="">
+    Plot.plot({
+      width,
+      height: 60,
+      marks: [
+        Plot.frame(),
+        Plot.text([`${width} px`], {frameAnchor: "middle", fontSize: 16})
+      ]
+    })
+  </script>
+  <script id="14" type="text/markdown">
+    To measure a different element, use [`Generators.width`](#generators-width-element-options).
+
+    ### dark
+
+    `true` if the page uses a dark [color scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme), and `false` otherwise. With a light and a dark theme, as in `light-dark(air, midnight)`, it follows the reader's [preferred color scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme). Use it, for example, to choose chart colors.
+  </script>
+  <script id="15" type="text/markdown" pinned="">
+    The current color scheme is *${dark ? "dark" : "light"}*.
+  </script>
+  <script id="16" type="text/markdown">
+    ### now
+
+    The current time, as returned by [`Date.now()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now): milliseconds since January 1, 1970. It updates on every animation frame (typically 60 times per second), so cells that reference it run continuously.
+  </script>
+  <script id="17" type="text/markdown" pinned="">
+    The current time is ${new Date(now).toLocaleTimeString("en-US")}.
+  </script>
+  <script id="18" type="text/markdown">
+    ---
+
+    ## Cell lifecycle
+
+    ### invalidation
+
+    A promise that resolves when the current cell is about to run again, or is deleted. Use it to clean up after the cell: _e.g._, stop timers, remove event listeners, or cancel network requests.
+  </script>
+  <script id="19" type="module" pinned="">
+    const counter = display(html`<span>0</span>`);
+    let ticks = 0;
+    const timer = setInterval(() => (counter.textContent = ++ticks), 1000);
+    invalidation.then(() => clearInterval(timer));
+  </script>
+  <script id="20" type="text/markdown">
+    The cell above counts seconds; when it runs again, the old timer is stopped. See [Invalidation](https://observablehq.com/@observablehq/invalidation) for another example.
+
+    `invalidation` is provided by the [Observable Runtime](https://github.com/observablehq/runtime); each cell gets a new promise each time it runs.
+
+    ### visibility(*value*)
+
+    Returns a promise that resolves with *value* when the cell's output enters the viewport, as detected by an [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver). Use it to delay expensive work until the reader scrolls to the cell. Like `invalidation`, it is provided by the Observable Runtime.
+  </script>
+  <script id="21" type="module" pinned="">
+    await visibility();
+    display(html`This cell became visible at ${new Date().toLocaleTimeString("en-US")}.`);
+  </script>
+  <script id="22" type="text/markdown">
+    ---
+
+    ## Generators
+
+    The `Generators` namespace has functions that create [async generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncGenerator), typically to turn events into reactive values. When a top-level variable is a generator, other cells see its latest value and run again each time it yields. When the declaring cell runs again, the runtime calls the generator's `return` method, which releases its resources, such as event listeners.
+
+    ### Generators.input(*element*)
+
+    Returns an async generator that yields the current value of the input *element* each time the element emits an event. [`view`](#view-element) uses this function. If the element's initial value is not `undefined`, the generator yields it first.
+
+    The event depends on the element's `type`:
+
+    - `button`, `submit`, and `checkbox` - *click*
+    - `file` - *change*
+    - any other type - *input*
+
+    The value also depends on the element's `type`:
+
+    - `range` and `number` - *element*.valueAsNumber
+    - `date` - *element*.valueAsDate
+    - `checkbox` - *element*.checked
+    - `file` - *element*.files[0], or *element*.files if the input accepts multiple files
+    - `select-multiple` - an array of the selected options' values
+    - any other type - *element*.value
+
+    The *element* does not need to be a native input: it only needs to expose a `value` and emit *input* events, as [Observable Inputs](https://github.com/observablehq/inputs) do.
+  </script>
+  <script id="25" type="text/markdown">
+    ### Generators.observe(*initialize*)
+
+    Returns an async generator that turns a source of events into a sequence of values. `Generators.observe` calls *initialize* immediately, passing it a *notify* function; each call to *notify* sets the next value of the generator. *initialize* can return a *dispose* function, which is called when the generator terminates. *initialize* must be synchronous.
+
+    If *notify* is called several times before the next value is read, only the latest value is kept. For example, to track the [hash](https://developer.mozilla.org/en-US/docs/Web/API/Location/hash) of the page's URL:
+  </script>
+  <script id="26" type="module" pinned="">
+    const hash = Generators.observe((notify) => {
+      const changed = () => notify(location.hash);
+      addEventListener("hashchange", changed);
+      changed();
+      return () => removeEventListener("hashchange", changed);
+    });
+  </script>
+  <script id="27" type="module" pinned="">
+    hash
+  </script>
+  <script id="28" type="text/markdown">
+    Click <a href="#example-hash">here</a> to change the hash.
+
+    ### Generators.queue(*initialize*)
+
+    Like [`Generators.observe`](#generators-observe-initialize), except that no value is dropped: values are queued and yielded in order. Use it when every value matters, such as for a log of messages.
+
+    ```js
+    const messages = Generators.queue((notify) => {
+      const socket = new WebSocket("wss://example.com/messages");
+      socket.onmessage = (event) => notify(event.data);
+      return () => socket.close();
+    });
+    ```
+
+    ### Generators.width(*element*, *options*)
+
+    Returns an async generator that yields the width of *element* in pixels, excluding padding and border, each time it changes. *options* are passed to [ResizeObserver.observe](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver/observe). The built-in [`width`](#width) is the width of the `main` element (or of the `body` if there is no `main` element).
+
+    ```js
+    const sidebarWidth = Generators.width(document.querySelector("#sidebar"));
+    ```
+
+    ### Generators.dark()
+
+    Returns an async generator that yields `true` when the page uses a dark color scheme, and `false` otherwise. This is the definition of the built-in [`dark`](#dark).
+
+    ### Generators.now()
+
+    Returns an async generator that yields `Date.now()` forever. This is the definition of the built-in [`now`](#now).
+  </script>
+  <script id="29" type="text/markdown">
+    ---
+
+    ## Mutable
+
+    ### Mutable(*value*)
+
+    Returns a generator with a `value` property, initialized to *value*. Cells that reference the variable run again when `value` is assigned. Only the cell that calls `Mutable` can read or assign `value`; to let other cells change it, declare functions in that cell, and call them from other cells. See [Mutables](https://observablehq.com/@observablehq/mutables).
+  </script>
+  <script id="30" type="module" pinned="">
+    const count = Mutable(0);
+    const increment = () => ++count.value;
+    const reset = () => (count.value = 0);
+  </script>
+  <script id="31" type="module" pinned="">
+    Inputs.button([["Increment", increment], ["Reset", reset]])
+  </script>
+  <script id="32" type="module" pinned="">
+    count
+  </script>
+  <script id="34" type="text/markdown">
+    ---
+
+    ## Files
+
+    ### FileAttachment(*path*)
+
+    Returns a _file attachment_: a handle to the file at *path*, relative to the notebook. The file is not downloaded until you call one of its [methods](#file-methods). For security, a notebook can only load files in its own directory or in a subdirectory.
+  </script>
+  <script id="35" type="module" pinned="">
+    FileAttachment("ex/data/penguins.csv")
+  </script>
+  <script id="36" type="text/markdown">
+    `FileAttachment` must be called with a literal string, such as `FileAttachment("data.csv")`; a computed path, such as <code>FileAttachment(\`frame$\{i}.png\`)</code>, is a syntax error. Notebook Kit uses these paths to include the files in the built site. To load several files, list each one: `[FileAttachment("frame1.png"), FileAttachment("frame2.png")]`.
+
+    A file attachment has the following properties:
+
+    - *file*.name - the name of the file, without its directory, such as `penguins.csv`
+    - *file*.href - the absolute URL of the file
+    - *file*.mimeType - the [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types), such as `text/csv`, guessed from the file extension (`.csv`, `.tsv`, `.json`, `.html`, `.xml`, `.png`, `.jpg`, or `.js`); it defaults to `application/octet-stream`
+    - *file*.lastModified and *file*.size - the time of the last modification (in milliseconds since January 1, 1970) and the size in bytes, if known; Notebook Kit leaves them undefined
+
+    *file*.url() returns a promise of the URL; use *file*.href instead, unless the file has no `href`, such as a file in a [ZIP archive](#file-zip).
+
+    <div class="info">
+
+    **Only on hosted Observable**
+
+    - `FileAttachment.attach(file)` attaches a [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) to the notebook with code; see [Programmatic file attachments](https://observablehq.com/@observablehq/programmatic-file-attachments).
+    - `fetch(url, {cache: true})` saves the response as a file attachment, so that later fetches load it instead of the live data; see [Fetch caching](https://observablehq.com/@observablehq/fetch-caching).
+    - `fetch(url, {proxy: true})` routes the request through Observable's proxy, for servers that do not allow cross-origin requests; see [Fetch proxying](https://observablehq.com/@observablehq/fetch-proxying).
+    - `Secret(name)` returns the value of a workspace secret, in private notebooks only; see [Secrets](https://observablehq.com/@observablehq/secrets).
+
+    </div>
+  </script>
+  <script id="37" type="text/markdown">
+    ### File methods
+
+    Each method reads the file and returns a promise. When a top-level variable is a promise, other cells wait for it, and see its result.
+
+    | Method | Resolves to |
+    | - | - |
+    | [*file*.text(*encoding*)](#file-text-encoding) | a string |
+    | [*file*.json()](#file-json) | a JSON value |
+    | [*file*.csv(*options*)](#file-csv-options) | an array of rows |
+    | [*file*.tsv(*options*)](#file-csv-options) | an array of rows |
+    | [*file*.dsv(*options*)](#file-csv-options) | an array of rows |
+    | [*file*.arrow()](#file-arrow) | a [Flechette](https://idl.uw.edu/flechette/) table |
+    | [*file*.parquet()](#file-parquet) | a Flechette table |
+    | [*file*.arquero(*options*)](#file-arquero-options) | an [Arquero](https://idl.uw.edu/arquero/) table |
+    | [*file*.xlsx()](#file-xlsx) | a `Workbook` |
+    | [*file*.zip()](#file-zip) | a `ZipArchive` |
+    | [*file*.image(*properties*)](#file-image-properties) | an [`HTMLImageElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement) |
+    | [*file*.xml(*mimeType*)](#file-xml-mime-type-and-file-html) | a [`Document`](https://developer.mozilla.org/en-US/docs/Web/API/Document) |
+    | [*file*.html()](#file-xml-mime-type-and-file-html) | a `Document` |
+    | [*file*.blob()](#file-blob-file-array-buffer-and-file-stream) | a [`Blob`](https://developer.mozilla.org/en-US/docs/Web/API/Blob) |
+    | [*file*.arrayBuffer()](#file-blob-file-array-buffer-and-file-stream) | an [`ArrayBuffer`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer) |
+    | [*file*.stream()](#file-blob-file-array-buffer-and-file-stream) | a [`ReadableStream`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) of bytes |
+
+    ### file.text(*encoding*)
+
+    Returns the contents of the file as a string. The file is decoded as UTF-8, unless you specify another [encoding](https://developer.mozilla.org/en-US/docs/Web/API/Encoding_API/Encodings), such as `"utf-16be"`.
+  </script>
+  <script id="38" type="module" pinned="">
+    FileAttachment("ex/data/life.txt").text()
+  </script>
+  <script id="39" type="text/markdown">
+    ### file.json()
+
+    Parses the file as [JSON](https://www.json.org/). JSON has no date type: dates are usually stored as strings or numbers, and must be converted.
+  </script>
+  <script id="40" type="module" pinned="">
+    FileAttachment("ex/data/capitals.json").json()
+  </script>
+  <script id="41" type="text/markdown">
+    ### file.csv(*options*)
+
+    Parses the file as comma-separated values with [d3-dsv](https://d3js.org/d3-dsv). *file*.tsv parses tab-separated values, and *file*.dsv uses the **delimiter** option (a comma by default). The options are:
+
+    - **array** - if true, returns one array per line, header included; otherwise (the default), the first line is the header, each other line becomes an object keyed by column name, and the result has a `columns` property.
+    - **typed** - how to convert values, which are strings in the file:
+      - false (the default) - values remain strings
+      - true - values are converted with [d3.autoType](https://d3js.org/d3-dsv#autoType), row by row
+      - `"auto"` - each column gets one type, based on its first 100 rows: boolean, number, or date if at least 90% of its non-empty values have that type, and string otherwise. If **array** is true, `"auto"` falls back to d3.autoType, row by row.
+
+    Only convert types if the data is compatible: for example, d3.autoType turns ZIP codes such as `01234` into numbers.
+  </script>
+  <script id="42" type="module" pinned="">
+    FileAttachment("ex/data/AMZN.csv").csv({typed: true})
+  </script>
+  <script id="44" type="module" pinned="">
+    FileAttachment("ex/data/faithful.tsv").tsv({typed: true})
+  </script>
+  <script id="45" type="text/markdown">
+    ### file.arrow()
+
+    Parses an [Apache Arrow](https://arrow.apache.org/) file with [Flechette](https://idl.uw.edu/flechette/), and returns a Flechette table. Dates and timestamps become `Date` objects.
+  </script>
+  <script id="46" type="module" pinned="">
+    const flights = FileAttachment("ex/data/flights-200k.arrow").arrow();
+  </script>
+  <script id="47" type="module" pinned="">
+    flights.numRows
+  </script>
+  <script id="48" type="text/markdown">
+    ### file.parquet()
+
+    Parses an [Apache Parquet](https://parquet.apache.org/) file with [parquet-wasm](https://github.com/kylebarron/parquet-wasm), and returns a Flechette table. Dates and timestamps become `Date` objects. To query a Parquet file with SQL, use [DuckDB](#duck-db-client-of-sources-config) instead.
+
+    ```js
+    const gaia = FileAttachment("gaia-sample.parquet").parquet();
+    ```
+
+    ### file.arquero(*options*)
+
+    Loads the file into an [Arquero](https://idl.uw.edu/arquero/) table, with [aq.fromCSV](https://idl.uw.edu/arquero/api/#fromCSV) for CSV and TSV files, [aq.fromJSON](https://idl.uw.edu/arquero/api/#fromJSON) for JSON files, and [aq.fromArrow](https://idl.uw.edu/arquero/api/#fromArrow) for `.arrow` and `.parquet` files. Other files throw an error. *options* are passed to the Arquero function.
+  </script>
+  <script id="49" type="module" pinned="">
+    FileAttachment("ex/data/penguins.csv").arquero().then((table) => table.groupby("species").count().objects())
+  </script>
+  <script id="50" type="text/markdown">
+    ### file.xlsx()
+
+    Reads a Microsoft Excel (`.xlsx`) file with [ExcelJS](https://github.com/exceljs/exceljs), and returns a `Workbook`:
+
+    - *workbook*.sheetNames - the sheet names
+    - *workbook*.sheet(*name*, *options*) - the rows of the sheet with the given *name* or index (starting at 0)
+
+    The options are:
+
+    - **range** - the cells to read, such as `"A1:J10"`; either end can omit the column or the row, as in `"B3:"` (from B3 to the end) or `":J"` (columns A to J). Defaults to the whole sheet.
+    - **headers** - if true, the values of the first row are the column names; otherwise, the column names are letters (A, B, C…).
+
+    Each row is an object keyed by column name, with a hidden `#` property for the row number. Empty cells are omitted, and formula cells have the value of their last result. The array has a `columns` property: `"#"` followed by the column names.
+
+    ```js
+    const workbook = await FileAttachment("laser-report.xlsx").xlsx();
+    const reports = workbook.sheet(0, {headers: true, range: "A1:J"});
+    ```
+
+    ### file.zip()
+
+    Reads a ZIP archive with [JSZip](https://stuk.github.io/jszip/), and returns a `ZipArchive`:
+
+    - *archive*.filenames - the paths of the files in the archive, without directories
+    - *archive*.file(*path*) - a file attachment for the file at *path*; throws an error if there is no such file
+
+    These file attachments have the same methods as others, but no `href`; their `url()` method returns a temporary [object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL_static).
+
+    ```js
+    const archive = await FileAttachment("muybridge.zip").zip();
+    const image = await archive.file("deer.jpeg").image();
+    ```
+
+    ### file.image(*properties*)
+
+    Loads the file as an image, and returns a promise of the [`HTMLImageElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement) once it has loaded. *properties*, if any, are assigned to the image, such as `{width: 320}`. Images from another site are loaded with `crossOrigin = "anonymous"`, so that you can read their pixels in a canvas if the site allows it ([CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS)).
+
+    To show an image without processing it, an `<img>` element in a Markdown or HTML cell is simpler. The built site includes the local images, audio, video, stylesheets, and download links that Markdown and HTML cells reference.
+  </script>
+  <script id="51" type="module" pinned="">
+    FileAttachment("ex/data/sea-ice.jpg").image({width: 320})
+  </script>
+  <script id="52" type="text/markdown">
+    ### file.xml(*mimeType*) and file.html()
+
+    Parses the file with [DOMParser](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser), and returns a [`Document`](https://developer.mozilla.org/en-US/docs/Web/API/Document). *mimeType* defaults to `"application/xml"`; *file*.html() is the same as *file*.xml(`"text/html"`).
+
+    ```js
+    const svg = FileAttachment("logo.svg").xml("image/svg+xml");
+    ```
+
+    ### file.blob(), file.arrayBuffer(), and file.stream()
+
+    Return the contents of the file as a [`Blob`](https://developer.mozilla.org/en-US/docs/Web/API/Blob), an [`ArrayBuffer`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer), or a [`ReadableStream`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) of bytes. Use them for formats that the standard library does not parse, or to read a file in chunks.
+  </script>
+  <script id="53" type="module" pinned="">
+    FileAttachment("ex/data/sea-ice.jpg").arrayBuffer().then((buffer) => buffer.byteLength)
+  </script>
+  <script id="54" type="text/markdown">
+    To count the bytes of a file without loading it all into memory:
+
+    ```js
+    const stream = await FileAttachment("sea-ice.jpg").stream();
+    const reader = stream.getReader();
+    let total = 0;
+
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      total += value.length;
+    }
+
+    display(total);
+    ```
+  </script>
+  <script id="55" type="text/markdown">
+    ---
+
+    ## SQL and databases
+
+    SQL cells (`application/sql`) query a database and display the results as a table; see [Database connectors](./databases). The following built-ins connect JavaScript and SQL.
+
+    ### DatabaseClient(*name*, *options*)
+
+    Returns a client for the database *name*, either configured in `.observable/databases.json` next to the notebook, or one that needs no configuration, such as `duckdb`; see [Database connectors](./databases). Like `FileAttachment`, it requires a literal string. SQL cells use this function and set *options*; you can omit them.
+
+    In Notebook Kit, *client*.sql\`*query*\` returns a promise of an array of objects, one per row, with a `schema` property (the name and type of each column) and a `date` property (when the query ran). On hosted Observable, it returns a Flechette table instead (see below).
+
+    ```js
+    const warehouse = DatabaseClient("duckdb");
+    const three = await warehouse.sql`SELECT 1 + $\{2} AS three`;
+    ```
+
+    Notebook Kit does not run queries from the browser: it reads results saved in `.observable/cache`. SQL cells without interpolated values run when the notebook is previewed or built; to save the results of other queries, use the [`notebooks query`](./kit#query) command.
+
+    <div class="info">
+
+    **Only on hosted Observable**
+
+    `DatabaseClient` connects to the databases of your workspace, and runs queries live in private notebooks. *client*.sql returns a promise of a Flechette (Apache Arrow) table, and accepts SQL fragments, views, and variants. Results are cached as file attachments; set the **cache** option to false to always run queries live, or the **since** option to re-run queries whose results are older than a date. See [Database clients](https://observablehq.com/@observablehq/database-clients).
+
+    </div>
+
+    `DatabaseClient.of(source, name)` returns a promise of *source* if it is already a client (an object with a `sql` method); otherwise, of a new DuckDB-Wasm client with *source* loaded as the table *name*. SQL cells with a `var:` database use it.
+  </script>
+  <script id="56" type="text/markdown">
+    ### DuckDBClient.of(*sources*, *config*)
+
+    Creates a [DuckDB](https://duckdb.org/) database that runs in the browser ([DuckDB-Wasm](https://duckdb.org/docs/stable/clients/wasm/overview)), and returns a promise of a client. *sources* maps table names to data:
+
+    - a file attachment of a CSV, TSV, JSON, Arrow, or Parquet file
+    - a file attachment of a DuckDB database (`.db`, `.ddb`, or `.duckdb`), attached read-only under the key's name
+    - an array of objects
+    - an Apache Arrow, Flechette, or Arquero table
+    - a URL, which DuckDB reads when queried
+    - `{file, ...options}` or `{data, ...options}`, where *options* are passed to DuckDB-Wasm
+    - a promise of any of the above
+
+    If DuckDB cannot read the values of a CSV file, it loads all columns as strings. Parquet files are exposed as views: DuckDB reads them when a query uses them.
+
+    *config* is passed to DuckDB-Wasm. By default, the client converts decimals and big integers to numbers (`query.castDecimalToDouble`, `query.castBigIntToDouble`), converts timestamps to dates (`query.castTimestampToDate`), and downloads each file completely (`filesystem.forceFullHTTPReads`). To let DuckDB fetch only the parts of a Parquet file that a query needs, with range requests, set this option to false:
+
+    ```js
+    const db = DuckDBClient.of(sources, {filesystem: {forceFullHTTPReads: false}});
+    ```
+  </script>
+  <script id="57" type="module" pinned="">
+    const db = DuckDBClient.of({penguins: FileAttachment("ex/data/penguins.csv")});
+  </script>
+  <script id="58" type="text/markdown">
+    ### db.sql\`*query*\`
+
+    Runs the SQL *query*, written as a [tagged template literal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates), and returns a promise of an Apache Arrow table. Interpolated values are sent to DuckDB alongside the SQL text, not inside it, which protects against [SQL injection](https://en.wikipedia.org/wiki/SQL_injection). [SQL fragments](#sql) are the exception: their text becomes part of the query.
+  </script>
+  <script id="59" type="module" pinned="">
+    Inputs.table(await db.sql`SELECT species, island, COUNT(*) AS count FROM penguins GROUP BY ALL ORDER BY count DESC`)
+  </script>
+  <script id="60" type="text/markdown">
+    A DuckDB client has other methods:
+
+    - *db*.query(*query*, *params*) - runs the SQL string *query*, with optional values *params* for its `?` placeholders; returns a promise of an Apache Arrow table
+    - *db*.queryRow(*query*, *params*) - returns a promise of the first row, or null
+    - *db*.queryStream(*query*, *params*) - returns a promise of `{schema, readRows}`, where `readRows()` yields the rows in batches
+    - *db*.describeTables() - returns a promise of the tables, as `{name}` objects
+    - *db*.describeColumns({table}) - returns a promise of the columns of *table*, as `{name, type, nullable, databaseType}` objects
+
+    `DuckDBClient.sql(sources, config)` creates a client and returns a promise of its `sql` function. Don't name the result `sql`, or it replaces the built-in [`sql`](#sql).
+
+    ```js
+    const query = await DuckDBClient.sql({penguins});
+    const gentoo = await query`SELECT * FROM penguins WHERE species = 'Gentoo'`;
+    ```
+
+    The built-in `duckdb` is the [DuckDB-Wasm](https://github.com/duckdb/duckdb-wasm) module, for lower-level access.
+
+    ### SQL cells with var: databases
+
+    A SQL cell can query a client defined by a JavaScript cell: set the cell's database to `var:` followed by the variable name. The SQL cell below, with `database="var:db"`, queries the client `db` above.
+  </script>
+  <script id="61" type="application/sql" pinned="" database="var:db">
+    SELECT species, sex, COUNT(*) AS count
+    FROM penguins
+    GROUP BY species, sex
+    ORDER BY species, sex
+  </script>
+  <script id="62" type="text/markdown">
+    The variable can be any object with a `sql` tagged template function. Otherwise, the SQL cell loads its value into a new DuckDB-Wasm database, as a table with the variable's name: for example, `database="var:penguins"` queries the `penguins` [sample dataset](#sample-datasets). This database is recreated each time the cell runs; to run several queries on the same data, use `DuckDBClient.of`.
+
+    A SQL cell's **output** is what its client returns: an Apache Arrow table for `DuckDBClient`, and, for database connectors, an array of objects in Notebook Kit or a Flechette table on hosted Observable.
+
+    ### sql\`…\`
+
+    Returns a SQL _fragment_: a piece of SQL that keeps its interpolated values apart from its text. A fragment interpolated in a query adds its text to the query, and its values to the query's values. Use fragments to build queries from parts, for example to add a filter only when an option is selected. `DuckDBClient` (including SQL cells with a `var:` DuckDB client) and *fragment*.query support fragments; in Notebook Kit, database connectors currently do not. For a guide with more examples, see [Composing SQL](https://observablehq.com/@observablehq/composing-sql).
+  </script>
+  <script id="63" type="module" pinned="">
+    const island = view(Inputs.select([null, "Biscoe", "Dream", "Torgersen"], {label: "Island", format: (d) => d ?? "All islands"}));
+  </script>
+  <script id="64" type="module" pinned="">
+    const where = island == null ? sql`` : sql`WHERE island = ${island}`;
+  </script>
+  <script id="65" type="application/sql" pinned="" database="var:db">
+    SELECT species, COUNT(*) AS count
+    FROM penguins
+    ${where}
+    GROUP BY species
+    ORDER BY species
+  </script>
+  <script id="66" type="text/markdown">
+    A fragment has the following methods:
+
+    - *fragment*.flat(*dialect*) - returns the fragment with nested fragments, [views](#sql-view), and [variants](#sql-variant-variants) resolved for a SQL *dialect* (the flavor of SQL of a database, such as `duckdb` or `mysql`)
+    - *fragment*.query(*database*) - flattens the fragment for *database*, and runs it
+    - *fragment*.toDialect(*dialect*) - returns the fragment with each variant replaced by its value for *dialect*
+    - *fragment*.toString() - returns the SQL text of the flattened fragment (for the default dialect), with `?` for each value
+  </script>
+  <script id="67" type="module" pinned="">
+    String(sql`SELECT species, COUNT(*) AS count FROM penguins ${where} GROUP BY species`)
+  </script>
+  <script id="68" type="text/markdown">
+    ### sql.view\`…\`
+
+    Returns a SQL _view_: a fragment that can be used like a table in other queries. When a query is flattened, the view becomes a named subquery in its `WITH` clause (a [common table expression](https://duckdb.org/docs/stable/sql/query_syntax/with)). See [Composing SQL](https://observablehq.com/@observablehq/composing-sql) for details.
+  </script>
+  <script id="69" type="module" pinned="">
+    const adelieView = sql.view`SELECT * FROM penguins WHERE species = 'Adelie'`;
+  </script>
+  <script id="70" type="module" pinned="">
+    String(sql`SELECT island, COUNT(*) AS count FROM ${adelieView} GROUP BY island`)
+  </script>
+  <script id="71" type="text/markdown">
+    *view*.bind(*database*) returns a view attached to *database*; run it with *view*.query(). A view can be bound only once.
+
+    #### SQL view cells
+
+    A SQL view cell (`type="application/sql+view"`) defines a bound view instead of running a query: its **database** attribute is the database, and its **output** attribute names the view. The view runs only when it is used, in a SQL cell or through `query()`. The cell displays the view object, not results.
+
+    ```html
+    <script type="application/sql+view" database="var:db" output="adelie">
+      SELECT * FROM penguins WHERE species = 'Adelie'
+    <\/script>
+    ```
+
+    Here is that cell:
+  </script>
+  <script id="72" type="application/sql+view" pinned="" database="var:db" output="adelie">
+    SELECT * FROM penguins WHERE species = 'Adelie'
+  </script>
+  <script id="73" type="text/markdown">
+    A SQL cell can select from the view:
+  </script>
+  <script id="74" type="application/sql" pinned="" database="var:db">
+    SELECT island, COUNT(*) AS count FROM ${adelie} GROUP BY island
+  </script>
+  <script id="75" type="text/markdown">
+    A JavaScript cell can run it:
+  </script>
+  <script id="76" type="module" pinned="">
+    Inputs.table(await adelie.query())
+  </script>
+  <script id="77" type="text/markdown">
+    A query that uses a bound view must run on the same database.
+
+    ### sql.ident(*name*)
+
+    Returns a fragment for the SQL identifier *name* (a table or column name), quoted for the database. Use it for names that come from variables, since names cannot be passed as values.
+
+    ### sql.text(*value*)
+
+    Returns a fragment for the SQL string *value*, quoted for the database. A string interpolated with `$\{…}` is sent to the database alongside the query, and appears as `?` in the SQL text; with `sql.text`, the string is baked into the SQL text itself. Use it where the database does not accept a parameter, such as in DuckDB's `PIVOT … IN (…)`.
+  </script>
+  <script id="78" type="module" pinned="">
+    const speciesList = ["Adelie", "Gentoo"].map(sql.text).reduce((a, b) => sql`${a}, ${b}`);
+    const pivot = sql`PIVOT penguins ON ${sql.ident("species")} IN (${speciesList}) USING COUNT(*) GROUP BY island`;
+
+    display(String(pivot));
+    display(Inputs.table(await pivot.query(db)));
+  </script>
+  <script id="79" type="text/markdown">
+    ### sql.variant(*variants*)
+
+    Returns a value that depends on the SQL dialect. *variants* has a key per dialect, such as `duckdb` or `mysql`, and an optional `default` key. The query uses the value for its database's dialect, or the default; if there is neither, it throws an error. A client’s dialect is specified in its `dialect` property.
+  </script>
+  <script id="80" type="module" pinned="">
+    const label = sql`SELECT ${sql.variant({mysql: sql`CONCAT(species, ' ', island)`, default: sql`species || ' ' || island`})} AS label FROM penguins`;
+
+    display(String(label.flat("mysql")));
+    display(String(label.flat("duckdb")));
+  </script>
+  <script id="81" type="text/markdown">
+    ---
+
+    ## Data loaders
+
+    ### Interpreter(*name*, *options*)
+
+    Returns an interpreter for [data loader](./data-loaders) cells: *name* is `node`, `python`, or `r`, and *options*.**format** is the output format (`buffer` by default). *interpreter*.run(*source*) returns a promise of a file attachment for the saved output of the program *source* in `.observable/cache`; it does not run the program. In Notebook Kit, data loader cells load that file directly, so you rarely need this function.
+  </script>
+  <script id="82" type="text/markdown">
+    ---
+
+    ## Markup
+
+    These tagged template literals turn text into page content. Markdown, HTML, ${tex`\TeX`}, and DOT cells use them: a Markdown cell is like a JavaScript cell containing a `md` template literal.
+
+    ### md\`…\`
+
+    Renders [CommonMark](https://commonmark.org/) text with [markdown-it](https://github.com/markdown-it/markdown-it). HTML is allowed, but Markdown inside an HTML block is not rendered: `<p>**bold**</p>` shows the asterisks. URLs become links, and quotes and dashes become typographic quotes and dashes. Headings of level 2 and 3 get an anchor link. Code blocks with a language, such as `js`, are highlighted.
+
+    Interpolated DOM nodes are inserted as they are. An interpolated array can contain strings, rendered as Markdown, and DOM nodes. Other values become strings, rendered as Markdown without escaping. `md` returns a `div`, or the result itself if it is a single node, such as one HTML element.
+  </script>
+  <script id="83" type="module" pinned="">
+    md`> The value of ${tex`\pi^2`} is *about* ${(Math.PI ** 2).toFixed(4)} -- "roughly".`
+  </script>
+  <script id="84" type="text/markdown">
+    ### htl
+
+    The `html` and `svg` template literals of [Hypertext Literal](https://github.com/observablehq/htl) (`htl`) create HTML and SVG elements safely. Interpolated values are escaped according to their context: a string is inserted as text, not as HTML; DOM nodes and arrays of nodes are inserted as they are. In attributes, you can interpolate strings, numbers, booleans, objects for `style`, and functions for event handlers such as `onclick`.
+
+    If the template has several top-level nodes, `html` wraps them in a `span`, and `svg` in a `g`. To get a [document fragment](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment) instead, use `html.fragment` or `svg.fragment`.
+  </script>
+  <script id="85" type="module" pinned="">
+    html`<b>Hello</b>, ${"<i>world</i>"}!`
+  </script>
+  <script id="86" type="module" pinned="">
+    svg`<svg width="60" height="60"><circle cx="30" cy="30" r="30" fill="currentColor"></circle></svg>`
+  </script>
+  <script id="87" type="text/markdown">
+    ### tex\`…\`
+
+    Renders ${tex`\TeX`} with [KaTeX](https://katex.org/), inline. `tex.block` renders it as a centered block. `tex.options(options)` returns a `tex` tag with the given [KaTeX options](https://katex.org/docs/options.html). Backslashes do not need to be escaped.
+  </script>
+  <script id="88" type="text/markdown" pinned="">
+    Inline in Markdown: ${tex`E = mc^2`}.
+  </script>
+  <script id="89" type="module" pinned="">
+    tex.block`\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}`
+  </script>
+  <script id="90" type="text/markdown">
+    ### dot\`…\`
+
+    Renders a [Graphviz](https://graphviz.org/) DOT graph as SVG with [Viz.js](https://github.com/mdaines/viz-js), in the page's text color and sans-serif font.
+  </script>
+  <script id="91" type="module" pinned="">
+    dot`digraph { rankdir = LR; a -> b -> c; a -> c; }`
+  </script>
+  <script id="92" type="text/markdown">
+    ### mermaid\`…\`
+
+    Renders a [Mermaid](https://mermaid.js.org/) diagram as SVG. Unlike the other template literals, it returns a promise. The theme is `dark` if the page is dark when Mermaid loads, and `neutral` otherwise.
+  </script>
+  <script id="93" type="module" pinned="">
+    mermaid`graph LR
+      A[Load] --> B[Query] --> C[Chart]
+      A --> C`
+  </script>
+  <script id="94" type="text/markdown">
+    ---
+
+    ## Recommended libraries
+
+    The libraries below are available without an explicit import. Most are loaded from [jsDelivr](https://www.jsdelivr.com/) and get the latest version. To use another version or another library, import it explicitly, as in `import * as Plot from "npm:@observablehq/plot@0.6"`.
+
+    | Name | Library |
+    | - | - |
+    | `_` | [Lodash](https://lodash.com/) |
+    | `aq` | [Arquero](https://idl.uw.edu/arquero/) |
+    | `Arrow` | [Apache Arrow](https://arrow.apache.org/docs/js/) (version 17.0.0) |
+    | `d3` | [D3](https://d3js.org/) |
+    | `dot` | [Graphviz](#dot) template literal |
+    | `duckdb` | [DuckDB-Wasm](https://github.com/duckdb/duckdb-wasm) (version 1.32.0) |
+    | `DuckDBClient` | [DuckDB client](#duck-db-client-of-sources-config) |
+    | `echarts` | [Apache ECharts](https://echarts.apache.org/) |
+    | `Flechette` | [Flechette](https://idl.uw.edu/flechette/) |
+    | `htl`, `html`, `svg` | [Hypertext Literal](#htl) |
+    | `Inputs` | [Observable Inputs](https://github.com/observablehq/inputs), with its stylesheet |
+    | `L` | [Leaflet](https://leafletjs.com/), with its stylesheet |
+    | `mapboxgl` | [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/), with its stylesheet |
+    | `md` | [Markdown](#md) template literal |
+    | `mermaid` | [Mermaid](#mermaid) template literal |
+    | `Plot` | [Observable Plot](https://observablehq.com/plot/) |
+    | `React`, `ReactDOM` | [React](https://react.dev/) |
+    | `tex` | [KaTeX](#tex) template literal |
+    | `topojson` | [TopoJSON Client](https://github.com/topojson/topojson-client) |
+    | `vl` | [Vega-Lite API](https://vega.github.io/vega-lite-api/), with Vega and Vega-Lite |
+  </script>
+  <script id="95" type="text/markdown">
+    ---
+
+    ## Sample datasets
+
+    The following datasets help you get started and try examples. Each is downloaded on demand from the [@observablehq/sample-datasets](https://www.npmjs.com/package/@observablehq/sample-datasets) package. CSV datasets are parsed with [d3.autoType](https://d3js.org/d3-dsv#autoType), which converts numbers and dates.
+
+    | Name | Description | Source |
+    | - | - | - |
+    | `aapl` | Apple stock prices | [Yahoo! Finance](https://finance.yahoo.com/lookup) |
+    | `alphabet` | Frequency of letters in English | [_Cryptographical Mathematics_, Robert Edward Lewand](http://cs.wellesley.edu/~fturbak/codman/letterfreq.html) |
+    | `cars` | Characteristics of car models | [1983 ASA Data Exposition](http://lib.stat.cmu.edu/datasets/) |
+    | `citywages` | Wages in US cities | [The New York Times](https://www.nytimes.com/2019/12/02/upshot/wealth-poverty-divide-american-cities.html) |
+    | `diamonds` | Prices and characteristics of diamonds | [ggplot2](https://github.com/tidyverse/ggplot2/blob/main/data-raw/diamonds.csv) |
+    | `flare` | Package hierarchy of the Flare visualization toolkit | [D3](https://observablehq.com/@d3/treemap) |
+    | `industries` | Unemployment by industry | [Bureau of Labor Statistics](https://www.bls.gov/) |
+    | `miserables` | Co-occurrence of characters in _Les Misérables_ (JSON, with `nodes` and `links`) | [Stanford GraphBase, Donald Knuth](https://www-cs-faculty.stanford.edu/~knuth/sgb.html) |
+    | `olympians` | Athletes of the 2016 Summer Olympics | [Matt Riggott/IOC](https://www.flother.is/2017/olympic-games-data/) |
+    | `penguins` | Measurements of penguins of the Palmer Archipelago | [Dr. Kristen Gorman](https://github.com/allisonhorst/palmerpenguins) |
+    | `pizza` | Sales of a fictional pizza restaurant | [Observable](https://observablehq.com/@observablehq/pizza-paradise-data) |
+    | `weather` | Daily weather in Seattle | [NOAA](https://www.ncdc.noaa.gov/cdo-web/datatools/records), [Vega](https://github.com/vega/vega-datasets/blob/main/scripts/weather.py) |
+
+    Like other built-ins, these names are not reserved: you can declare your own `penguins` variable.
+  </script>
+  <script id="97" type="text/markdown">
+    ---
+
+    ## Deprecated
+
+    The `DOM`, `Files`, and `Promises` namespaces are kept for compatibility with the older standard library (2018), and are deprecated:
+
+    | Deprecated | Alternative |
+    | - | - |
+    | `DOM.canvas(width, height)` | `document.createElement("canvas")`, or the `html` template literal |
+    | `DOM.context2d(width, height, dpi)` | no direct alternative; see below |
+    | `DOM.download(object, name, label)` | an `<a download>` link to an [object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL_static) |
+    | `DOM.element(name, attributes)` | `document.createElement`, `document.createElementNS`, or the `html` and `svg` template literals |
+    | `DOM.input(type)` | `Inputs`, or `document.createElement("input")` |
+    | `DOM.range(min, max, step)` | `Inputs.range` |
+    | `DOM.select(values)` | `Inputs.select` |
+    | `DOM.svg(width, height)` | the `svg` template literal |
+    | `DOM.text(string)` | `document.createTextNode(string)` |
+    | `DOM.uid(name)` | no direct alternative; see below |
+    | `Files.buffer(blob)` | *blob*.arrayBuffer() |
+    | `Files.text(blob)` | *blob*.text() |
+    | `Files.url(blob)` | `URL.createObjectURL(blob)`, which returns an object URL instead of a data URL |
+    | `Promises.delay(duration, value)` | `new Promise((resolve) => setTimeout(() => resolve(value), duration))` |
+    | `Promises.tick(duration, value)` | `new Promise((resolve) => setTimeout(() => resolve(value), duration - (Date.now() % duration)))` |
+    | `Promises.when(date, value)` | `new Promise((resolve) => setTimeout(() => resolve(value), date - Date.now()))` |
+
+    `DOM.context2d(width, height, dpi)` returns the 2D context of a new canvas of the given size, scaled for the screen's pixel density *dpi* (by default, [`devicePixelRatio`](https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio)); use *context*.canvas to get the canvas.
+
+    `DOM.uid(name)` returns a unique identifier, for references between SVG elements such as clip paths. Use its `id` property in an `id` attribute, its `href` property in an `href` attribute, and the identifier itself in attributes such as `clip-path`.
+  </script>
+  <script id="98" type="text/markdown">
+    ---
+
+    ## Differences from the standard library (2018)
+
+    For authors familiar with the [previous standard library](https://github.com/observablehq/stdlib):
+
+    - `display` and `view` are new.
+    - `dark`, `DatabaseClient`, `Interpreter`, `sql`, `duckdb`, `echarts`, `Flechette`, `mapboxgl`, `React`, and `ReactDOM` are new.
+    - `require` and `resolve` are removed: use `import` with an `npm:` specifier, or a URL.
+    - `SQLite`, `SQLiteDatabaseClient`, and *file*.sqlite() are removed; SQL cells can query SQLite with a [database connector](./databases).
+    - `Generators.disposable`, `filter`, `map`, `range`, `valueAt`, and `worker` are removed; `Generators.dark`, `now`, and `width` are new.
+    - `Generators.input`, `observe`, and `queue` return async generators of values, instead of generators of promises; to read them in a loop, use `for await`.
+    - `Mutable(value)` returns the generator; it used to be a constructor with `generator` and `value` properties.
+    - `width` is the width of the `main` element instead of the `body`, and updates when the element is resized, not only the window.
+    - `html` and `svg` use Hypertext Literal, which escapes interpolated strings; they used to insert strings as HTML.
+    - `md` uses markdown-it instead of Marked, and usually returns a `div`.
+    - `FileAttachment` paths are relative to the notebook, and must be literal strings. *file*.href is new; prefer it to *file*.url(). *file*.dsv(), *file*.parquet(), *file*.arquero(), *file*.text(*encoding*), *file*.lastModified, and *file*.size are new. *file*.arrow() returns a Flechette table instead of an Apache Arrow JS table, and has no `version` option.
+    - `DOM`, `Files`, and `Promises` are [deprecated](#deprecated).
+  </script>
+</notebook>
