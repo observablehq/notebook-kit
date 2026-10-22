@@ -1,3 +1,4 @@
+/** @deprecated */
 export function context2d(
   width: number,
   height: number,
