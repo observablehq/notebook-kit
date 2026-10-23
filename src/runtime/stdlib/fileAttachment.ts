@@ -2,6 +2,7 @@
 
 import {inferTypes} from "./dsv.js";
 
+/** A read-only map from each registered file’s resolved name href to the corresponding file.  */
 export const registeredFiles = new Map<string, FileAttachment>();
 
 export type DsvOptions = {delimiter?: string; array?: boolean; typed?: "auto" | boolean};
