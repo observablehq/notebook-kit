@@ -128,13 +128,9 @@ h2,
 h3,
 h4,
 h5,
-h6 {
-  max-width: 640px;
-}
-
+h6,
 .katex-display {
-  overflow-x: auto;
-  overflow-y: hidden;
+  max-width: 640px;
 }
 
 blockquote,
