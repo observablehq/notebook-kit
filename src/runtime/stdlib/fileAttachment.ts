@@ -90,7 +90,7 @@ export function registerFile(
     const {path, mimeType, lastModified, size} = info;
     const file = new FileAttachmentImpl(
       new URL(path, base).href,
-      name.split("/").pop()!,
+      name,
       mimeType,
       lastModified,
       size
