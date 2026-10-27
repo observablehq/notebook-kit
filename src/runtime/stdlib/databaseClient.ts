@@ -112,7 +112,7 @@ function isSqliteFile(source: unknown): source is FileAttachment {
     source != null &&
     typeof source === "object" &&
     "mimeType" in source &&
-    source.mimeType === "application/vnd.sqlite3"
+    (source.mimeType === "application/vnd.sqlite3" || source.mimeType === "application/x-sqlite3")
   );
 }
 
