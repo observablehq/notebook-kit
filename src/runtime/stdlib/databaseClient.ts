@@ -81,9 +81,11 @@ class DatabaseClientImpl implements DatabaseClient {
 async function of(source: unknown, name: string): Promise<{sql: DatabaseClient["sql"]}> {
   return isDatabaseClient(source)
     ? source
-    : isSqliteFile(source)
-      ? source.sqlite()
-      : (await import("./duckdb.js")).DuckDBClient.of({[name]: source});
+    : isDuckDBFile(source)
+      ? source.duckdb()
+      : isSqliteFile(source)
+        ? source.sqlite()
+        : (await import("./duckdb.js")).DuckDBClient.of({[name]: source});
 }
 
 function isDatabaseClient(source: unknown): source is DatabaseClient {
@@ -92,6 +94,16 @@ function isDatabaseClient(source: unknown): source is DatabaseClient {
     typeof source === "object" &&
     "sql" in source &&
     typeof source["sql"] === "function"
+  );
+}
+
+function isDuckDBFile(source: unknown): source is FileAttachment {
+  return (
+    source != null &&
+    typeof source === "object" &&
+    "name" in source &&
+    typeof source.name === "string" &&
+    /\.duckdb$/i.test(source.name)
   );
 }
 

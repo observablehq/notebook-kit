@@ -47,6 +47,8 @@ export interface FileAttachment {
   arquero(options?: any): Promise<any>;
   /** Returns the contents of this Parquet file as an Apache Arrow table. */
   parquet(): Promise<any>;
+  /** Returns a DuckDBClient initialized from this DuckDB file. */
+  duckdb(): Promise<DuckDBClient>;
   /** Returns a SQLiteDatabaseClient initialized from this SQLite file. */
   sqlite(): Promise<SQLiteDatabaseClient>;
   /** Returns the contents of this file as an XML document. */
@@ -210,6 +212,10 @@ export abstract class AbstractFile implements FileAttachment {
   async parquet() {
     const [Flechette, Parquet, buffer] = await Promise.all([import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm"), import("https://cdn.jsdelivr.net/npm/parquet-wasm/+esm").then(async (Parquet) => (await Parquet.default("https://cdn.jsdelivr.net/npm/parquet-wasm/esm/parquet_wasm_bg.wasm"), Parquet)), this.arrayBuffer()]); // prettier-ignore
     return Flechette.tableFromIPC(Parquet.readParquet(new Uint8Array(buffer)).intoIPCStream(), {useDate: true}); // prettier-ignore
+  }
+  async duckdb() {
+    const {DuckDBClient} = await import("./duckdb.js");
+    return DuckDBClient.open(this);
   }
   async sqlite() {
     const [{SQLiteDatabaseClient}, response] = await Promise.all([import("./sqlite.js"), this.arrayBuffer()]); // prettier-ignore
