@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import katex from "https://cdn.jsdelivr.net/npm/katex/+esm";
+import katex from "https://esm.sh/katex";
 import type {RawTemplateRenderer} from "./template.js";
 
 const link = document.createElement("link");
-link.href = "https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css";
+link.href = "https://esm.sh/katex/dist/katex.min.css";
 link.rel = "stylesheet";
 document.head.appendChild(link);
 

@@ -1,4 +1,4 @@
-import JSZip from "https://cdn.jsdelivr.net/npm/jszip/+esm";
+import JSZip from "https://esm.sh/jszip";
 import {AbstractFile} from "./fileAttachment.js";
 
 export class ZipArchive {

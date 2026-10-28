@@ -7,7 +7,7 @@ import {clear, display} from "./display.js";
 
 const {createRoot} = vi.hoisted(() => ({createRoot: vi.fn()}));
 
-// The runtime loads React DOM from jsDelivr, which isn't available in tests, so
+// The runtime loads React DOM from npm, which isn't available in tests, so
 // substitute the installed react-dom (spying on createRoot).
 vi.mock("./stdlib/recommendedLibraries.js", () => ({
   ReactDOM: async () => {
