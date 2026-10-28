@@ -5,7 +5,7 @@
     "type": "git",
     "url": "git+https://github.com/observablehq/notebook-kit.git"
   },
-  "version": "2.8.0",
+  "version": "2.9.1",
   "type": "module",
   "scripts": {
     "test": "TZ=America/Los_Angeles vitest",
@@ -71,6 +71,7 @@
     "@google-cloud/bigquery": "^8.3.1",
     "@types/jsdom": "^21.1.7",
     "@types/markdown-it": "^14.1.2",
+    "@types/sql.js": "^1.4.11",
     "bun-types": "^1.3.14",
     "eslint": "^9.39.4",
     "exceljs": "^4.4.0",
@@ -81,6 +82,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "snowflake-sdk": "^2.4.2",
+    "sql.js": "^1.15.2",
     "tsx": "^4.22.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.4",

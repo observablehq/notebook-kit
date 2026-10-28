@@ -23,6 +23,11 @@ switch (command) {
     await run(process.argv.slice(3));
     break;
   }
+  case "version": {
+    const {version} = (await import("../package.json", {with: {type: "json"}})).default;
+    console.log(version);
+    break;
+  }
   default: {
     console.log(
       `usage: notebooks <command>

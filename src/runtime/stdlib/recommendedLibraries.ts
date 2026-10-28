@@ -19,8 +19,8 @@ export const Plot = () => import("https://cdn.jsdelivr.net/npm/@observablehq/plo
 export const React = () => import("https://cdn.jsdelivr.net/npm/react@19.3.1/+esm");
 export const ReactDOM = () => import("https://cdn.jsdelivr.net/npm/react-dom@19.3.1/client/+esm");
 export const JSX = () => import("https://cdn.jsdelivr.net/npm/react@19.3.1/jsx-runtime/+esm");
-// export const SQLite = () => import("observablehq:stdlib/sqlite").then((_) => _.default);
-// export const SQLiteDatabaseClient = () => import("observablehq:stdlib/sqlite").then((_) => _.SQLiteDatabaseClient);
+export const SQLite = () => import("./sqlite.js").then((_) => _.default);
+export const SQLiteDatabaseClient = () => import("./sqlite.js").then((_) => _.SQLiteDatabaseClient);
 export const tex = () => import("./tex.js").then((_) => _.tex);
 export const topojson = () => import("https://cdn.jsdelivr.net/npm/topojson-client/+esm");
 // export const vg = () => import("observablehq:stdlib/vgplot").then((_) => _.default());

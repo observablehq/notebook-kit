@@ -173,6 +173,12 @@ export class DuckDBClient {
     await this._worker.terminate();
   }
 
+  static async open(file, config) {
+    const db = await DuckDBClient.from([file], config);
+    await db._db.open({path: file.name});
+    return db;
+  }
+
   static async from(files, config) {
     const db = await DuckDBClient.of({}, config);
     for (const {name, href} of files) {
