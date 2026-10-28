@@ -3,19 +3,16 @@ import {html} from "https://esm.sh/htl";
 
 // Copyright 2019–2020 Observable, Inc.
 // https://observablehq.com/@mbostock/scrubber
-export function Scrubber(
-  values,
-  {
-    format = (value) => value,
-    initial = 0,
-    direction = 1,
-    delay = null,
-    autoplay = true,
-    loop = true,
-    loopDelay = null,
-    alternate = false
-  } = {}
-) {
+export function Scrubber(values, {
+  format = (value) => value,
+  initial = 0,
+  direction = 1,
+  delay = null,
+  autoplay = true,
+  loop = true,
+  loopDelay = null,
+  alternate = false
+} = {}) {
   values = Array.from(values);
   const form = html`<form style="font: 12px var(--sans-serif); font-variant-numeric: tabular-nums; display: flex; height: 33px; align-items: center;">
   <button name=b type=button style="margin-right: 0.4em; width: 5em;"></button>
@@ -34,9 +31,9 @@ export function Scrubber(
   }
   function stop() {
     form.b.textContent = "Play";
-    if (frame !== null) (cancelAnimationFrame(frame), (frame = null));
-    if (timer !== null) (clearTimeout(timer), (timer = null));
-    if (interval !== null) (clearInterval(interval), (interval = null));
+    if (frame !== null) cancelAnimationFrame(frame), frame = null;
+    if (timer !== null) clearTimeout(timer), timer = null;
+    if (interval !== null) clearInterval(interval), interval = null;
   }
   function running() {
     return frame !== null || timer !== null || interval !== null;
@@ -46,8 +43,8 @@ export function Scrubber(
       if (!loop) return stop();
       if (alternate) direction = -direction;
       if (loopDelay !== null) {
-        if (frame !== null) (cancelAnimationFrame(frame), (frame = null));
-        if (interval !== null) (clearInterval(interval), (interval = null));
+        if (frame !== null) cancelAnimationFrame(frame), frame = null;
+        if (interval !== null) clearInterval(interval), interval = null;
         timer = setTimeout(() => (step(), start()), loopDelay);
         return;
       }
