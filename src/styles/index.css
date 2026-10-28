@@ -5,6 +5,20 @@
 @import url("./highlight.css");
 @import url("./plot.css");
 
+:root {
+  --max-width: calc(1024px - 4 * 16px); /* max-w-5xl p-4 */
+}
+
+body {
+  margin: 16px 0;
+  padding: 16px 24px;
+}
+
+body > main {
+  margin: auto;
+  max-width: var(--max-width);
+}
+
 .observablehq--cell:empty {
   min-height: 0;
 }

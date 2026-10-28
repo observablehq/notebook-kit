@@ -3,7 +3,6 @@
   --sans-serif: "Inter Variable", ui-sans-serif, sans-serif;
   --monospace: "Spline Sans Mono Variable", Menlo, Consolas, monospace;
   --monospace-font: 14px/1.5 var(--monospace);
-  --max-width: calc(1024px - 4 * 16px); /* max-w-5xl p-4 */
 }
 
 html {
@@ -16,13 +15,6 @@ html {
 body {
   background: var(--theme-background);
   color: var(--theme-foreground);
-  margin: 16px 0;
-  padding: 16px 24px;
-}
-
-main {
-  margin: auto;
-  max-width: var(--max-width);
 }
 
 h1,
