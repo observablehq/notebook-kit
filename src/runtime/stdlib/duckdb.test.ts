@@ -2,7 +2,7 @@
 import {assert, test, vi} from "vitest";
 import {sql} from "./sql.js";
 
-vi.mock("https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm", () => ({
+vi.mock("https://esm.sh/@duckdb/duckdb-wasm@1.32.0", () => ({
   selectBundle: () => new Promise(() => {}),
   ConsoleLogger: class {},
   LogLevel: {}

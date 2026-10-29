@@ -1,5 +1,5 @@
-import {disposal} from "https://cdn.jsdelivr.net/npm/@observablehq/inputs/+esm";
-import {html} from "https://cdn.jsdelivr.net/npm/htl/+esm";
+import {disposal} from "https://esm.sh/@observablehq/inputs";
+import {html} from "https://esm.sh/htl";
 
 // Copyright 2019–2020 Observable, Inc.
 // https://observablehq.com/@mbostock/scrubber

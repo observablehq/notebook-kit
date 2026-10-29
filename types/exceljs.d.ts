@@ -1,3 +1,3 @@
-declare module "https://cdn.jsdelivr.net/npm/exceljs/+esm" {
+declare module "https://esm.sh/exceljs" {
   export {default} from "exceljs";
 }
