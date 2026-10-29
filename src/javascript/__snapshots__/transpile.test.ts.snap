@@ -441,7 +441,7 @@ exports[`transpiles Observable JavaScript dynamic imports 1`] = `
   "automutable": false,
   "autoview": false,
   "body": "function(){return(
-import("https://cdn.jsdelivr.net/npm/d3/+esm")
+import("https://esm.sh/d3")
 )}",
   "databases": Set {},
   "files": Set {},
@@ -457,7 +457,7 @@ exports[`transpiles Observable JavaScript dynamic imports 2`] = `
   "automutable": false,
   "autoview": false,
   "body": "function(){return(
-import("https://cdn.jsdelivr.net/npm/d3@7/+esm")
+import("https://esm.sh/d3@7")
 )}",
   "databases": Set {},
   "files": Set {},
@@ -473,7 +473,7 @@ exports[`transpiles Observable JavaScript dynamic imports 3`] = `
   "automutable": false,
   "autoview": false,
   "body": "function(){return(
-import("https://cdn.jsdelivr.net/npm/@observablehq/plot/+esm")
+import("https://esm.sh/@observablehq/plot")
 )}",
   "databases": Set {},
   "files": Set {},
@@ -489,7 +489,7 @@ exports[`transpiles Observable JavaScript dynamic imports 4`] = `
   "automutable": false,
   "autoview": false,
   "body": "function(){return(
-import("https://cdn.jsdelivr.net/npm/lodash/fp/+esm")
+import("https://esm.sh/lodash/fp")
 )}",
   "databases": Set {},
   "files": Set {},
@@ -505,7 +505,7 @@ exports[`transpiles Observable JavaScript dynamic imports 5`] = `
   "automutable": false,
   "autoview": false,
   "body": "function(){return(
-import("https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/controls/OrbitControls.js/+esm")
+import("https://esm.sh/three@0.150.1/examples/jsm/controls/OrbitControls.js")
 )}",
   "databases": Set {},
   "files": Set {},
@@ -521,7 +521,7 @@ exports[`transpiles Observable JavaScript dynamic imports 6`] = `
   "automutable": false,
   "autoview": false,
   "body": "function(){return(
-import("https://cdn.jsdelivr.net/npm/leaflet/dist/leaflet.css")
+import("https://esm.sh/leaflet/dist/leaflet.css")
 )}",
   "databases": Set {},
   "files": Set {},
@@ -1126,6 +1126,158 @@ return (
 }
 `;
 
+exports[`transpiles TSX expressions 1`] = `
+{
+  "autodisplay": true,
+  "body": "(JSX,a) => {
+return (
+JSX.jsx("div", {"className": "x", children: a})
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+    "a",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX expressions 2`] = `
+{
+  "autodisplay": true,
+  "body": "(JSX,Foo,x) => {
+return (
+JSX.jsx(Foo, {"bar": x})
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+    "Foo",
+    "x",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX expressions 3`] = `
+{
+  "autodisplay": true,
+  "body": "(JSX,xs) => {
+return (
+JSX.jsx(JSX.Fragment, {children: xs.map((x) => JSX.jsx("li", {children: x}, x))})
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+    "xs",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX programs 1`] = `
+{
+  "autodisplay": false,
+  "body": "(JSX,a) => {
+const el = JSX.jsx("p", {children: a});
+return {el};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+    "a",
+  ],
+  "outputs": [
+    "el",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX programs 2`] = `
+{
+  "autodisplay": false,
+  "body": "(JSX) => {
+function Hello({name}) { return JSX.jsx("b", {children: name}); }
+return {Hello};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+  ],
+  "outputs": [
+    "Hello",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX programs 3`] = `
+{
+  "autodisplay": false,
+  "body": "async (JSX) => {
+const {Button} = await import("https://esm.sh/ui").then((module) => {
+  if (!("Button" in module)) throw new SyntaxError(\`export 'Button' not found\`);
+  return module;
+});
+
+const b = JSX.jsx(Button, {});
+return {Button,b};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {
+    "npm:ui",
+  },
+  "inputs": [
+    "JSX",
+  ],
+  "outputs": [
+    "Button",
+    "b",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX with top-level await and file attachments 1`] = `
+{
+  "autodisplay": true,
+  "body": "async (JSX,FileAttachment) => {
+return (
+JSX.jsx("pre", {children: await FileAttachment(new URL("a.txt", import.meta.url).href).text()})
+)
+}",
+  "databases": Set {},
+  "files": Set {
+    "a.txt",
+  },
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+    "FileAttachment",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
 exports[`transpiles TypeScript class expressions 1`] = `
 {
   "autodisplay": false,
@@ -1285,7 +1437,7 @@ exports[`transpiles TypeScript imports 1`] = `
 {
   "autodisplay": false,
   "body": "async () => {
-const {foo} = await import("https://cdn.jsdelivr.net/npm/bar/+esm").then((module) => {
+const {foo} = await import("https://esm.sh/bar").then((module) => {
   if (!("foo" in module)) throw new SyntaxError(\`export 'foo' not found\`);
   return module;
 });
@@ -1309,7 +1461,7 @@ exports[`transpiles TypeScript imports 2`] = `
 {
   "autodisplay": false,
   "body": "async () => {
-const {} = await import("https://cdn.jsdelivr.net/npm/bar/+esm");
+const {} = await import("https://esm.sh/bar");
 
 }",
   "databases": Set {},
@@ -1594,7 +1746,7 @@ exports[`transpiles dynamic npm: imports 1`] = `
 {
   "autodisplay": false,
   "body": "async () => {
-const d3 = await import("https://cdn.jsdelivr.net/npm/d3/+esm");
+const d3 = await import("https://esm.sh/d3");
 return {d3};
 }",
   "databases": Set {},
@@ -1694,7 +1846,7 @@ exports[`transpiles import.meta.resolve 1`] = `
   "autodisplay": true,
   "body": "() => {
 return (
-"https://cdn.jsdelivr.net/npm/d3/+esm"
+"https://esm.sh/d3"
 )
 }",
   "databases": Set {},
@@ -1990,7 +2142,7 @@ exports[`transpiles static npm: imports 1`] = `
 {
   "autodisplay": false,
   "body": "async () => {
-const d3 = await import("https://cdn.jsdelivr.net/npm/d3/+esm");
+const d3 = await import("https://esm.sh/d3");
 
 return {d3};
 }",
@@ -2011,7 +2163,7 @@ exports[`transpiles static npm: imports 2`] = `
 {
   "autodisplay": false,
   "body": "async () => {
-const {default: _} = await import("https://cdn.jsdelivr.net/npm/lodash/+esm").then((module) => {
+const {default: _} = await import("https://esm.sh/lodash").then((module) => {
   if (!("default" in module)) throw new SyntaxError(\`export 'default' not found\`);
   return module;
 });
@@ -2035,7 +2187,7 @@ exports[`transpiles static npm: imports 3`] = `
 {
   "autodisplay": false,
   "body": "async () => {
-const [{}, {}] = await Promise.all([import("https://cdn.jsdelivr.net/npm/d3/+esm"), import("https://cdn.jsdelivr.net/npm/isoformat/+esm")]);
+const [{}, {}] = await Promise.all([import("https://esm.sh/d3"), import("https://esm.sh/isoformat")]);
 
 }",
   "databases": Set {},

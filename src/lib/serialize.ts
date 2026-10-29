@@ -81,6 +81,8 @@ function serializeMode(mode: Cell["mode"]): string {
       return "application/vnd.observable.javascript";
     case "ts":
       return "text/x-typescript";
+    case "tsx":
+      return "text/x-tsx";
     default:
       return "module";
   }
@@ -110,6 +112,8 @@ function deserializeMode(mode: string | null): Cell["mode"] {
       return "ojs";
     case "text/x-typescript":
       return "ts";
+    case "text/x-tsx":
+      return "tsx";
     default:
       return "js";
   }

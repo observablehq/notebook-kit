@@ -5,6 +5,7 @@ import {findAwaits} from "./awaits.js";
 import {findDeclarations} from "./declarations.js";
 import type {FeatureExpression} from "./features.js";
 import {findFeatures} from "./features.js";
+import {JsxParser} from "./jsx.js";
 import {findReferences} from "./references.js";
 import {checkErasableSyntax} from "./typescript.js";
 
@@ -30,17 +31,17 @@ export interface JavaScriptCell {
   async: boolean; // does this use top-level await?
 }
 
-type Dialect = "js" | "ts";
+type Dialect = "js" | "ts" | "tsx";
 
 const JsParser = Parser;
 const TsParser = Parser.extend(tsPlugin());
 
 function getParser(dialect: Dialect = "js"): typeof Parser {
-  return dialect === "ts" ? TsParser : JsParser;
+  return dialect === "tsx" ? JsxParser : dialect === "ts" ? TsParser : JsParser;
 }
 
 function getOptions(dialect: Dialect = "js"): Options {
-  return dialect === "ts" ? tsOptions : jsOptions;
+  return dialect === "js" ? jsOptions : tsOptions;
 }
 
 export function maybeParseJavaScript(input: string, dialect?: Dialect): JavaScriptCell | undefined {
@@ -57,7 +58,7 @@ export function parseJavaScript(input: string, dialect?: Dialect): JavaScriptCel
   if (expression?.type === "ClassExpression" && expression.id) expression = null; // treat named class as program
   if (expression?.type === "FunctionExpression" && expression.id) expression = null; // treat named function as program
   const body = expression ?? parseProgram(input, dialect); // otherwise parse as a program
-  if (dialect === "ts") checkErasableSyntax(body, input);
+  if (dialect === "ts" || dialect === "tsx") checkErasableSyntax(body, input);
   return {
     body,
     declarations: expression ? null : findDeclarations(body as Program, input),

@@ -231,7 +231,7 @@ define(
     inputs: ${JSON.stringify(transpiled.inputs)},
     outputs: ${JSON.stringify(transpiled.outputs)},
     output: ${JSON.stringify(transpiled.output)},
-    display: ${cell.mode === "js" || cell.mode === "ts"},
+    display: ${cell.mode === "js" || cell.mode === "ts" || cell.mode === "tsx"},
     displayMode: ${JSON.stringify(cell.mode === "sql" ? "table" : "default")},
     assets: ${assets.size > 0 ? "assets" : "undefined"},
     autodisplay: ${transpiled.autodisplay},

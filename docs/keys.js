@@ -1,4 +1,4 @@
-import {html} from "https://cdn.jsdelivr.net/npm/htl/+esm";
+import {html} from "https://esm.sh/htl";
 
 export const IS_MAC = /Mac|iPhone/.test(navigator.platform);
 

@@ -104,6 +104,28 @@ it("erases ambient TypeScript declarations", () => {
   expect(transpile('declare module "m" { export const x: number; }', "ts")).toMatchSnapshot();
 });
 
+it("transpiles TSX expressions", () => {
+  expect(transpile('<div className="x">{a}</div>', "tsx")).toMatchSnapshot();
+  expect(transpile("<Foo bar={x as number} />", "tsx")).toMatchSnapshot();
+  expect(transpile("<>{xs.map((x: string) => <li key={x}>{x}</li>)}</>", "tsx")).toMatchSnapshot();
+});
+
+it("transpiles TSX programs", () => {
+  expect(transpile("const el: HTMLElement = <p>{a}</p>;", "tsx")).toMatchSnapshot();
+  expect(transpile("function Hello({name}: {name: string}) { return <b>{name}</b>; }", "tsx")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {Button} from "npm:ui";\nimport type {Props} from "npm:ui";\nconst b = <Button />;', "tsx")).toMatchSnapshot(); // prettier-ignore
+});
+
+it("transpiles TSX with top-level await and file attachments", () => {
+  expect(transpile('<pre>{await FileAttachment("a.txt").text()}</pre>', "tsx", {resolveFiles: true})).toMatchSnapshot(); // prettier-ignore
+});
+
+it("throws SyntaxError on invalid TSX", () => {
+  expect(() => transpile("<div>", "tsx")).toThrow(SyntaxError);
+  expect(() => transpile("<div></span>", "tsx")).toThrow(SyntaxError);
+  expect(() => transpile("enum Direction { Up, Down }", "tsx")).toThrow(SyntaxError);
+});
+
 it("transpiles Observable JavaScript viewof declarations and references", () => {
   expect(transpile('viewof foo = Inputs.range()', "ojs")).toMatchSnapshot();
   expect(transpile('viewof foo.value', "ojs")).toMatchSnapshot();

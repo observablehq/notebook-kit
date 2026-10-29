@@ -115,6 +115,7 @@
 
     - `module` - JavaScript
     - `text/x-typescript` - TypeScript
+    - `text/x-tsx` - TypeScript with JSX
     - `text/markdown` - Markdown
     - `text/html` - HTML
     - `application/sql` - SQL
@@ -399,12 +400,12 @@
     The Build API analyzes cell source code to find unbound references, such that the appropriate variable graph can be initialized using the [Observable Runtime](https://github.com/observablehq/runtime). For non-JavaScript cells (such as Markdown, HTML, and SQL), the Build API also transpiles the source into a tagged template literal expression.
   </script>
   <script id="18" type="text/markdown">
-    #### <code class="language-ts">maybeParseJavaScript(input: string, dialect: "js" | "ts" = "js"): JavaScriptCell | undefined</code>
+    #### <code class="language-ts">maybeParseJavaScript(input: string, dialect: "js" | "ts" | "tsx" = "js"): JavaScriptCell | undefined</code>
 
     Parses the specified JavaScript cell source code, returning the resulting AST as either a `Program` or `Expression` node, along with any top-level variable `declarations` and unbound `references` to other variables. If the specified `input` has invalid syntax, returns `undefined`.
   </script>
   <script id="19" type="text/markdown">
-    #### <code class="language-ts">parseJavaScript(input: string, dialect: "js" | "ts" = "js"): JavaScriptCell</code>
+    #### <code class="language-ts">parseJavaScript(input: string, dialect: "js" | "ts" | "tsx" = "js"): JavaScriptCell</code>
 
     Parses the specified JavaScript cell source code, returning the resulting AST as either a `Program` or `Expression`, along with any top-level variable `declarations` and unbound `references` to other variables. (This method is called internally by `transpileJavaScript`.)
   </script>

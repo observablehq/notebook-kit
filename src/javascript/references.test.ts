@@ -49,3 +49,39 @@ test("destructured rest variables can mask references", () => {
 test("ignores globals", () => {
   expect(find(`window + bar`)).toMatchSnapshot();
 });
+
+function findTsx(input: string): string[] {
+  return parseJavaScript(input, "tsx").references.map((r) => r.name);
+}
+
+test("finds references in JSX expressions and attributes", () => {
+  expect(findTsx(`<div title={a}>{b}{...c}</div>`)).toEqual(["a", "b", "c"]);
+  expect(findTsx(`<div {...a} b={<i>{c}</i>} />`)).toEqual(["a", "c"]);
+  expect(findTsx(`<>{a}</>`)).toEqual(["a"]);
+});
+
+test("finds component tag names as references", () => {
+  expect(findTsx(`<Foo />`)).toEqual(["Foo"]);
+  expect(findTsx(`<Foo></Foo>`)).toEqual(["Foo"]);
+  expect(findTsx(`<Foo.Bar.Baz />`)).toEqual(["Foo"]);
+  expect(findTsx(`<foo.bar />`)).toEqual(["foo"]);
+});
+
+test("does not consider intrinsic tags or attribute names to be references", () => {
+  expect(findTsx(`<div />`)).toEqual([]);
+  expect(findTsx(`<my-element />`)).toEqual([]);
+  expect(findTsx(`<svg:rect />`)).toEqual([]);
+  expect(findTsx(`<div foo="1" bar />`)).toEqual([]);
+});
+
+test("local variables can mask JSX references", () => {
+  expect(findTsx(`{ const Foo = 1; <Foo />; }`)).toEqual([]);
+  expect(findTsx(`(Foo) => <Foo />`)).toEqual([]);
+  expect(findTsx(`(foo) => <foo.Bar />`)).toEqual([]);
+  expect(findTsx(`xs.map((x) => <li>{x}</li>)`)).toEqual(["xs"]);
+});
+
+test("finds references in TSX with types", () => {
+  expect(findTsx(`const a: Foo = <Bar baz={qux as T} />;`)).toEqual(["Bar", "qux"]);
+  expect(findTsx(`<T,>(x: T) => <Foo value={x} />`)).toEqual(["Foo"]);
+});
