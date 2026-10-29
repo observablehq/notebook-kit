@@ -1,3 +1,3 @@
-declare module "https://cdn.jsdelivr.net/npm/sql.js/+esm" {
+declare module "https://esm.sh/sql.js" {
   export {default} from "sql.js";
 }

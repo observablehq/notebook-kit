@@ -150,7 +150,7 @@ export abstract class AbstractFile implements FileAttachment {
     return (await fetchFile(this)).body!;
   }
   async dsv({delimiter = ",", array = false, typed = false}: DsvOptions = {}): Promise<DsvResult> {
-    const [text, d3] = await Promise.all([this.text(), import("https://cdn.jsdelivr.net/npm/d3-dsv/+esm")]); // prettier-ignore
+    const [text, d3] = await Promise.all([this.text(), import("https://esm.sh/d3-dsv")]); // prettier-ignore
     const format = d3.dsvFormat(delimiter);
     const parse = array ? ((typed &&= true), format.parseRows) : format.parse;
     const output = parse(text, typed === true ? d3.autoType : undefined);
@@ -175,7 +175,7 @@ export abstract class AbstractFile implements FileAttachment {
     });
   }
   async arrow(): Promise<any> {
-    const [Flechette, buffer] = await Promise.all([import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm"), this.arrayBuffer()]); // prettier-ignore
+    const [Flechette, buffer] = await Promise.all([import("https://esm.sh/@uwdata/flechette"), this.arrayBuffer()]); // prettier-ignore
     return Flechette.tableFromIPC(buffer, {useDate: true});
   }
   async arquero(options?: any): Promise<any> {
@@ -206,11 +206,11 @@ export abstract class AbstractFile implements FileAttachment {
         }
         break;
     }
-    const [aq, body] = await Promise.all([import("https://cdn.jsdelivr.net/npm/arquero/+esm"), request]); // prettier-ignore
+    const [aq, body] = await Promise.all([import("https://esm.sh/arquero"), request]); // prettier-ignore
     return aq[from](body, options);
   }
   async parquet() {
-    const [Flechette, Parquet, buffer] = await Promise.all([import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm"), import("https://cdn.jsdelivr.net/npm/parquet-wasm/+esm").then(async (Parquet) => (await Parquet.default("https://cdn.jsdelivr.net/npm/parquet-wasm/esm/parquet_wasm_bg.wasm"), Parquet)), this.arrayBuffer()]); // prettier-ignore
+    const [Flechette, Parquet, buffer] = await Promise.all([import("https://esm.sh/@uwdata/flechette"), import("https://esm.sh/parquet-wasm").then(async (Parquet) => (await Parquet.default("https://esm.sh/parquet-wasm/esm/parquet_wasm_bg.wasm"), Parquet)), this.arrayBuffer()]); // prettier-ignore
     return Flechette.tableFromIPC(Parquet.readParquet(new Uint8Array(buffer)).intoIPCStream(), {useDate: true}); // prettier-ignore
   }
   async duckdb() {

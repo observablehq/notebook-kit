@@ -5,10 +5,12 @@
 @import url("./highlight.css");
 @import url("./plot.css");
 
+/* allow an empty cell to disappear completely */
 .observablehq--cell:empty {
   min-height: 0;
 }
 
+/* nudge a pinned cell’s source up under non-empty output */
 .observablehq--cell:not(:empty) + pre {
   margin-top: -11px;
 }

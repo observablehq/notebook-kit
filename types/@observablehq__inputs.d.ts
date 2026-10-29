@@ -1,3 +1,3 @@
-declare module "https://cdn.jsdelivr.net/npm/@observablehq/inputs/+esm" {
+declare module "https://esm.sh/@observablehq/inputs" {
   export function table(value: unknown): HTMLElement;
 }

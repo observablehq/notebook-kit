@@ -1,4 +1,4 @@
-import initSqlJs from "https://cdn.jsdelivr.net/npm/sql.js/+esm";
+import initSqlJs from "https://esm.sh/sql.js";
 import type {Database, SqlValue} from "sql.js";
 import type {QueryResult} from "./databaseClient.js";
 import type {FileAttachment} from "./fileAttachment.js";
@@ -7,7 +7,7 @@ type DataSource = string | Uint8Array | ArrayBuffer | Response | FileAttachment;
 
 const SQLite = initSqlJs({
   locateFile(name) {
-    return `https://cdn.jsdelivr.net/npm/sql.js/dist/${name}`;
+    return `https://esm.sh/sql.js/dist/${name}`;
   }
 });
 

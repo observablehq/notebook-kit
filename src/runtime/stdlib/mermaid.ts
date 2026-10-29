@@ -1,4 +1,4 @@
-import mer from "https://cdn.jsdelivr.net/npm/mermaid/+esm";
+import mer from "https://esm.sh/mermaid";
 import type {AsyncRawTemplateRenderer} from "./template.js";
 
 let nextId = 0;
