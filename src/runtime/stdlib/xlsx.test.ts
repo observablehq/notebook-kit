@@ -3,7 +3,7 @@ import {describe, expect, test, vi} from "vitest";
 import {Workbook} from "./xlsx.js";
 
 // Route exceljs to the version from devDependencies
-vi.mock("https://cdn.jsdelivr.net/npm/exceljs/+esm", async () => import("exceljs"));
+vi.mock("https://esm.sh/exceljs", async () => import("exceljs"));
 
 type Row = Record<string, ExcelJS.CellValue>;
 

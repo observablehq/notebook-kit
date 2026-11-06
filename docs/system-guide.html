@@ -126,7 +126,7 @@
     To load live data, you can use `fetch`, `WebSocket`, and other standard web APIs.
   </script>
   <script id="82" type="module" pinned="">
-    const world = fetch("https://cdn.jsdelivr.net/npm/world-atlas/land-110m.json")
+    const world = fetch("https://esm.sh/world-atlas/land-110m.json")
       .then((response) => response.ok ? response.json() : Promise.reject(response.status))
       .then(display);
   </script>

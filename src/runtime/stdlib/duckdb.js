@@ -1,4 +1,4 @@
-import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm";
+import * as duckdb from "https://esm.sh/@duckdb/duckdb-wasm@1.32.0";
 import {sql} from "../index.js";
 
 // Adapted from https://observablehq.com/@cmudig/duckdb-client
@@ -32,12 +32,12 @@ import {sql} from "../index.js";
 
 const bundles = {
   mvp: {
-    mainModule: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-mvp.wasm",
-    mainWorker: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-mvp.worker.js" // prettier-ignore
+    mainModule: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-mvp.wasm",
+    mainWorker: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-mvp.worker.js" // prettier-ignore
   },
   eh: {
-    mainModule: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-eh.wasm",
-    mainWorker: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-eh.worker.js" // prettier-ignore
+    mainModule: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-eh.wasm",
+    mainWorker: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-eh.worker.js" // prettier-ignore
   }
 };
 const bundle = duckdb.selectBundle(bundles);
@@ -359,7 +359,7 @@ async function insertArrowIpc(database, name, buffer, options) {
 }
 
 async function insertFlechetteTable(database, name, table, options) {
-  const {tableToIPC} = await import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm");
+  const {tableToIPC} = await import("https://esm.sh/@uwdata/flechette");
   return await insertArrowIpc(database, name, tableToIPC(table, {format: "stream"}), options);
 }
 
@@ -369,7 +369,7 @@ async function insertArqueroTable(database, name, source) {
 }
 
 async function insertArray(database, name, array, options) {
-  const arrow = await import("https://cdn.jsdelivr.net/npm/apache-arrow@17.0.0/+esm");
+  const arrow = await import("https://esm.sh/apache-arrow@17.0.0");
   const table = arrow.tableFromJSON(array);
   return await insertArrowTable(database, name, table, options);
 }

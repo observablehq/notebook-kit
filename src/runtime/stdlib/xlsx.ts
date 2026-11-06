@@ -1,4 +1,4 @@
-import Excel from "https://cdn.jsdelivr.net/npm/exceljs/+esm";
+import Excel from "https://esm.sh/exceljs";
 
 export class Workbook {
   declare private readonly _: Excel.Workbook;

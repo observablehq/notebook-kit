@@ -12,7 +12,7 @@ export const pizza = () => csv(dataset("pizza.csv"), true);
 export const weather = () => csv(dataset("weather.csv"), true);
 
 function dataset(name: string): string {
-  return `https://cdn.jsdelivr.net/npm/@observablehq/sample-datasets/${name}`;
+  return `https://esm.sh/@observablehq/sample-datasets/${name}`;
 }
 
 async function json(url: string) {
@@ -28,6 +28,6 @@ async function text(url: string) {
 }
 
 async function csv(url: string, typed: boolean) {
-  const [contents, d3] = await Promise.all([text(url), import("https://cdn.jsdelivr.net/npm/d3-dsv/+esm")]); // prettier-ignore
+  const [contents, d3] = await Promise.all([text(url), import("https://esm.sh/d3-dsv")]); // prettier-ignore
   return d3.csvParse(contents, typed && d3.autoType);
 }

@@ -98,16 +98,15 @@ function transformObservableImport(body: ImportDeclaration): void {
 
 /**
  * Rewrite a bare dynamic import such as import("d3") to a CDN URL, like
- * import("https://cdn.jsdelivr.net/npm/d3/+esm"), using the same resolution as
+ * import("https://esm.sh/d3"), using the same resolution as
  * static imports. Protocol (npm:, https:, …) and local imports are left alone.
  */
 function rewriteDynamicImports(output: Sourcemap, body: Node): void {
   simple(body, {
     ImportExpression({source}) {
       if (!isStringLiteral(source)) return;
-      let value = getStringLiteralValue(source);
+      const value = getStringLiteralValue(source);
       if (/^(\w+:|\.?\.?\/)/.test(value)) return;
-      if (/\.(js|mjs|cjs)$/.test(value)) value += "/+esm";
       const resolution = resolveNpmImport(`npm:${value}`);
       output.replaceLeft(source.start, source.end, JSON.stringify(resolution));
     }

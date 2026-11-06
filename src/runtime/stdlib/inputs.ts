@@ -1,3 +1,3 @@
-export * from "https://cdn.jsdelivr.net/npm/@observablehq/inputs/+esm";
+export * from "https://esm.sh/@observablehq/inputs";
 
 import "./inputs.css";

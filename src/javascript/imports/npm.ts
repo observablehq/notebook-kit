@@ -24,15 +24,7 @@ function parseNpmSpecifier(specifier: string): NpmSpecifier {
 export function resolveNpmImport(specifier: string): string {
   if (!specifier.startsWith("npm:")) return specifier;
   const {name, range, path} = parseNpmSpecifier(specifier.slice(4));
-  return `https://cdn.jsdelivr.net/npm/${name}${
-    range || getDefaultRange(name)
-  }${
-    path
-      ? !/(\.\w+|\/|\/\+esm)$/.test(path) // if not file, directory, or /+esm
-        ? `${path}/+esm` // then append /+esm
-        : path // otherwise keep as-is
-      : getDefaultPath(name)
-  }`;
+  return `https://esm.sh/${name}${range || getDefaultRange(name)}${path || getDefaultPath(name)}`;
 }
 
 function getDefaultRange(name: string): string {
@@ -52,16 +44,16 @@ function getDefaultRange(name: string): string {
 function getDefaultPath(name: string): string {
   switch (name) {
     case "mermaid":
-      return "/dist/mermaid.esm.min.mjs/+esm";
+      return "/dist/mermaid.esm.min.mjs";
     case "echarts":
-      return "/dist/echarts.esm.min.js/+esm";
+      return "/dist/echarts.esm.min.js";
     case "jquery-ui":
-      return "/dist/jquery-ui.js/+esm";
+      return "/dist/jquery-ui.js";
     case "deck.gl":
-      return "/dist.min.js/+esm";
+      return "/dist.min.js";
     case "react-dom":
-      return "/client/+esm";
+      return "/client";
     default:
-      return "/+esm";
+      return "";
   }
 }
