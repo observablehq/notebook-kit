@@ -130,6 +130,8 @@ function deserializeFormat(format: string | null): Cell["format"] {
     case "arrow":
     case "parquet":
     case "html":
+    case "svg":
+    case "xml":
       return format;
   }
 }
