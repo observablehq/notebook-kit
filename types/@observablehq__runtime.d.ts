@@ -20,8 +20,10 @@ declare module "@observablehq/runtime" {
     _scope: Map<string, Variable>;
     _resolve(name: string): Variable;
     variable(observer?: ObserverOption, options?: VariableOptions): Variable;
-    define(inputs: string[], definition: VariableDefinition): Variable;
-    define(name: string | null, inputs: string[], definition: VariableDefinition): Variable;
+    builtin(name: string, value: unknown): Variable;
+    builtin(name: string, inputs: readonly string[], definition: VariableDefinition): Variable;
+    define(inputs: readonly string[], definition: VariableDefinition): Variable;
+    define(name: string | null, inputs: readonly string[], definition: VariableDefinition): Variable; // prettier-ignore
   }
   export class Variable {
     _module: Module;
@@ -31,8 +33,8 @@ declare module "@observablehq/runtime" {
     _promise: Promise<unknown>;
     _definition: unknown;
     constructor(type: number, module: Module, observer?: ObserverOption, options?: VariableOptions);
-    define(inputs: string[], definition: VariableDefinition): Variable;
-    define(name: string | null, inputs: string[], definition: VariableDefinition): Variable;
+    define(inputs: readonly string[], definition: VariableDefinition): Variable;
+    define(name: string | null, inputs: readonly string[], definition: VariableDefinition): Variable; // prettier-ignore
     delete(): Variable;
   }
 }

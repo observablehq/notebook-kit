@@ -1,4 +1,5 @@
-import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm";
+import * as duckdb from "https://esm.sh/@duckdb/duckdb-wasm@1.32.0";
+import {sql} from "../index.js";
 
 // Adapted from https://observablehq.com/@cmudig/duckdb-client
 // Copyright 2021 CMU Data Interaction Group
@@ -31,12 +32,12 @@ import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0
 
 const bundles = {
   mvp: {
-    mainModule: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-mvp.wasm",
-    mainWorker: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-mvp.worker.js" // prettier-ignore
+    mainModule: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-mvp.wasm",
+    mainWorker: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-mvp.worker.js" // prettier-ignore
   },
   eh: {
-    mainModule: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-eh.wasm",
-    mainWorker: "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-eh.worker.js" // prettier-ignore
+    mainModule: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-eh.wasm",
+    mainWorker: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-eh.worker.js" // prettier-ignore
   }
 };
 const bundle = duckdb.selectBundle(bundles);
@@ -73,9 +74,10 @@ const mainWorkerUrl = bundle.then(({mainWorker}) => {
 // }
 
 export class DuckDBClient {
-  constructor(db) {
+  constructor(db, worker) {
     Object.defineProperties(this, {
-      _db: {value: db}
+      _db: {value: db},
+      _worker: {value: worker}
     });
   }
 
@@ -137,8 +139,9 @@ export class DuckDBClient {
     }
   }
 
-  async sql(strings, ...args) {
-    return await this.query(strings.join("?"), args);
+  async sql(strings, ...params) {
+    ({strings, params} = sql.call(null, strings, ...params).flat(this.dialect));
+    return await this.query(strings.join("?"), params);
   }
 
   queryTag(strings, ...params) {
@@ -165,8 +168,27 @@ export class DuckDBClient {
     );
   }
 
+  async terminate() {
+    await this._db.terminate();
+    await this._worker.terminate();
+  }
+
+  static async open(file, config) {
+    const db = await DuckDBClient.from([file], config);
+    await db._db.open({path: file.name});
+    return db;
+  }
+
+  static async from(files, config) {
+    const db = await DuckDBClient.of({}, config);
+    for (const {name, href} of files) {
+      await db._db.registerFileURL(name, new URL(href, location).href, 4); // HTTP
+    }
+    return db;
+  }
+
   static async of(sources = {}, config = {}) {
-    const db = await createDuckDB();
+    const [db, worker] = await createDuckDB();
     if (config.query?.castDecimalToDouble === undefined) {
       config = {...config, query: {...config.query, castDecimalToDouble: true}};
     }
@@ -184,7 +206,7 @@ export class DuckDBClient {
     await Promise.all(
       Object.entries(sources).map(([name, source]) => insertSource(db, name, source))
     );
-    return new DuckDBClient(db);
+    return new DuckDBClient(db, worker);
   }
 
   static sql() {
@@ -337,7 +359,7 @@ async function insertArrowIpc(database, name, buffer, options) {
 }
 
 async function insertFlechetteTable(database, name, table, options) {
-  const {tableToIPC} = await import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm");
+  const {tableToIPC} = await import("https://esm.sh/@uwdata/flechette");
   return await insertArrowIpc(database, name, tableToIPC(table, {format: "stream"}), options);
 }
 
@@ -347,7 +369,7 @@ async function insertArqueroTable(database, name, source) {
 }
 
 async function insertArray(database, name, array, options) {
-  const arrow = await import("https://cdn.jsdelivr.net/npm/apache-arrow@17.0.0/+esm");
+  const arrow = await import("https://esm.sh/apache-arrow@17.0.0");
   const table = arrow.tableFromJSON(array);
   return await insertArrowTable(database, name, table, options);
 }
@@ -356,7 +378,7 @@ async function createDuckDB() {
   const worker = new Worker(await mainWorkerUrl);
   const db = new duckdb.AsyncDuckDB(logger, worker);
   await db.instantiate((await bundle).mainModule);
-  return db;
+  return [db, worker];
 }
 
 // https://duckdb.org/docs/sql/data_types/overview

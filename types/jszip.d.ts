@@ -1,3 +1,3 @@
-declare module "https://cdn.jsdelivr.net/npm/jszip/+esm" {
+declare module "https://esm.sh/jszip" {
   export {default} from "jszip";
 }

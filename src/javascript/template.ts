@@ -137,6 +137,10 @@ function getDatabase(cell: Cell): string {
     const name = database.slice("var:".length);
     return `(await DatabaseClient.of(${name}, ${JSON.stringify(name)}))`;
   }
+  if (database.startsWith("file:")) {
+    const name = database.slice("file:".length);
+    return `(await DatabaseClient.of(FileAttachment(${JSON.stringify(name)})))`;
+  }
   return `DatabaseClient(${JSON.stringify(database)}, {id: ${id}${since === undefined ? "" : `, since: ${JSON.stringify(since)}`}})`;
 }
 

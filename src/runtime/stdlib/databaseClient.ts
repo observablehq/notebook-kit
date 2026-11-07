@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type {SerializableQueryResult} from "../../databases/index.js";
 import {hash, nameHash} from "../../lib/hash.js";
+import type {FileAttachment} from "./fileAttachment.js";
 
 /** @deprecated Use unknown instead. */
 export type QueryParam = any;
 
 /** @see https://observablehq.com/@observablehq/database-client-specification#%C2%A71 */
-export type QueryResult = Record<string, any>[] & {schema: ColumnSchema[]; date: Date};
+export type QueryResult = Record<string, any>[] & ({schema: ColumnSchema[]; date: Date} | ({columns: string[]})); // prettier-ignore
 
 /** @see https://observablehq.com/@observablehq/database-client-specification#%C2%A72.2 */
 export interface ColumnSchema {
@@ -39,11 +40,11 @@ export interface QueryOptions extends QueryOptionsSpec {
   since?: Date;
 }
 
-export interface DatabaseClient<T = QueryResult> {
+export interface DatabaseClient {
   readonly name: string;
   readonly options: QueryOptions;
   readonly dialect?: string;
-  sql<S extends T = T>(strings: readonly string[], ...params: unknown[]): Promise<S>;
+  sql(strings: readonly string[], ...params: unknown[]): Promise<QueryResult>;
 }
 
 export const DatabaseClient = (name: string, options?: QueryOptionsSpec): DatabaseClient => {
@@ -66,11 +67,11 @@ class DatabaseClientImpl implements DatabaseClient {
       options: {value: options, enumerable: true}
     });
   }
-  async sql<T = QueryResult>(strings: readonly string[], ...params: unknown[]): Promise<T> {
+  async sql(strings: readonly string[], ...params: unknown[]): Promise<QueryResult> {
     const path = await this.cachePath(strings, ...params);
     const response = await fetch(path);
     if (!response.ok) throw new Error(`failed to fetch: ${path}`);
-    return (await response.json().then(revive)) as T;
+    return await response.json().then(revive);
   }
   async cachePath(strings: readonly string[], ...params: unknown[]): Promise<string> {
     return `.observable/cache/${await nameHash(this.name)}-${await hash(strings, ...params)}.json`;
@@ -78,12 +79,41 @@ class DatabaseClientImpl implements DatabaseClient {
 }
 
 async function of(source: unknown, name: string): Promise<{sql: DatabaseClient["sql"]}> {
-  return source != null &&
+  return isDatabaseClient(source)
+    ? source
+    : isDuckDBFile(source)
+      ? source.duckdb()
+      : isSqliteFile(source)
+        ? source.sqlite()
+        : (await import("./duckdb.js")).DuckDBClient.of({[name]: source});
+}
+
+function isDatabaseClient(source: unknown): source is DatabaseClient {
+  return (
+    source != null &&
     typeof source === "object" &&
     "sql" in source &&
     typeof source["sql"] === "function"
-    ? (source as DatabaseClient)
-    : (await import("./duckdb.js")).DuckDBClient.of({[name]: source});
+  );
+}
+
+function isDuckDBFile(source: unknown): source is FileAttachment {
+  return (
+    source != null &&
+    typeof source === "object" &&
+    "name" in source &&
+    typeof source.name === "string" &&
+    /\.duckdb$/i.test(source.name)
+  );
+}
+
+function isSqliteFile(source: unknown): source is FileAttachment {
+  return (
+    source != null &&
+    typeof source === "object" &&
+    "mimeType" in source &&
+    (source.mimeType === "application/vnd.sqlite3" || source.mimeType === "application/x-sqlite3")
+  );
 }
 
 function revive({rows, schema, date, ...meta}: SerializableQueryResult): QueryResult {

@@ -1,7 +1,11 @@
-import {inferTypes} from "./dsv.js";
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const files = new Map<string, FileAttachmentImpl>();
+
+import {inferTypes} from "./dsv.js";
+import type {DuckDBClient} from "./duckdb.js";
+import type {SQLiteDatabaseClient} from "./sqlite.js";
+
+/** A read-only map from each registered file’s resolved name href to the corresponding file.  */
+const registeredFiles = new Map<string, FileAttachment>();
 
 export type DsvOptions = {delimiter?: string; array?: boolean; typed?: "auto" | boolean};
 export type DsvResult = (Record<string, any>[] | any[][]) & {columns: string[]};
@@ -43,6 +47,10 @@ export interface FileAttachment {
   arquero(options?: any): Promise<any>;
   /** Returns the contents of this Parquet file as an Apache Arrow table. */
   parquet(): Promise<any>;
+  /** Returns a DuckDBClient initialized from this DuckDB file. */
+  duckdb(): Promise<DuckDBClient>;
+  /** Returns a SQLiteDatabaseClient initialized from this SQLite file. */
+  sqlite(): Promise<SQLiteDatabaseClient>;
   /** Returns the contents of this file as an XML document. */
   xml(mimeType?: DOMParserSupportedType): Promise<Document>;
   /** Returns the contents of this file as an HTML document. */
@@ -53,13 +61,13 @@ let strict = false;
 
 export const FileAttachment = (name: string, base = document.baseURI): FileAttachment => {
   const href = new URL(name, base).href;
-  let file = files.get(href);
+  let file = registeredFiles.get(href);
   if (!file) {
     if (strict) {
       throw new Error(`File not found: ${name}`);
     } else {
       file = new FileAttachmentImpl(href, name.split("/").pop()!);
-      files.set(href, file);
+      registeredFiles.set(href, file);
     }
   }
   return file;
@@ -76,24 +84,27 @@ export function requireFileRegistration(value: boolean) {
   strict = value;
 }
 
+export function registerFile(name: string, info: FileInfo, base?: string | URL): FileAttachment;
+export function registerFile(name: string, info: null, base?: string | URL): undefined;
+export function registerFile(name: string, info: FileInfo | null, base?: string | URL): FileAttachment | undefined; // prettier-ignore
 export function registerFile(
   name: string,
   info: FileInfo | null,
   base: string | URL = document.baseURI
-) {
+): FileAttachment | undefined {
   const href = new URL(name, base).href;
   if (info == null) {
-    files.delete(href);
+    registeredFiles.delete(href);
   } else {
     const {path, mimeType, lastModified, size} = info;
     const file = new FileAttachmentImpl(
       new URL(path, base).href,
-      name.split("/").pop()!,
+      name,
       mimeType,
       lastModified,
       size
     );
-    files.set(href, file);
+    registeredFiles.set(href, file);
     return file;
   }
 }
@@ -139,7 +150,7 @@ export abstract class AbstractFile implements FileAttachment {
     return (await fetchFile(this)).body!;
   }
   async dsv({delimiter = ",", array = false, typed = false}: DsvOptions = {}): Promise<DsvResult> {
-    const [text, d3] = await Promise.all([this.text(), import("https://cdn.jsdelivr.net/npm/d3-dsv/+esm")]); // prettier-ignore
+    const [text, d3] = await Promise.all([this.text(), import("https://esm.sh/d3-dsv")]); // prettier-ignore
     const format = d3.dsvFormat(delimiter);
     const parse = array ? ((typed &&= true), format.parseRows) : format.parse;
     const output = parse(text, typed === true ? d3.autoType : undefined);
@@ -164,7 +175,7 @@ export abstract class AbstractFile implements FileAttachment {
     });
   }
   async arrow(): Promise<any> {
-    const [Flechette, buffer] = await Promise.all([import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm"), this.arrayBuffer()]); // prettier-ignore
+    const [Flechette, buffer] = await Promise.all([import("https://esm.sh/@uwdata/flechette"), this.arrayBuffer()]); // prettier-ignore
     return Flechette.tableFromIPC(buffer, {useDate: true});
   }
   async arquero(options?: any): Promise<any> {
@@ -195,12 +206,20 @@ export abstract class AbstractFile implements FileAttachment {
         }
         break;
     }
-    const [aq, body] = await Promise.all([import("https://cdn.jsdelivr.net/npm/arquero/+esm"), request]); // prettier-ignore
+    const [aq, body] = await Promise.all([import("https://esm.sh/arquero"), request]); // prettier-ignore
     return aq[from](body, options);
   }
   async parquet() {
-    const [Flechette, Parquet, buffer] = await Promise.all([import("https://cdn.jsdelivr.net/npm/@uwdata/flechette/+esm"), import("https://cdn.jsdelivr.net/npm/parquet-wasm/+esm").then(async (Parquet) => (await Parquet.default("https://cdn.jsdelivr.net/npm/parquet-wasm/esm/parquet_wasm_bg.wasm"), Parquet)), this.arrayBuffer()]); // prettier-ignore
+    const [Flechette, Parquet, buffer] = await Promise.all([import("https://esm.sh/@uwdata/flechette"), import("https://esm.sh/parquet-wasm").then(async (Parquet) => (await Parquet.default("https://esm.sh/parquet-wasm/esm/parquet_wasm_bg.wasm"), Parquet)), this.arrayBuffer()]); // prettier-ignore
     return Flechette.tableFromIPC(Parquet.readParquet(new Uint8Array(buffer)).intoIPCStream(), {useDate: true}); // prettier-ignore
+  }
+  async duckdb() {
+    const {DuckDBClient} = await import("./duckdb.js");
+    return DuckDBClient.open(this);
+  }
+  async sqlite() {
+    const [{SQLiteDatabaseClient}, response] = await Promise.all([import("./sqlite.js"), this.arrayBuffer()]); // prettier-ignore
+    return SQLiteDatabaseClient.open(response);
   }
   async zip() {
     const [{ZipArchive}, buffer] = await Promise.all([import("./zip.js"), this.arrayBuffer()]);
@@ -256,19 +275,41 @@ class FileAttachmentImpl extends AbstractFile {
 Object.defineProperty(FileAttachmentImpl, "name", {value: "FileAttachment"}); // prevent mangling
 FileAttachment.prototype = FileAttachmentImpl.prototype; // instanceof
 
-type FileResolution = {url: string; mimeType?: string; lastModified?: number; size?: number};
-type FileResolver = (name: string) => FileResolution | string | null;
+type NamedFiledResolution = FileResolution & {name: string};
+type FileResolution = ({url: string; href?: undefined} | {url?: undefined; href: string}) & {mimeType?: string; lastModified?: number; size?: number}; // prettier-ignore
+type FileResolver = (name: string) => FileResolution | string | null | undefined;
 
-export function fileAttachments(resolve: FileResolver): (name: string) => FileAttachment {
+export function fileAttachments(
+  files: FileResolver | Iterable<NamedFiledResolution>
+): (name: string) => FileAttachment {
+  const resolve = typeof files === "function" ? files : fileResolver(files);
   function FileAttachment(name: string) {
     const result = resolve((name += ""));
     if (result == null) throw new Error(`File not found: ${name}`);
-    if (typeof result === "object" && "url" in result) {
-      const {url, mimeType, lastModified, size} = result;
-      return new FileAttachmentImpl(url, name, mimeType, lastModified, size);
+    if (typeof result === "object" && ("url" in result || "href" in result)) {
+      const {url, href, mimeType, lastModified, size} = result;
+      return new FileAttachmentImpl(href ?? url, name, mimeType, lastModified, size);
     }
     return new FileAttachmentImpl(result, name);
   }
   FileAttachment.prototype = FileAttachmentImpl.prototype; // instanceof
   return FileAttachment;
+}
+
+function fileResolver(files: Iterable<NamedFiledResolution>): FileResolver {
+  const filesByName = new Map(Array.from(files, (f) => [f.name, f]));
+  return (name) => filesByName.get(name);
+}
+
+type FileRef = Pick<FileAttachment, "name" | "href">;
+
+export function fileDatabase(files?: Iterable<FileRef>) {
+  return [
+    ["DuckDBClient", "invalidation"],
+    async (Client: typeof DuckDBClient, invalidation: Promise<void>) => {
+      const db = await Client.from(files ?? registeredFiles.values());
+      invalidation.then(() => db.terminate());
+      return db;
+    }
+  ] as const;
 }

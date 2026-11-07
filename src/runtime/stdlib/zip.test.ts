@@ -3,8 +3,8 @@ import {fileURLToPath} from "node:url";
 import {assert, beforeAll, describe, test, vi} from "vitest";
 
 // Route jszip and exceljs to the versions from devDependencies
-vi.mock("https://cdn.jsdelivr.net/npm/jszip/+esm", async () => await import("jszip"));
-vi.mock("https://cdn.jsdelivr.net/npm/exceljs/+esm", async () => await import("exceljs"));
+vi.mock("https://esm.sh/jszip", async () => await import("jszip"));
+vi.mock("https://esm.sh/exceljs", async () => await import("exceljs"));
 
 const {ZipArchive} = await import("./zip.js");
 

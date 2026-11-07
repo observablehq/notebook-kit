@@ -1,4 +1,4 @@
-@import url("https://cdn.jsdelivr.net/npm/@observablehq/inputs/dist/index.css");
+@import url("https://esm.sh/@observablehq/inputs/dist/index.css");
 
 .inputs-3a86ea-table tr:not(:last-child) td,
 .inputs-3a86ea-table tr:not(:last-child) th {
