@@ -22,5 +22,5 @@ export const SQLite = () => import("./sqlite.js").then((_) => _.default);
 export const SQLiteDatabaseClient = () => import("./sqlite.js").then((_) => _.SQLiteDatabaseClient);
 export const tex = () => import("./tex.js").then((_) => _.tex);
 export const topojson = () => import("https://esm.sh/topojson-client");
-// export const vg = () => import("observablehq:stdlib/vgplot").then((_) => _.default());
+export const vgplot = () => import("https://esm.sh/@uwdata/vgplot?deps=@duckdb/duckdb-wasm@1.32.0");
 export const vl = () => import("./vega-lite.js").then((_) => _.vl);

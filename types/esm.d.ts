@@ -1,6 +1,7 @@
 declare module "https://esm.sh/@duckdb/duckdb-wasm@1.32.0";
 declare module "https://esm.sh/@observablehq/plot";
 declare module "https://esm.sh/@uwdata/flechette";
+declare module "https://esm.sh/@uwdata/vgplot?deps=@duckdb/duckdb-wasm@1.32.0";
 declare module "https://esm.sh/@viz-js/viz";
 declare module "https://esm.sh/apache-arrow@17.0.0";
 declare module "https://esm.sh/arquero";
