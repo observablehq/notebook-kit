@@ -54,13 +54,13 @@ export function define(
       inputs.filter((i) => i !== "display" && i !== "view"),
       () => {
         const version = v._version; // capture version on input change
-        return (value: unknown) => {
+        return (...values: unknown[]) => {
           if (version < displayVersion) throw new Error("stale display");
           else if (state.variables[0] !== v) throw new Error("stale display");
           else if (version > displayVersion) clear(state);
           displayVersion = version;
-          display(state, value, output, displayMode);
-          return value;
+          for (const value of values) display(state, value, output, displayMode);
+          return values.length === 1 ? values[0] : values;
         };
       }
     );
