@@ -101,8 +101,6 @@ export function observable({
   transformTemplate = (template) => template,
   transformNotebook = (notebook) => notebook
 }: ObservableOptions = {}): PluginOption {
-  let root = process.cwd();
-
   /** The most recently-rendered notebooks in the preview server, by filename. */
   const notebooks = new Map<
     string,
@@ -283,21 +281,11 @@ export function observable({
       if (notebook.shell !== previous.notebook.shell) return;
       return [module];
     },
-    configResolved(config) {
-      root = config.root;
-    },
-    async load(id) {
+    load(id) {
       if (!id.endsWith(NOTEBOOK_QUERY)) return;
       const filename = id.slice(0, -NOTEBOOK_QUERY.length);
-      let entry = notebooks.get(filename);
-      if (!entry) {
-        // The notebook module is normally rendered by transformIndexHtml; but
-        // in case it’s requested directly, render it on demand.
-        const context: IndexHtmlTransformContext = {path: `/${relative(root, filename)}`, filename};
-        const notebook = await render(await readFile(filename, "utf-8"), context, {dev: true});
-        entry = {context, notebook};
-        notebooks.set(filename, entry);
-      }
+      const entry = notebooks.get(filename);
+      if (!entry) throw new Error(`notebook not loaded: ${filename}`);
       return renderNotebookModule(entry.notebook);
     },
     transformIndexHtml: {
