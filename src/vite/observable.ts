@@ -82,6 +82,8 @@ interface Asset {
 }
 
 interface RenderedNotebook {
+  /** the render context */
+  context: IndexHtmlTransformContext;
   /** the rendered page (sans the notebook’s styles and script) */
   html: string;
   /** the rendered document title */
@@ -111,10 +113,7 @@ export function observable({
   transformNotebook = (notebook) => notebook
 }: ObservableOptions = {}): PluginOption {
   /** The most recently-rendered notebooks in the preview server, by filename. */
-  const notebooks = new Map<
-    string,
-    {context: IndexHtmlTransformContext; notebook: RenderedNotebook}
-  >();
+  const notebooks = new Map<string, RenderedNotebook>();
 
   /**
    * Renders the given notebook. If a dev environment is specified (i.e., in the
@@ -268,6 +267,7 @@ export function observable({
     filterMissingAssets(assets, dir);
 
     return {
+      context,
       html: document.documentElement.outerHTML,
       title: title.textContent ?? "",
       theme: notebook.theme,
@@ -311,9 +311,9 @@ export function observable({
         const {context} = previous;
         const input = path === filename ? await read() : await readFile(path, "utf-8");
         const notebook = await render(input, context, this.environment);
-        notebooks.set(path, {context, notebook});
+        notebooks.set(path, notebook);
         this.environment.moduleGraph.invalidateModule(module);
-        if (path === filename && notebook.shell === previous.notebook.shell) self = module;
+        if (path === filename && notebook.shell === previous.shell) self = module;
       }
 
       // If the notebook itself changed and only its cells changed, update just
@@ -325,9 +325,9 @@ export function observable({
     async load(id) {
       if (!id.endsWith(OBSERVABLE_QUERY) || this.environment.mode !== "dev") return;
       const filename = id.slice(0, -OBSERVABLE_QUERY.length);
-      const entry = notebooks.get(filename);
-      if (!entry) throw new Error(`notebook not loaded: ${filename}`);
-      return renderNotebookModule(entry.notebook);
+      const notebook = notebooks.get(filename);
+      if (!notebook) throw new Error(`notebook not loaded: ${filename}`);
+      return renderNotebookModule(notebook);
     },
     transformIndexHtml: {
       order: "pre",
@@ -341,7 +341,7 @@ export function observable({
         const filename = normalizePath(context.filename);
         const environment = server.environments.client;
         const notebook = await render(input, context, environment);
-        notebooks.set(filename, {context, notebook});
+        notebooks.set(filename, notebook);
         const module = environment.moduleGraph.getModuleById(filename + OBSERVABLE_QUERY);
         if (module) environment.moduleGraph.invalidateModule(module);
         return renderPage(notebook, renderHotScript(notebook, basename(filename)));
