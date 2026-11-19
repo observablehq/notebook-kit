@@ -297,10 +297,10 @@ export function observable({
       // Re-render any loaded notebooks affected by this change: either the
       // notebook itself changed, or one of its cells’ local dependencies (such
       // as an imported module, a file attachment, or a static asset referenced
-      // by a Markdown or HTML cell). The page accepts updates
-      // to the notebook module, redefining only the cells whose keys changed.
-      // The notebook module must be invalidated explicitly; otherwise, for a
-      // changed dependency, Vite would only update the import timestamps in the
+      // by a Markdown or HTML cell). The page accepts updates to the notebook
+      // module, redefining only the cells whose keys changed. The notebook
+      // module must be invalidated explicitly; otherwise, for a changed
+      // dependency, Vite would only update the import timestamps in the
       // previously-transformed code, without reloading the notebook module.
       const filename = normalizePath(file);
       let self: EnvironmentModuleNode | undefined;
@@ -445,13 +445,15 @@ export const cells = [${cells
 /** Returns the notebook modules that are (or transitively import) the given modules. */
 function findNotebookModules(modules: EnvironmentModuleNode[]): EnvironmentModuleNode[] {
   const notebooks: EnvironmentModuleNode[] = [];
-  const seen = new Set<EnvironmentModuleNode>();
-  const queue = modules.slice();
+  const queue = new Set(modules);
   for (const module of queue) {
-    if (seen.has(module)) continue;
-    seen.add(module);
-    if (module.id?.endsWith(OBSERVABLE_QUERY)) notebooks.push(module);
-    else queue.push(...module.importers);
+    if (module.id?.endsWith(OBSERVABLE_QUERY)) {
+      notebooks.push(module);
+    } else {
+      for (const importer of module.importers) {
+        queue.add(importer);
+      }
+    }
   }
   return notebooks;
 }
