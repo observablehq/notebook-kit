@@ -86,7 +86,9 @@ export function hot(
         if (definition && !cell.state) defines.push(cell);
         return cell;
       }
-      const nodes = parseHtml(html, assets);
+      const fragment = parseHtml(html);
+      if (assets) for (const element of fragment.children) mapAssets(element, assets);
+      const nodes = Array.from(fragment.childNodes);
       const old = oldCellById.get(id);
       if (old?.state && definition) {
         // When redefining a cell, reuse its root and state to avoid flashing:
@@ -128,9 +130,8 @@ export function hot(
   return update;
 }
 
-function parseHtml(html: string, assets?: Map<string, string>): ChildNode[] {
+function parseHtml(html: string): DocumentFragment {
   const template = document.createElement("template");
   template.innerHTML = html;
-  if (assets) for (const element of template.content.children) mapAssets(element, assets);
-  return Array.from(template.content.childNodes);
+  return template.content;
 }
