@@ -248,8 +248,9 @@ export function observable({
         code.textContent = value;
         await highlight(code);
       }
-      const html = Array.from(contents.children, (node) => node.outerHTML).join("");
-      const length = contents.childNodes.length;
+      const nodes = Array.from(contents.children);
+      const html = nodes.map((node) => node.outerHTML).join("");
+      const length = nodes.length;
       const definition = transpiled && renderDefinition(cell, transpiled, "assets");
       const dependencies = environment
         ? await getDependencies(environment, context.filename, [
@@ -289,7 +290,8 @@ export function observable({
     },
     async hotUpdate({type, file, modules, read}) {
       if (this.environment.name !== "client") return;
-      if (file === resolve(template)) {
+      const filename = normalizePath(file);
+      if (filename === normalizePath(resolve(template))) {
         this.environment.hot.send({type: "full-reload"});
         return;
       }
@@ -302,12 +304,15 @@ export function observable({
       // module must be invalidated explicitly; otherwise, for a changed
       // dependency, Vite would only update the import timestamps in the
       // previously-transformed code, without reloading the notebook module.
-      const filename = normalizePath(file);
       let self: EnvironmentModuleNode | undefined;
       for (const module of findNotebookModules(modules)) {
         const path = module.id!.slice(0, -OBSERVABLE_QUERY.length);
         const previous = notebooks.get(path);
         if (!previous) continue;
+        if (type === "delete" && path === filename) {
+          notebooks.delete(path); // can’t re-render; Vite’s default will reload
+          continue;
+        }
         const {context} = previous;
         const input = path === filename ? await read() : await readFile(path, "utf-8");
         const notebook = await render(input, context, this.environment);
