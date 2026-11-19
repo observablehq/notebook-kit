@@ -101,7 +101,7 @@ interface RenderedNotebook {
  * notebook module, identified by this query suffix on the page’s path. This
  * allows incremental updates via hot module replacement.
  */
-const NOTEBOOK_QUERY = "?observable-notebook";
+const OBSERVABLE_QUERY = "?observable";
 
 export function observable({
   window = new JSDOM().window,
@@ -305,7 +305,7 @@ export function observable({
       const filename = normalizePath(file);
       let self: EnvironmentModuleNode | undefined;
       for (const module of findNotebookModules(modules)) {
-        const path = module.id!.slice(0, -NOTEBOOK_QUERY.length);
+        const path = module.id!.slice(0, -OBSERVABLE_QUERY.length);
         const previous = notebooks.get(path);
         if (!previous) continue;
         const {context} = previous;
@@ -323,8 +323,8 @@ export function observable({
       if (self && type === "update") return [self];
     },
     async load(id) {
-      if (!id.endsWith(NOTEBOOK_QUERY) || this.environment.mode !== "dev") return;
-      const filename = id.slice(0, -NOTEBOOK_QUERY.length);
+      if (!id.endsWith(OBSERVABLE_QUERY) || this.environment.mode !== "dev") return;
+      const filename = id.slice(0, -OBSERVABLE_QUERY.length);
       const entry = notebooks.get(filename);
       if (!entry) throw new Error(`notebook not loaded: ${filename}`);
       return renderNotebookModule(entry.notebook);
@@ -342,7 +342,7 @@ export function observable({
         const environment = server.environments.client;
         const notebook = await render(input, context, environment);
         notebooks.set(filename, {context, notebook});
-        const module = environment.moduleGraph.getModuleById(filename + NOTEBOOK_QUERY);
+        const module = environment.moduleGraph.getModuleById(filename + OBSERVABLE_QUERY);
         if (module) environment.moduleGraph.invalidateModule(module);
         return renderPage(notebook, renderHotScript(notebook, basename(filename)));
       }
@@ -402,7 +402,7 @@ define(
  * notebook’s cells, with support for incremental updates (for preview).
  */
 function renderHotScript({cells}: RenderedNotebook, name: string): string {
-  const specifier = escapeScript(JSON.stringify(`./${name}${NOTEBOOK_QUERY}`));
+  const specifier = escapeScript(JSON.stringify(`./${name}${OBSERVABLE_QUERY}`));
   const initial = escapeScript(JSON.stringify(cells.map<HotInitialCell>(({cell, key, length}) => [cell.id, key, length]))); // prettier-ignore
   return `
 import {hot} from "observable:runtime/hot";
@@ -450,7 +450,7 @@ function findNotebookModules(modules: EnvironmentModuleNode[]): EnvironmentModul
   for (const module of queue) {
     if (seen.has(module)) continue;
     seen.add(module);
-    if (module.id?.endsWith(NOTEBOOK_QUERY)) notebooks.push(module);
+    if (module.id?.endsWith(OBSERVABLE_QUERY)) notebooks.push(module);
     else queue.push(...module.importers);
   }
   return notebooks;
