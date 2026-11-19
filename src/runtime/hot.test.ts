@@ -69,7 +69,7 @@ function mount(notebook: HotNotebook) {
   const initial = notebook.cells.map(({id, key, html}) => {
     const template = document.createElement("template");
     template.innerHTML = html;
-    return [id, key, template.content.childNodes.length] as [number, string, number];
+    return {id, key, length: template.content.childNodes.length};
   });
   return (update = hot(notebook, initial));
 }

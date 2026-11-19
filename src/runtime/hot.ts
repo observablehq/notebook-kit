@@ -25,8 +25,15 @@ export type HotNotebook = {
   assets?: Map<string, string>;
 };
 
-/** A cell’s initial (server-rendered) state: its id, key, and number of top-level nodes. */
-export type HotInitialCell = [id: number, key: string, length: number];
+/** A cell’s initial (server-rendered) state. */
+export type HotInitialCell = {
+  /** the cell id */
+  id: number;
+  /** a hash of the cell’s rendered html and definition */
+  key: string;
+  /** the number of top-level nodes */
+  length: number;
+};
 
 type MountedCell = {
   /** the cell id */
@@ -51,7 +58,7 @@ export function hot(
 ): (notebook: HotNotebook) => void {
   let cells: MountedCell[] = [];
 
-  for (const [id, key, length] of initial) {
+  for (const {id, key, length} of initial) {
     let node: ChildNode | null = document.getElementById(`cell-${id}`);
     if (!node) continue;
     const nodes: ChildNode[] = [node];

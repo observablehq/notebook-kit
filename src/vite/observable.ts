@@ -403,7 +403,7 @@ define(
  */
 function renderHotScript({cells}: RenderedNotebook, name: string): string {
   const specifier = escapeScript(JSON.stringify(`./${name}${OBSERVABLE_QUERY}`));
-  const initial = escapeScript(JSON.stringify(cells.map<HotInitialCell>(({cell, key, length}) => [cell.id, key, length]))); // prettier-ignore
+  const initial = escapeScript(JSON.stringify(cells.map<HotInitialCell>(({cell, key, length}) => ({id: cell.id, key, length})))); // prettier-ignore
   return `
 import {hot} from "observable:runtime/hot";
 import * as notebook from ${specifier};
