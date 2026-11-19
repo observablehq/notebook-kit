@@ -35,15 +35,13 @@ export function deserialize(data: string, {parser = new DOMParser()} = {}): Note
   const theme = deserializeTheme(_notebook?.getAttribute("theme"));
   const readOnly = _notebook?.hasAttribute("readonly");
   const title = document.querySelector("title")?.textContent ?? undefined;
-  let maxCellId = 0;
   const cellIds = new Set<number>();
   const cells = Array.from<HTMLScriptElement, CellSpec>(
     document.querySelectorAll("notebook script"),
     (cell) => {
       let id = Math.floor(Number(cell.id));
-      if (!isFinite(id) || !(id > 0) || cellIds.has(id)) id = ++maxCellId;
-      else if (id > maxCellId) maxCellId = id;
-      cellIds.add(id);
+      if (!isFinite(id) || !(id > 0) || cellIds.has(id)) id = NaN; // assigned below
+      else cellIds.add(id);
       const mode = deserializeMode(cell.getAttribute("type"));
       const value = dedent(cell.textContent?.replace(/<\\(?=\\*\/script(\s|>))/gi, "<") ?? "");
       const pinned = cell.hasAttribute("pinned");
@@ -54,7 +52,27 @@ export function deserialize(data: string, {parser = new DOMParser()} = {}): Note
       return {id, mode, value, pinned, hidden, format, output, database};
     }
   );
+  // Cells without a (valid, unique) declared id are assigned an id based on
+  // their value, so that the id is stable even if other cells are inserted,
+  // removed, or reordered. If multiple cells have the same value (or their ids
+  // otherwise collide), subsequent cells are assigned the next free id.
+  for (const cell of cells) {
+    if (!isNaN(cell.id)) continue;
+    let id = fnv1a(cell.value!) + 1; // in [1, 2^32]
+    while (cellIds.has(id)) ++id;
+    cellIds.add((cell.id = id));
+  }
   return toNotebook({title, theme, readOnly, cells});
+}
+
+/** Returns the 32-bit FNV-1a hash of the given string (of UTF-16 code units). */
+function fnv1a(content: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < content.length; ++i) {
+    hash ^= content.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
 }
 
 function serializeMode(mode: Cell["mode"]): string {

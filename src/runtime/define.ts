@@ -95,3 +95,18 @@ export function define(
     }
   }
 }
+
+/** Deletes the runtime variables previously defined by define for the given state. */
+export function undefine(state: DefineState): void {
+  const variables = state.variables;
+  state.variables = [];
+  for (const v of variables) {
+    v._observer = {}; // ignore any subsequent notifications (e.g., from the deletion)
+    v.delete();
+  }
+  // The display and view shadow variables must be deleted after the variables
+  // that reference them; view references display, so it must be deleted first.
+  const shadow = variables[0]?._shadow;
+  shadow?.get("view")?.delete();
+  shadow?.get("display")?.delete();
+}

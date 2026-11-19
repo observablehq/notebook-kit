@@ -47,11 +47,3 @@ const defaultNotebook = new NotebookRuntime();
 export const runtime = defaultNotebook.runtime;
 export const main = defaultNotebook.main;
 export const define = defaultNotebook.define.bind(defaultNotebook);
-
-main.constructor.prototype.defines = function (this: Module, name: string): boolean {
-  return (
-    this._scope.has(name) || // prettier
-    this._builtins.has(name) ||
-    this._runtime._builtin._scope.has(name)
-  );
-};
