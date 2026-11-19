@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import {afterEach, beforeEach, expect, test} from "vitest";
+import {afterEach, beforeEach, expect, test, vi} from "vitest";
 import type {HotCell, HotNotebook} from "./hot.js";
 import {hot} from "./hot.js";
 
@@ -141,11 +141,17 @@ test("hot inserts, removes, and reorders cells", async () => {
 });
 
 test("hot displays an error when a referenced variable is removed", async () => {
-  const update = mount({title: "Test", cells: [constCell(1, "x", 1), exprCell(2, "x", 1)]});
-  await tick();
-  update({title: "Test", cells: [exprCell(2, "x", 1)]});
-  await tick();
-  expect(text(2)).toMatch(/x is not defined/);
+  const error = vi.spyOn(console, "error").mockImplementation(() => {});
+  try {
+    const update = mount({title: "Test", cells: [constCell(1, "x", 1), exprCell(2, "x", 1)]});
+    await tick();
+    update({title: "Test", cells: [exprCell(2, "x", 1)]});
+    await tick();
+    expect(text(2)).toMatch(/x is not defined/);
+    expect(error).toHaveBeenCalledWith(expect.objectContaining({message: "x is not defined"}));
+  } finally {
+    error.mockRestore();
+  }
 });
 
 test("hot redefines cells that use display and view", async () => {

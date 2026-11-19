@@ -26,7 +26,9 @@ export type HotNotebook = {
 export type HotInitialCell = [id: number, key: string, length: number];
 
 type MountedCell = {
+  /** the cell id */
   id: number;
+  /** a hash of the cell’s rendered html and definition */
   key: string;
   /** the top-level nodes for this cell; the first is the cell’s root */
   nodes: ChildNode[];
@@ -47,12 +49,10 @@ export function hot(
   let cells: MountedCell[] = [];
 
   for (const [id, key, length] of initial) {
-    const root = document.getElementById(`cell-${id}`);
-    if (!root) continue;
-    const nodes: ChildNode[] = [root];
-    for (let node: ChildNode | null = root; nodes.length < length && (node = node.nextSibling); ) {
-      nodes.push(node);
-    }
+    let node: ChildNode | null = document.getElementById(`cell-${id}`);
+    if (!node) continue;
+    const nodes: ChildNode[] = [node];
+    while (nodes.length < length && (node = node.nextSibling)) nodes.push(node);
     cells.push({id, key, nodes});
   }
 
@@ -66,29 +66,29 @@ export function hot(
 
     // Undefine any old cells that are no longer present.
     const newKeys = new Set(newCells.map((cell) => cell.key));
-    const oldCells = new Map(cells.map((cell) => [cell.key, cell]));
-    const removed = new Map<number, MountedCell>();
+    const cellByKey = new Map(cells.map((cell) => [cell.key, cell]));
+    const oldCellById = new Map<number, MountedCell>();
     for (const cell of cells) {
       if (newKeys.has(cell.key)) continue;
       if (cell.state) undefine(cell.state);
-      removed.set(cell.id, cell);
+      oldCellById.set(cell.id, cell);
     }
 
     // Compute the new cells, reusing unchanged cells as-is.
     const defines: MountedCell[] = [];
     cells = newCells.map(({id, key, html, definition}) => {
-      let cell = oldCells.get(key);
+      let cell = cellByKey.get(key);
       if (cell) {
         // Server-rendered cells are not yet defined.
         if (definition && !cell.state) defines.push(cell);
         return cell;
       }
       const nodes = parseHtml(html);
-      const old = removed.get(id);
+      const old = oldCellById.get(id);
       if (old?.state && definition) {
         // When redefining a cell, reuse its root and state to avoid flashing:
         // the old display is retained until the new definition displays.
-        removed.delete(id);
+        oldCellById.delete(id);
         for (const node of old.nodes.slice(1)) node.remove();
         nodes[0] = old.nodes[0];
         cell = {id, key, nodes, state: old.state};
@@ -100,7 +100,7 @@ export function hot(
     });
 
     // Remove the old cells’ nodes, and insert (or move) the new cells’ nodes.
-    for (const cell of removed.values()) {
+    for (const cell of oldCellById.values()) {
       for (const node of cell.nodes) node.remove();
     }
     let previous = anchor;
