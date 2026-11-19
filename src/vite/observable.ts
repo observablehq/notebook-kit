@@ -19,6 +19,7 @@ import {Sourcemap} from "../javascript/sourcemap.js";
 import type {TranspiledJavaScript} from "../javascript/transpile.js";
 import {transpile} from "../javascript/transpile.js";
 import {parseTemplate} from "../javascript/template.js";
+import type {HotInitialCell} from "../runtime/hot.js";
 import {collectAssets} from "../runtime/stdlib/assets.js";
 import {highlight} from "../runtime/stdlib/highlight.js";
 import {MarkdownRenderer} from "../runtime/stdlib/md.js";
@@ -402,9 +403,7 @@ define(
  */
 function renderHotScript({cells}: RenderedNotebook, name: string): string {
   const specifier = escapeScript(JSON.stringify(`./${name}${NOTEBOOK_QUERY}`));
-  const initial = escapeScript(
-    JSON.stringify(cells.map(({cell, key, length}) => [cell.id, key, length]))
-  );
+  const initial = escapeScript(JSON.stringify(cells.map<HotInitialCell>(({cell, key, length}) => [cell.id, key, length]))); // prettier-ignore
   return `
 import {hot} from "observable:runtime/hot";
 import * as notebook from ${specifier};
@@ -501,7 +500,10 @@ function cleanUrl(id: string): string {
 }
 
 /** Returns the specifiers of the given cell’s local imports and files. */
-function getLocalDependencies({imports = new Set(), files = new Set()}: TranspiledJavaScript): string[] {
+function getLocalDependencies({
+  imports = new Set(),
+  files = new Set()
+}: TranspiledJavaScript): string[] {
   const dependencies = Array.from(imports).filter(isPathSpecifier);
   for (const file of files) {
     if (/^\w+:/.test(file)) continue; // ignore URLs
