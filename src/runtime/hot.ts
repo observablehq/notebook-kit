@@ -1,6 +1,7 @@
 import type {DefineState, Definition} from "./define.js";
 import {undefine} from "./define.js";
 import {define} from "./index.js";
+import {mapAssets} from "./stdlib/assets.js";
 
 /** A rendered cell, as exported by the notebook module in the preview server. */
 export type HotCell = {
@@ -20,6 +21,8 @@ export type HotNotebook = {
   title: string;
   /** the rendered cells, in order */
   cells: HotCell[];
+  /** the mapping from static asset paths to URLs, if any */
+  assets?: Map<string, string>;
 };
 
 /** A cell’s initial (server-rendered) state: its id, key, and number of top-level nodes. */
@@ -56,7 +59,7 @@ export function hot(
     cells.push({id, key, nodes});
   }
 
-  function update({title, cells: newCells}: HotNotebook): void {
+  function update({title, cells: newCells, assets}: HotNotebook): void {
     if (document.title !== title) document.title = title;
 
     // Determine where cells are inserted; this must happen before removal.
@@ -83,7 +86,7 @@ export function hot(
         if (definition && !cell.state) defines.push(cell);
         return cell;
       }
-      const nodes = parseHtml(html);
+      const nodes = parseHtml(html, assets);
       const old = oldCellById.get(id);
       if (old?.state && definition) {
         // When redefining a cell, reuse its root and state to avoid flashing:
@@ -125,8 +128,9 @@ export function hot(
   return update;
 }
 
-function parseHtml(html: string): ChildNode[] {
+function parseHtml(html: string, assets?: Map<string, string>): ChildNode[] {
   const template = document.createElement("template");
   template.innerHTML = html;
+  if (assets) for (const element of template.content.children) mapAssets(element, assets);
   return Array.from(template.content.childNodes);
 }

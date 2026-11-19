@@ -189,6 +189,17 @@ test("hot redefines cells that use display and view", async () => {
   expect(text(2)).toBe("two");
 });
 
+test("hot maps static assets in new and changed cells", async () => {
+  const image = (id: number, alt: string): HotCell => ({id, key: `${id}:${alt}`, html: cellHtml(id, `<img src="./a.png" alt="${alt}">`)}); // prettier-ignore
+  const update = mount({title: "Test", cells: [image(1, "one")]});
+  const src = () => document.querySelector("#cell-1 img")!.getAttribute("src");
+  expect(src()).toBe("./a.png"); // server-rendered cells are left as-is
+  update({title: "Test", cells: [image(1, "two")], assets: new Map([["./a.png", "/a.png?t=1"]])}); // prettier-ignore
+  expect(src()).toBe("/a.png?t=1");
+  update({title: "Test", cells: [image(1, "three")], assets: new Map([["./a.png", "/a.png?t=2"]])}); // prettier-ignore
+  expect(src()).toBe("/a.png?t=2");
+});
+
 test("hot updates the document title", async () => {
   const update = mount({title: "Test", cells: []});
   update({title: "Updated", cells: [staticCell(1, "a")]});

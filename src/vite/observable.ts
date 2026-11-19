@@ -1,12 +1,13 @@
 import {fork, spawn} from "node:child_process";
 import {createHash} from "node:crypto";
 import {createWriteStream, existsSync, unlinkSync} from "node:fs";
-import {mkdir, readFile} from "node:fs/promises";
+import {mkdir, readFile, stat} from "node:fs/promises";
 import {basename, dirname, join, resolve} from "node:path";
 import {relative} from "node:path/posix";
 import {fileURLToPath} from "node:url";
 import type {TemplateLiteral} from "acorn";
 import {JSDOM} from "jsdom";
+import type {DevEnvironment, EnvironmentModuleNode} from "vite";
 import type {PluginOption, IndexHtmlTransformContext} from "vite";
 import {normalizePath} from "vite";
 import {getQueryCachePath} from "../databases/index.js";
@@ -72,6 +73,13 @@ interface RenderedCell {
   key: string;
 }
 
+interface Asset {
+  /** the import path of the asset, typically starting with ./ */
+  path: string;
+  /** for the preview server, the modification time of the asset (for cache-busting) */
+  mtime?: number;
+}
+
 interface RenderedNotebook {
   /** the rendered page (sans the notebook’s styles and script) */
   html: string;
@@ -80,7 +88,7 @@ interface RenderedNotebook {
   /** the notebook theme */
   theme: Notebook["theme"];
   /** the static assets referenced by the notebook */
-  assets: string[];
+  assets: Asset[];
   /** the rendered cells */
   cells: RenderedCell[];
   /** a hash of everything other than cells; if this changes, a full reload is needed */
@@ -109,10 +117,15 @@ export function observable({
     {context: IndexHtmlTransformContext; notebook: RenderedNotebook}
   >();
 
+  /**
+   * Renders the given notebook. If a dev environment is specified (i.e., in the
+   * preview server), errors are displayed in cells rather than thrown, and the
+   * cell keys reflect the current state of the cells’ local dependencies.
+   */
   async function render(
     input: string,
     context: IndexHtmlTransformContext,
-    {dev = false}: {dev?: boolean} = {} // if true, display errors in cells
+    environment?: DevEnvironment
   ): Promise<RenderedNotebook> {
     const notebook = await transformNotebook(deserialize(input, {parser}), context);
     const templateHtml = await transformTemplate(await readFile(template, "utf-8"), context);
@@ -223,11 +236,13 @@ export function observable({
       } catch (error) {
         // In the preview server, display the error in the cell rather than
         // failing the entire page.
-        if (!dev) throw error;
+        if (!environment) throw error;
         while (div.lastChild) div.lastChild.remove();
         transpiled = transpileError(error);
       }
-      collectAssets(assets, div);
+      const cellAssets = new Set<string>();
+      collectAssets(cellAssets, div);
+      for (const asset of cellAssets) assets.add(asset);
       if (pinned) {
         const pre = contents.appendChild(document.createElement("pre"));
         const code = pre.appendChild(document.createElement("code"));
@@ -238,19 +253,31 @@ export function observable({
       const html = Array.from(contents.children, (node) => node.outerHTML).join("");
       const length = contents.childNodes.length;
       const definition = transpiled && renderDefinition(cell, transpiled, "assets");
-      const key = hash([id, html, definition]);
+      const dependencies = environment
+        ? await getDependencies(environment, context.filename, [
+            ...cellAssets,
+            ...(transpiled ? getLocalDependencies(transpiled) : [])
+          ])
+        : [];
+      const key = hash([id, html, definition, dependencies]);
       rendered.push({cell, html, length, transpiled, key});
       main.appendChild(contents);
     }
 
     // Don’t error if assets are missing (matching Vite’s behavior).
-    filterMissingAssets(assets, dirname(context.filename));
+    const dir = dirname(context.filename);
+    filterMissingAssets(assets, dir);
 
     return {
       html: document.documentElement.outerHTML,
       title: title.textContent ?? "",
       theme: notebook.theme,
-      assets: Array.from(assets),
+      assets: await Promise.all(
+        Array.from(assets, async (path) => ({
+          path,
+          mtime: environment && (await getModifiedTime(join(dir, path)))
+        }))
+      ),
       cells: rendered,
       shell: hash([templateHtml, notebook.theme])
     };
@@ -268,33 +295,46 @@ export function observable({
         return;
       }
 
-      // If this is a notebook that has been loaded in the preview server, re-
-      // render it. If only cells changed, update the notebook module, which the
-      // page accepts to apply the changes incrementally; otherwise, fall back
-      // to Vite’s default behavior (a full reload).
-      if (type !== "update") return;
+      // Re-render any loaded notebooks affected by this change: either the
+      // notebook itself changed, or one of its cells’ local dependencies (such
+      // as an imported module, a file attachment, or a static asset referenced
+      // by a Markdown or HTML cell). The page accepts updates
+      // to the notebook module, redefining only the cells whose keys changed.
+      // The notebook module must be invalidated explicitly; otherwise, for a
+      // changed dependency, Vite would only update the import timestamps in the
+      // previously-transformed code, without reloading the notebook module.
       const filename = normalizePath(file);
-      const module = modules.find((module) => module.id === filename + NOTEBOOK_QUERY);
-      const previous = notebooks.get(filename);
-      if (!module || !previous) return;
-      const {context} = previous;
-      const notebook = await render(await read(), context, {dev: true});
-      notebooks.set(filename, {context, notebook});
-      if (notebook.shell !== previous.notebook.shell) return;
-      return [module];
+      let self: EnvironmentModuleNode | undefined;
+      for (const module of findNotebookModules(modules)) {
+        const path = module.id!.slice(0, -NOTEBOOK_QUERY.length);
+        const previous = notebooks.get(path);
+        if (!previous) continue;
+        const {context} = previous;
+        const input = path === filename ? await read() : await readFile(path, "utf-8");
+        const notebook = await render(input, context, this.environment);
+        notebooks.set(path, {context, notebook});
+        this.environment.moduleGraph.invalidateModule(module);
+        if (path === filename && notebook.shell === previous.notebook.shell) self = module;
+      }
+
+      // If the notebook itself changed and only its cells changed, update just
+      // the notebook module; otherwise, fall back to Vite’s default behavior
+      // (for a notebook, a full reload). Note that a change to a dependency
+      // cannot change the template or theme.
+      if (self && type === "update") return [self];
     },
     configResolved(config) {
       root = config.root;
     },
     async load(id) {
-      if (!id.endsWith(NOTEBOOK_QUERY)) return;
+      if (!id.endsWith(NOTEBOOK_QUERY) || this.environment.mode !== "dev") return;
       const filename = id.slice(0, -NOTEBOOK_QUERY.length);
       let entry = notebooks.get(filename);
       if (!entry) {
         // The notebook module is normally rendered by transformIndexHtml; but
         // in case it’s requested directly, render it on demand.
         const context: IndexHtmlTransformContext = {path: `/${relative(root, filename)}`, filename};
-        const notebook = await render(await readFile(filename, "utf-8"), context, {dev: true});
+        const notebook = await render(await readFile(filename, "utf-8"), context, this.environment);
         entry = {context, notebook};
         notebooks.set(filename, entry);
       }
@@ -310,11 +350,11 @@ export function observable({
           return renderPage(notebook, renderScript(notebook));
         }
         const filename = normalizePath(context.filename);
-        const notebook = await render(input, context, {dev: true});
+        const environment = server.environments.client;
+        const notebook = await render(input, context, environment);
         notebooks.set(filename, {context, notebook});
-        const {moduleGraph} = server.environments.client;
-        const module = moduleGraph.getModuleById(filename + NOTEBOOK_QUERY);
-        if (module) moduleGraph.invalidateModule(module);
+        const module = environment.moduleGraph.getModuleById(filename + NOTEBOOK_QUERY);
+        if (module) environment.moduleGraph.invalidateModule(module);
         return renderPage(notebook, renderHotScript(notebook, basename(filename)));
       }
     }
@@ -385,10 +425,20 @@ if (import.meta.hot) import.meta.hot.accept(${specifier}, (notebook) => notebook
 `;
 }
 
-/** Renders the notebook module (for preview); see HotNotebook. */
+/**
+ * Renders the notebook module (for preview); see HotNotebook. The asset URLs
+ * include the assets’ modification times, so that when an asset changes, the
+ * browser loads the new asset rather than using its in-memory cache. (Small
+ * assets are inlined by Vite as data: URLs, which don’t need versioning.)
+ */
 function renderNotebookModule({title, assets, cells}: RenderedNotebook): string {
-  return `${renderAssetImports(assets).slice(1)}
-const assets = ${assets.length > 0 ? renderAssetMap(assets) : "new Map()"};
+  return `${renderAssetImports(assets).slice(1)}${
+    assets.some(({mtime}) => mtime !== undefined)
+      ? `
+const versionAsset = (url, version) => url.startsWith("data:") ? url : \`\${url}\${url.includes("?") ? "&" : "?"}t=\${version}\`;`
+      : ""
+  }
+export const assets = ${assets.length > 0 ? renderAssetMap(assets) : "new Map()"};
 export const title = ${JSON.stringify(title)};
 export const cells = [${cells
     .map(
@@ -405,18 +455,94 @@ export const cells = [${cells
 `;
 }
 
-function renderAssetImports(assets: string[]): string {
+/** Returns the notebook modules that are (or transitively import) the given modules. */
+function findNotebookModules(modules: EnvironmentModuleNode[]): EnvironmentModuleNode[] {
+  const notebooks: EnvironmentModuleNode[] = [];
+  const seen = new Set<EnvironmentModuleNode>();
+  const queue = modules.slice();
+  for (const module of queue) {
+    if (seen.has(module)) continue;
+    seen.add(module);
+    if (module.id?.endsWith(NOTEBOOK_QUERY)) notebooks.push(module);
+    else queue.push(...module.importers);
+  }
+  return notebooks;
+}
+
+/**
+ * Returns the given local dependencies of a cell (imported modules, file
+ * attachments, and static assets) as [path, mtime] pairs, resolved the same
+ * way that Vite will later resolve them, so that the cell is re-rendered if any
+ * of its dependencies change. This includes transitive imports, if known to
+ * Vite’s module graph (i.e., the imported modules have already been loaded),
+ * excluding packages.
+ */
+async function getDependencies(
+  environment: DevEnvironment,
+  importer: string,
+  specifiers: string[]
+): Promise<[path: string, mtime: number | undefined][]> {
+  const {moduleGraph, pluginContainer} = environment;
+  const paths = new Set<string>();
+  for (const specifier of specifiers) {
+    const resolved = await pluginContainer.resolveId(specifier, importer);
+    if (!resolved || resolved.external) continue;
+    const queue = [cleanUrl(resolved.id)];
+    for (const path of queue) {
+      if (paths.has(path) || path.includes("/node_modules/")) continue;
+      paths.add(path);
+      for (const module of moduleGraph.getModulesByFile(path) ?? []) {
+        for (const imported of module.importedModules) {
+          if (imported.file) queue.push(imported.file);
+        }
+      }
+    }
+  }
+  return Promise.all(Array.from(paths, async (path) => [path, await getModifiedTime(path)]));
+}
+
+async function getModifiedTime(path: string): Promise<number | undefined> {
+  return stat(path).then(
+    (s) => Math.round(s.mtimeMs),
+    () => undefined
+  );
+}
+
+function cleanUrl(id: string): string {
+  return id.replace(/[?#].*$/, "");
+}
+
+/** Returns the specifiers of the given cell’s local imports and files. */
+function getLocalDependencies({imports = new Set(), files = new Set()}: TranspiledJavaScript): string[] {
+  const dependencies = Array.from(imports).filter(isPathSpecifier);
+  for (const file of files) {
+    if (/^\w+:/.test(file)) continue; // ignore URLs
+    dependencies.push(isPathSpecifier(file) ? file : `./${file}`);
+  }
+  return dependencies;
+}
+
+function isPathSpecifier(specifier: string): boolean {
+  return /^\.{0,2}\//.test(specifier);
+}
+
+function renderAssetImports(assets: Asset[]): string {
   return assets
     .map(
-      (asset, i) => `
-import asset${i + 1} from ${JSON.stringify(`${asset}?url`)};`
+      ({path}, i) => `
+import asset${i + 1} from ${JSON.stringify(`${path}?url`)};`
     )
     .join("");
 }
 
-function renderAssetMap(assets: string[]): string {
+function renderAssetMap(assets: Asset[]): string {
   return `new Map([
-${assets.map((asset, i) => `  [${JSON.stringify(asset)}, asset${i + 1}]`).join(",\n")}
+${assets
+  .map(({path, mtime}, i) => {
+    const url = mtime === undefined ? `asset${i + 1}` : `versionAsset(asset${i + 1}, ${mtime})`;
+    return `  [${JSON.stringify(path)}, ${url}]`;
+  })
+  .join(",\n")}
 ])`;
 }
 
