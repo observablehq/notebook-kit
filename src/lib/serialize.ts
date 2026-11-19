@@ -53,21 +53,16 @@ export function deserialize(data: string, {parser = new DOMParser()} = {}): Note
     }
   );
   // Cells without a (valid, unique) declared id are assigned an id based on
-  // their contents, so that the id is stable even if other cells are inserted,
-  // removed, or reordered. If multiple cells have the same contents (or their
-  // ids otherwise collide), subsequent cells are assigned the next free id.
+  // their value, so that the id is stable even if other cells are inserted,
+  // removed, or reordered. If multiple cells have the same value (or their ids
+  // otherwise collide), subsequent cells are assigned the next free id.
   for (const cell of cells) {
     if (!isNaN(cell.id)) continue;
-    let id = contentId(cell);
+    let id = fnv1a(cell.value!) + 1; // in [1, 2^32]
     while (cellIds.has(id)) ++id;
     cellIds.add((cell.id = id));
   }
   return toNotebook({title, theme, readOnly, cells});
-}
-
-/** Returns a positive integer id in [1, 2^32] derived from the cell’s contents. */
-function contentId(cell: CellSpec): number {
-  return fnv1a(JSON.stringify(cell)) + 1;
 }
 
 /** Returns the 32-bit FNV-1a hash of the given string (of UTF-16 code units). */
