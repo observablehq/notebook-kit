@@ -114,6 +114,7 @@ export function observable({
 }: ObservableOptions = {}): PluginOption {
   /** The most recently-rendered notebooks in the preview server, by filename. */
   const notebooks = new Map<string, RenderedNotebook>();
+  let root = process.cwd();
 
   /**
    * Renders the given notebook. If a dev environment is specified (i.e., in the
@@ -230,7 +231,7 @@ export function observable({
       div.className = "observablehq observablehq--cell";
       try {
         const isStatic = await renderCell(cell, div);
-        if (!isStatic) transpiled = transpile(cell, {resolveFiles: true});
+        if (!isStatic) transpiled = transpile(cell);
       } catch (error) {
         // In the preview server, display the error in the cell rather than
         // failing the entire page.
@@ -241,6 +242,9 @@ export function observable({
       const cellAssets = new Set<string>();
       collectAssets(cellAssets, div);
       for (const asset of cellAssets) assets.add(asset);
+      for (const file of transpiled?.files ?? []) {
+        if (!/^\w+:/.test(file)) assets.add(isPathSpecifier(file) ? file : `./${file}`);
+      }
       if (pinned) {
         const pre = contents.appendChild(document.createElement("pre"));
         const code = pre.appendChild(document.createElement("code"));
@@ -265,7 +269,7 @@ export function observable({
 
     // Don’t error if assets are missing (matching Vite’s behavior).
     const dir = dirname(context.filename);
-    filterMissingAssets(assets, dir);
+    filterMissingAssets(assets, dir, root);
 
     return {
       context,
@@ -275,7 +279,8 @@ export function observable({
       assets: await Promise.all(
         Array.from(assets, async (path) => ({
           path,
-          mtime: environment && (await getModifiedTime(join(dir, path)))
+          mtime:
+            environment && (await getModifiedTime(join(path.startsWith("/") ? root : dir, path)))
         }))
       ),
       cells: rendered,
@@ -285,6 +290,9 @@ export function observable({
 
   return {
     name: "observable",
+    configResolved(config) {
+      root = config.root;
+    },
     buildStart() {
       this.addWatchFile(template);
     },
@@ -378,13 +386,13 @@ function renderPage({html, theme}: RenderedNotebook, script: string): string {
 /** Renders the script that defines the notebook’s cells (for production). */
 function renderScript({assets, cells}: RenderedNotebook): string {
   return `
-import {define} from "observable:runtime";${renderAssetImports(assets)}${
+import {define, registerFile} from "observable:runtime";${renderAssetImports(assets)}${
     assets.length > 0
       ? `
 
 const assets = ${renderAssetMap(assets)};`
       : ""
-  }
+  }${renderFileRegistrations(assets, cells)}
 ${cells
   .filter(({transpiled}) => transpiled)
   .map(
@@ -424,13 +432,13 @@ if (import.meta.hot) import.meta.hot.accept(${specifier}, (notebook) => notebook
  * assets are inlined by Vite as data: URLs, which don’t need versioning.)
  */
 function renderNotebookModule({title, assets, cells}: RenderedNotebook): string {
-  return `${renderAssetImports(assets).slice(1)}${
+  return `import {registerFile} from "observable:runtime";${renderAssetImports(assets)}${
     assets.some(({mtime}) => mtime !== undefined)
       ? `
 const versionAsset = (url, version) => url.startsWith("data:") ? url : \`\${url}\${url.includes("?") ? "&" : "?"}t=\${version}\`;`
       : ""
   }
-export const assets = ${assets.length > 0 ? renderAssetMap(assets) : "new Map()"};
+export const assets = ${assets.length > 0 ? renderAssetMap(assets) : "new Map()"};${renderFileRegistrations(assets, cells)}
 export const title = ${JSON.stringify(title)};
 export const cells = [${cells
     .map(
@@ -523,6 +531,25 @@ function isPathSpecifier(specifier: string): boolean {
   return /^\.{0,2}\//.test(specifier);
 }
 
+/**
+ * Registers each file passed to FileAttachment under its original name.
+ * Otherwise the name comes from the built URL, which Vite may hash or turn
+ * into a data: URL.
+ */
+function renderFileRegistrations(assets: Asset[], cells: RenderedCell[]): string {
+  const paths = new Set(assets.map(({path}) => path));
+  const files = new Set(cells.flatMap(({transpiled}) => Array.from(transpiled?.files ?? [])));
+  return Array.from(files, (file) => {
+    const path = isPathSpecifier(file) ? file : `./${file}`;
+    if (!paths.has(path)) return ""; // a URL, or a missing file
+    const i = file.lastIndexOf("/") + 1;
+    const name = JSON.stringify(file.slice(i));
+    const dir = JSON.stringify(file.slice(0, i) || "./");
+    return `
+registerFile(${name}, {path: assets.get(${JSON.stringify(path)})}, new URL(${dir}, document.baseURI));`;
+  }).join("");
+}
+
 function renderAssetImports(assets: Asset[]): string {
   return assets
     .map(
@@ -580,9 +607,9 @@ function hash(data: unknown): string {
   return createHash("sha256").update(JSON.stringify(data)).digest("base64url").slice(0, 16);
 }
 
-function filterMissingAssets(assets: Set<string>, dir: string): void {
+function filterMissingAssets(assets: Set<string>, dir: string, root: string): void {
   for (const asset of assets) {
-    if (!existsSync(join(dir, asset))) {
+    if (!existsSync(join(asset.startsWith("/") ? root : dir, asset))) {
       console.warn(`warning: asset not found: ${asset}`);
       assets.delete(asset);
     }

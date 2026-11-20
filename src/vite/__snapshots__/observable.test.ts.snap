@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`registers file attachments under their original name 1`] = `
+"
+import {define, registerFile} from "observable:runtime";
+import asset1 from "./a.txt?url";
+import asset2 from "../data/b.csv?url";
+import asset3 from "/c.txt?url";
+
+const assets = new Map([
+  ["./a.txt", asset1],
+  ["../data/b.csv", asset2],
+  ["/c.txt", asset3]
+]);
+registerFile("a.txt", {path: assets.get("./a.txt")}, new URL("./", document.baseURI));
+registerFile("b.csv", {path: assets.get("../data/b.csv")}, new URL("../data/", document.baseURI));
+registerFile("c.txt", {path: assets.get("/c.txt")}, new URL("/", document.baseURI));
+
+define(
+  {
+    root: document.getElementById(\`cell-1\`),
+    expanded: [],
+    variables: []
+  },
+  {
+    id: 1,
+    body: (FileAttachment) => {
+return (
+[FileAttachment("a.txt"), FileAttachment("../data/b.csv"), FileAttachment("/c.txt")]
+)
+},
+    inputs: ["FileAttachment"],
+    outputs: [],
+    output: undefined,
+    display: true,
+    displayMode: "default",
+    assets: assets,
+    autodisplay: true,
+    autoview: undefined,
+    automutable: undefined
+  }
+);
+"
+`;
