@@ -42,11 +42,11 @@ export interface FileAttachment {
   /** Returns the contents of this file as an image. */
   image(props?: Partial<HTMLImageElement>): Promise<HTMLImageElement>;
   /** Returns the contents of this Arrow IPC file as an Apache Arrow table. */
-  arrow(): Promise<any>;
+  arrow(options?: any): Promise<any>;
   /** Returns the contents of this file as an Arquero table. */
   arquero(options?: any): Promise<any>;
   /** Returns the contents of this Parquet file as an Apache Arrow table. */
-  parquet(): Promise<any>;
+  parquet(options?: any): Promise<any>;
   /** Returns a DuckDBClient initialized from this DuckDB file. */
   duckdb(): Promise<DuckDBClient>;
   /** Returns a SQLiteDatabaseClient initialized from this SQLite file. */
@@ -174,9 +174,9 @@ export abstract class AbstractFile implements FileAttachment {
       i.src = url;
     });
   }
-  async arrow(): Promise<any> {
+  async arrow(options?: any): Promise<any> {
     const [Flechette, buffer] = await Promise.all([import("https://esm.sh/@uwdata/flechette"), this.arrayBuffer()]); // prettier-ignore
-    return Flechette.tableFromIPC(buffer, {useDate: true});
+    return Flechette.tableFromIPC(buffer, flechetteDefaults(options));
   }
   async arquero(options?: any): Promise<any> {
     let request: Promise<unknown>;
@@ -209,9 +209,9 @@ export abstract class AbstractFile implements FileAttachment {
     const [aq, body] = await Promise.all([import("https://esm.sh/arquero"), request]); // prettier-ignore
     return aq[from](body, options);
   }
-  async parquet() {
+  async parquet(options?: any) {
     const [Flechette, Parquet, buffer] = await Promise.all([import("https://esm.sh/@uwdata/flechette"), import("https://esm.sh/parquet-wasm").then(async (Parquet) => (await Parquet.default("https://esm.sh/parquet-wasm/esm/parquet_wasm_bg.wasm"), Parquet)), this.arrayBuffer()]); // prettier-ignore
-    return Flechette.tableFromIPC(Parquet.readParquet(new Uint8Array(buffer)).intoIPCStream(), {useDate: true}); // prettier-ignore
+    return Flechette.tableFromIPC(Parquet.readParquet(new Uint8Array(buffer)).intoIPCStream(), flechetteDefaults(options)); // prettier-ignore
   }
   async duckdb() {
     const {DuckDBClient} = await import("./duckdb.js");
@@ -235,6 +235,10 @@ export abstract class AbstractFile implements FileAttachment {
     const [{Workbook}, buffer] = await Promise.all([import("./xlsx.js"), this.arrayBuffer()]);
     return Workbook.load(buffer);
   }
+}
+
+function flechetteDefaults({useDate = true, useBigInt = true, ...options} = {}) {
+  return {useDate, useBigInt, ...options};
 }
 
 // TODO Replace this with static analysis of files.
