@@ -249,7 +249,7 @@ thead tr {
   border-bottom: solid 1px var(--theme-foreground-fainter);
 }
 
-tfoot tr {
+tfoot tr:first-child {
   border-top: solid 1px var(--theme-foreground-fainter);
 }
 
