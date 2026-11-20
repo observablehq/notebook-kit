@@ -57,7 +57,7 @@ Cell source is indented four spaces, which are trimmed. Escape a `</script>` ins
 The standard library includes `display`, `view`, `width`, `now`, `invalidation`, `visibility`, and `FileAttachment`, along with [Observable Inputs](https://github.com/observablehq/inputs) (`Inputs`), [Observable Plot](https://observablehq.com/plot/) (`Plot`), [D3](https://d3js.org) (`d3`), [Hypertext Literal](https://github.com/observablehq/htl) (`html`, `svg`), `md`, and `tex`. Import anything else from npm:
 
 ```js
-import he from "npm:he";
+import * as he from "npm:he";
 ```
 
 ## Data
