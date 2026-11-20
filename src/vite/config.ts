@@ -34,10 +34,7 @@ export function config(): UserConfig {
         // pnpm doesn't hoist our dependencies into the project's node_modules
         ...Object.keys(packageJson.dependencies)
           .filter((name) => name.startsWith("@fontsource-variable/"))
-          .map((find) => ({
-            find,
-            replacement: dirname(fileURLToPath(import.meta.resolve(`${find}/package.json`)))
-          }))
+          .map((find) => ({find, replacement: dirname(fileURLToPath(import.meta.resolve(`${find}/package.json`)))})) // prettier-ignore
       ]
     }
   };
