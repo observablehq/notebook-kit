@@ -256,7 +256,7 @@ function guessMimeType(name: string): string {
     case ".png":
       return "image/png";
     case ".jpg":
-      return "image/jpg";
+      return "image/jpeg";
     case ".js":
       return "text/javascript";
     default:
