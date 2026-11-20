@@ -131,9 +131,9 @@ Lower-level APIs parse, transpile, serialize, and run notebooks: see `@observabl
 
 ## Further reading
 
-The documentation is itself written as notebooks; read them on [observablehq.com](https://observablehq.com/notebook-kit/) or as source in [`docs/`](https://github.com/observablehq/notebook-kit/tree/main/docs):
+The documentation is itself written as notebooks; read them on [observablehq.com](https://observablehq.com/notebook-kit/) or as source in [`docs/`](./docs):
 
-- [System guide](https://github.com/observablehq/notebook-kit/blob/main/docs/system-guide.html) - cells, reactivity, and the standard library
-- [Notebook Kit](https://github.com/observablehq/notebook-kit/blob/main/docs/kit.html) - the file format, templates, CLI, and API
-- [Data loaders](https://github.com/observablehq/notebook-kit/blob/main/docs/data-loaders.html)
-- [Database connectors](https://github.com/observablehq/notebook-kit/blob/main/docs/databases.html) - configuration for each database
+- [System guide](./docs/system-guide.html) - cells, reactivity, and the standard library
+- [Notebook Kit](./docs/kit.html) - the file format, templates, CLI, and API
+- [Data loaders](./docs/data-loaders.html)
+- [Database connectors](./docs/databases.html) - configuration for each database
