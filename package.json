@@ -62,6 +62,7 @@
     "jsdom": "^26.1.0",
     "markdown-it": "^14.1.1",
     "markdown-it-anchor": "^9.2.0",
+    "mime": "^4.1.2",
     "vite": "^7.0.0 || ^8.0.0"
   },
   "devDependencies": {

@@ -7,7 +7,9 @@ import {relative} from "node:path/posix";
 import {fileURLToPath} from "node:url";
 import type {TemplateLiteral} from "acorn";
 import {JSDOM} from "jsdom";
-import type {DevEnvironment, EnvironmentModuleNode} from "vite";
+import {Mime} from "mime/lite";
+import standardTypes from "mime/types/standard.js";
+import type {DevEnvironment, EnvironmentModuleNode, ResolvedConfig} from "vite";
 import type {PluginOption, IndexHtmlTransformContext} from "vite";
 import {normalizePath} from "vite";
 import {getQueryCachePath} from "../databases/index.js";
@@ -20,6 +22,7 @@ import type {TranspiledJavaScript} from "../javascript/transpile.js";
 import {transpile} from "../javascript/transpile.js";
 import {parseTemplate} from "../javascript/template.js";
 import type {HotInitialCell} from "../runtime/hot.js";
+import type {FileInfo} from "../runtime/stdlib/fileAttachment.js";
 import {collectAssets} from "../runtime/stdlib/assets.js";
 import {highlight} from "../runtime/stdlib/highlight.js";
 import {MarkdownRenderer} from "../runtime/stdlib/md.js";
@@ -81,6 +84,13 @@ interface Asset {
   mtime?: number;
 }
 
+interface FileReference extends FileInfo {
+  /** the name of the file, as passed to FileAttachment */
+  name: string;
+  /** the import path of the file (typically starting with ./), or an absolute URL */
+  path: string;
+}
+
 interface RenderedNotebook {
   /** the render context */
   context: IndexHtmlTransformContext;
@@ -92,6 +102,8 @@ interface RenderedNotebook {
   theme: Notebook["theme"];
   /** the static assets referenced by the notebook */
   assets: Asset[];
+  /** the existing files referenced by the notebook’s cells */
+  files: FileReference[];
   /** the rendered cells */
   cells: RenderedCell[];
   /** a hash of everything other than cells; if this changes, a full reload is needed */
@@ -105,6 +117,14 @@ interface RenderedNotebook {
  */
 const OBSERVABLE_QUERY = "?observable";
 
+/** The standard MIME types, plus some data formats commonly used by notebooks. */
+const mime = new Mime(standardTypes, {
+  "application/vnd.apache.arrow.file": ["arrow"],
+  "application/vnd.apache.parquet": ["parquet"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["xlsx"],
+  "application/vnd.sqlite3": ["sqlite"]
+});
+
 export function observable({
   window = new JSDOM().window,
   parser = new window.DOMParser(),
@@ -114,6 +134,9 @@ export function observable({
 }: ObservableOptions = {}): PluginOption {
   /** The most recently-rendered notebooks in the preview server, by filename. */
   const notebooks = new Map<string, RenderedNotebook>();
+
+  /** The resolved Vite config. */
+  let config: ResolvedConfig;
 
   /**
    * Renders the given notebook. If a dev environment is specified (i.e., in the
@@ -130,6 +153,7 @@ export function observable({
     const document = parser.parseFromString(templateHtml, "text/html");
     const rendered: RenderedCell[] = [];
     const assets = new Set<string>();
+    const files = new Set<string>();
     const md = MarkdownRenderer({document});
 
     const {version} = (await import("../../package.json", {with: {type: "json"}})).default;
@@ -230,7 +254,7 @@ export function observable({
       div.className = "observablehq observablehq--cell";
       try {
         const isStatic = await renderCell(cell, div);
-        if (!isStatic) transpiled = transpile(cell, {resolveFiles: true});
+        if (!isStatic) transpiled = transpile(cell);
       } catch (error) {
         // In the preview server, display the error in the cell rather than
         // failing the entire page.
@@ -241,6 +265,7 @@ export function observable({
       const cellAssets = new Set<string>();
       collectAssets(cellAssets, div);
       for (const asset of cellAssets) assets.add(asset);
+      if (transpiled?.files) for (const file of transpiled.files) files.add(file);
       if (pinned) {
         const pre = contents.appendChild(document.createElement("pre"));
         const code = pre.appendChild(document.createElement("code"));
@@ -278,6 +303,7 @@ export function observable({
           mtime: environment && (await getModifiedTime(join(dir, path)))
         }))
       ),
+      files: await resolveFiles(files, dir, config),
       cells: rendered,
       shell: hash([templateHtml, notebook.theme])
     };
@@ -285,6 +311,9 @@ export function observable({
 
   return {
     name: "observable",
+    configResolved(resolvedConfig) {
+      config = resolvedConfig;
+    },
     buildStart() {
       this.addWatchFile(template);
     },
@@ -376,15 +405,22 @@ function renderPage({html, theme}: RenderedNotebook, script: string): string {
 }
 
 /** Renders the script that defines the notebook’s cells (for production). */
-function renderScript({assets, cells}: RenderedNotebook): string {
+function renderScript({assets, files, cells}: RenderedNotebook): string {
   return `
-import {define} from "observable:runtime";${renderAssetImports(assets)}${
+import {define, registerFile, requireFileRegistration} from "observable:runtime";${renderAssetImports(assets)}${
     assets.length > 0
       ? `
 
 const assets = ${renderAssetMap(assets)};`
       : ""
   }
+
+requireFileRegistration(true);${files
+    .map(
+      (file) => `
+registerFile(${escapeScript(JSON.stringify(file.name))}, ${escapeScript(renderFileInfo(file))});`
+    )
+    .join("")}
 ${cells
   .filter(({transpiled}) => transpiled)
   .map(
@@ -423,7 +459,7 @@ if (import.meta.hot) import.meta.hot.accept(${specifier}, (notebook) => notebook
  * browser loads the new asset rather than using its in-memory cache. (Small
  * assets are inlined by Vite as data: URLs, which don’t need versioning.)
  */
-function renderNotebookModule({title, assets, cells}: RenderedNotebook): string {
+function renderNotebookModule({title, assets, files, cells}: RenderedNotebook): string {
   return `${renderAssetImports(assets).slice(1)}${
     assets.some(({mtime}) => mtime !== undefined)
       ? `
@@ -431,6 +467,7 @@ const versionAsset = (url, version) => url.startsWith("data:") ? url : \`\${url}
       : ""
   }
 export const assets = ${assets.length > 0 ? renderAssetMap(assets) : "new Map()"};
+export const files = ${files.length > 0 ? renderFileMap(files) : "new Map()"};
 export const title = ${JSON.stringify(title)};
 export const cells = [${cells
     .map(
@@ -521,6 +558,63 @@ function getLocalDependencies({
 
 function isPathSpecifier(specifier: string): boolean {
   return /^\.{0,2}\//.test(specifier);
+}
+
+function isUrl(specifier: string): boolean {
+  return /^\w+:/.test(specifier);
+}
+
+/**
+ * Resolves the given file names (as passed to FileAttachment, relative to the
+ * given notebook directory) to file references, including their MIME type,
+ * modification time, and size. Files that do not exist are omitted, such that
+ * attempting to load them throws an error. URLs are passed through as-is.
+ */
+async function resolveFiles(
+  names: Iterable<string>,
+  dir: string,
+  {root, publicDir}: ResolvedConfig
+): Promise<FileReference[]> {
+  const files = await Promise.all(
+    Array.from(names, async (name): Promise<FileReference | undefined> => {
+      const mimeType = mime.getType(cleanUrl(name)) ?? undefined;
+      if (isUrl(name)) return {name, path: name, mimeType};
+      const paths = name.startsWith("/")
+        ? [join(root, cleanUrl(name)), ...(publicDir ? [join(publicDir, cleanUrl(name))] : [])]
+        : [join(dir, cleanUrl(name))];
+      for (const path of paths) {
+        const stats = await stat(path).catch(() => undefined);
+        if (!stats?.isFile()) continue;
+        return {
+          name,
+          path: isPathSpecifier(name) ? name : `./${name}`,
+          mimeType,
+          lastModified: Math.round(stats.mtimeMs),
+          size: stats.size
+        };
+      }
+      console.warn(`warning: file not found: ${name}`);
+    })
+  );
+  return files.filter((file) => file !== undefined);
+}
+
+/**
+ * Renders the FileInfo for the given file. Local paths are resolved via
+ * import.meta.url, so that Vite treats the file as an asset.
+ */
+function renderFileInfo({path, mimeType, lastModified, size}: FileReference): string {
+  return `{path: ${
+    isUrl(path) ? JSON.stringify(path) : `new URL(${JSON.stringify(path)}, import.meta.url).href`
+  }${mimeType === undefined ? "" : `, mimeType: ${JSON.stringify(mimeType)}`}${
+    lastModified === undefined ? "" : `, lastModified: ${lastModified}`
+  }${size === undefined ? "" : `, size: ${size}`}}`;
+}
+
+function renderFileMap(files: FileReference[]): string {
+  return `new Map([
+${files.map((file) => `  [${JSON.stringify(file.name)}, ${renderFileInfo(file)}]`).join(",\n")}
+])`;
 }
 
 function renderAssetImports(assets: Asset[]): string {

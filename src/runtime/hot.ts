@@ -2,6 +2,8 @@ import type {DefineState, Definition} from "./define.js";
 import {undefine} from "./define.js";
 import {define} from "./index.js";
 import {mapAssets} from "./stdlib/assets.js";
+import type {FileInfo} from "./stdlib/fileAttachment.js";
+import {registerFile, requireFileRegistration} from "./stdlib/fileAttachment.js";
 
 /** A rendered cell, as exported by the notebook module in the preview server. */
 export type HotCell = {
@@ -23,6 +25,8 @@ export type HotNotebook = {
   cells: HotCell[];
   /** the mapping from static asset paths to URLs, if any */
   assets?: Map<string, string>;
+  /** the files referenced by the notebook, by name, if any */
+  files?: Map<string, FileInfo>;
 };
 
 /** A cell’s initial (server-rendered) state. */
@@ -57,6 +61,9 @@ export function hot(
   initial: HotInitialCell[]
 ): (notebook: HotNotebook) => void {
   let cells: MountedCell[] = [];
+  let files = new Map<string, FileInfo>();
+
+  requireFileRegistration(true);
 
   for (const {id, key, length} of initial) {
     let node: ChildNode | null = document.getElementById(`cell-${id}`);
@@ -66,8 +73,14 @@ export function hot(
     cells.push({id, key, nodes});
   }
 
-  function update({title, cells: newCells, assets}: HotNotebook): void {
+  function update({title, cells: newCells, assets, files: newFiles = new Map()}: HotNotebook): void {
     if (document.title !== title) document.title = title;
+
+    // Register the current files (before any cells are defined), and
+    // unregister any old files that are no longer referenced.
+    for (const name of files.keys()) if (!newFiles.has(name)) registerFile(name, null);
+    for (const [name, info] of newFiles) registerFile(name, info);
+    files = newFiles;
 
     // Determine where cells are inserted; this must happen before removal.
     const first = cells[0]?.nodes[0];
