@@ -65,7 +65,7 @@ import * as he from "npm:he";
 `FileAttachment` loads a file from the notebook’s directory or a subdirectory:
 
 ```js
-const stocks = FileAttachment("data/stocks.csv").csv({typed: true});
+const stocks = FileAttachment("data/stocks.csv").csv({typed: "auto"});
 ```
 
 *Data loaders* are Node.js, Python, or R cells that run at build time rather than in the browser. A loader writes to stdout; `format` says how to parse it (`text`, `json`, `csv`, `tsv`, `xml`, `arrow`, `parquet`, `blob`, `buffer`, `html`, or an image type) and `output` names the result.
