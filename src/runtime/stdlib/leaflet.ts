@@ -2,7 +2,7 @@ import {Icon} from "https://esm.sh/leaflet";
 
 export * from "https://esm.sh/leaflet";
 
-Icon.Default.imagePath = "https://esm.esh/leaflet/dist/images/";
+Icon.Default.imagePath = "https://esm.sh/leaflet/dist/images/";
 
 const link = document.createElement("link");
 link.rel = "stylesheet";
