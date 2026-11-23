@@ -104,6 +104,57 @@ it("erases ambient TypeScript declarations", () => {
   expect(transpile('declare module "m" { export const x: number; }', "ts")).toMatchSnapshot();
 });
 
+it("transpiles TSX expressions", () => {
+  expect(transpile('<div className="x">{a}</div>', "tsx")).toMatchSnapshot();
+  expect(transpile("<Foo bar={x as number} />", "tsx")).toMatchSnapshot();
+  expect(transpile("<>{xs.map((x: string) => <li key={x}>{x}</li>)}</>", "tsx")).toMatchSnapshot();
+});
+
+it("transpiles TSX programs", () => {
+  expect(transpile("const el: HTMLElement = <p>{a}</p>;", "tsx")).toMatchSnapshot();
+  expect(transpile("function Hello({name}: {name: string}) { return <b>{name}</b>; }", "tsx")).toMatchSnapshot(); // prettier-ignore
+  expect(transpile('import {Button} from "npm:ui";\nimport type {Props} from "npm:ui";\nconst b = <Button />;', "tsx")).toMatchSnapshot(); // prettier-ignore
+});
+
+it("transpiles TSX object literal expressions", () => {
+  expect(transpile("{a: 1, b: <p />}", "tsx")).toMatchSnapshot();
+  expect(transpile("// comment\n{a: <p />} /* comment */", "tsx")).toMatchSnapshot();
+});
+
+it("transpiles TSX with TypeScript inside JSX", () => {
+  expect(transpile("<Foo a={x as T} b={(y!)} c={<i>{z satisfies U}</i>} />", "tsx").body).toBe(`(Foo,x,y,z,JSX) => {
+return (
+JSX.jsx(Foo, {"a": x, "b": (y), "c": JSX.jsx("i", {children: z})})
+)
+}`); // prettier-ignore
+  expect(transpile("<ul>{xs.map(<T,>(x: T) => <li key={x as string}>{x}</li>)}</ul>", "tsx").body).toBe(`(xs,JSX) => {
+return (
+JSX.jsx("ul", {children: xs.map((x) => JSX.jsx("li", {children: x}, x))})
+)
+}`); // prettier-ignore
+  expect(transpile("<p><a />{x!}<b /></p>", "tsx").body).toBe(`(JSX,x) => {
+return (
+JSX.jsxs("p", {children: [JSX.jsx("a", {}), x, JSX.jsx("b", {})]})
+)
+}`); // prettier-ignore
+});
+
+it("transpiles TSX with top-level await and file attachments", () => {
+  expect(transpile('<pre>{await FileAttachment("a.txt").text()}</pre>', "tsx", {resolveFiles: true})).toMatchSnapshot(); // prettier-ignore
+});
+
+it("throws SyntaxError on invalid TSX", () => {
+  expect(() => transpile("<div>", "tsx")).toThrow(SyntaxError);
+  expect(() => transpile("<div></span>", "tsx")).toThrow(SyntaxError);
+  expect(() => transpile("enum Direction { Up, Down }", "tsx")).toThrow(SyntaxError);
+});
+
+it("throws SyntaxError on spread children in TSX", () => {
+  expect(() => transpile("<p>{...xs}</p>", "tsx")).toThrow(new SyntaxError("Spread children are not supported (1:3)")); // prettier-ignore
+  expect(() => transpile("<p>a{...xs}{b}</p>", "tsx")).toThrow(SyntaxError);
+  expect(() => transpile("f(() => <><i>{...xs}</i></>)", "tsx")).toThrow(SyntaxError);
+});
+
 it("transpiles Observable JavaScript viewof declarations and references", () => {
   expect(transpile("viewof foo = Inputs.range()", "ojs")).toMatchSnapshot();
   expect(transpile("viewof foo.value", "ojs")).toMatchSnapshot();

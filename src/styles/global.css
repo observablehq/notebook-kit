@@ -20,7 +20,7 @@ body {
   padding: 16px 24px;
 }
 
-main {
+body > main {
   margin: auto;
   max-width: var(--max-width);
 }

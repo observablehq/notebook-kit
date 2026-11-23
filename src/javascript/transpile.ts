@@ -5,6 +5,7 @@ import {rewriteFileExpressions} from "./files.js";
 import type {ImportOptions} from "./imports.js";
 import {hasImportDeclaration} from "./imports.js";
 import {rewriteImportDeclarations, rewriteImportExpressions} from "./imports.js";
+import {rewriteJSX} from "./jsx.js";
 import {transpileObservable} from "./observable.js";
 import type {JavaScriptCell} from "./parse.js";
 import {parseJavaScript} from "./parse.js";
@@ -67,23 +68,27 @@ export function transpile(
   const transpiled =
     mode === "ts"
       ? transpileTypeScript(input, options)
-      : mode === "ojs"
+      : mode === "tsx"
+        ? transpileTypeScript(input, options, "tsx")
+        : mode === "ojs"
         ? transpileObservable(input, options)
         : mode !== "js"
           ? transpileJavaScript(transpileTemplate(cell), options)
           : transpileJavaScript(input, options);
-  if (mode !== "ts" && mode !== "js" && mode !== "ojs") transpiled.output = cell.output;
+  if (mode !== "ts" && mode !== "tsx" && mode !== "js" && mode !== "ojs") transpiled.output = cell.output;
   if (cell.hidden) transpiled.autodisplay = false;
   return transpiled;
 }
 
 export function transpileTypeScript(
   input: string,
-  options?: TranspileOptions
+  options?: TranspileOptions,
+  dialect: "ts" | "tsx" = "ts"
 ): TranspiledJavaScript {
-  const cell = parseJavaScript(input, "ts");
+  const cell = parseJavaScript(input, dialect);
   const output = new Sourcemap(input);
   stripTypes(cell, output);
+  if (dialect === "tsx") rewriteJSX(cell.body, output);
   return transpileCell(cell, output, options);
 }
 

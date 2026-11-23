@@ -100,16 +100,21 @@ export class Sourcemap {
     if (input.endsWith("\n")) this.delete(input.length - 1, input.length); // TODO better trim
     return this;
   }
-  toString(): string {
+  /** Returns the output for the given range of the input, applying any edits within it. */
+  slice(start = 0, end = this.length): string {
     let output = "";
-    let index = 0;
-    for (const {start, end, value} of this._edits) {
-      if (start > index) output += this.input.slice(index, start);
-      output += value;
-      index = end;
+    let index = start;
+    for (const edit of this._edits) {
+      if (edit.start < start || edit.end > end) continue;
+      if (edit.start > index) output += this.input.slice(index, edit.start);
+      output += edit.value;
+      index = edit.end;
     }
-    output += this.input.slice(index);
+    output += this.input.slice(index, end);
     return output;
+  }
+  toString(): string {
+    return this.slice();
   }
 }
 

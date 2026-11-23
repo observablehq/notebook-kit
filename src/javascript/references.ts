@@ -3,9 +3,11 @@ import type {BlockStatement, CatchClause, Class} from "acorn";
 import type {ForInStatement, ForOfStatement, ForStatement} from "acorn";
 import type {FunctionDeclaration, FunctionExpression} from "acorn";
 import type {Identifier, Node, Pattern, Program} from "acorn";
+import type {AncestorVisitors} from "acorn-walk";
 import {checkAssignments} from "./assignments.js";
 import {defaultGlobals} from "./globals.js";
 import {checkExports, isTypeImport} from "./imports.js";
+import {isIntrinsicName} from "./jsx.js";
 import {ancestor} from "./walk.js";
 
 // Based on https://github.com/ForbesLindesay/acorn-globals
@@ -157,14 +159,34 @@ export function findReferences(
     }
   }
 
+  // The walker only visits JSX identifiers that may be references: tag names,
+  // and the root object of member expressions such as <foo.Bar>. Intrinsic tag
+  // names such as <div> are compiled to strings, so they aren't references.
+  // Like identifiers, JSX identifiers have a name, so they're treated as such.
+  function jsxIdentifier(node: Node & {name: string}, _state: unknown, parents: Node[]) {
+    const parent = parents[parents.length - 2];
+    if (parent.type === "JSXOpeningElement" && isIntrinsicName(node.name)) return;
+    identifier(node as Identifier, _state, parents);
+  }
+
+  // JSX elements and fragments compile to calls to JSX.jsx or JSX.jsxs, so they
+  // reference JSX (which may be a local, or defined by another cell).
+  function jsxElement(node: Node, _state: unknown, parents: Node[]) {
+    const jsx = {type: "Identifier", name: "JSX", start: node.start, end: node.start};
+    identifier(jsx as Identifier, _state, parents);
+  }
+
   ancestor(node, {
     Pattern(node, _state, parents) {
       if (node.type === "Identifier") {
         identifier(node, _state, parents);
       }
     },
-    Identifier: identifier
-  });
+    Identifier: identifier,
+    JSXIdentifier: jsxIdentifier,
+    JSXElement: jsxElement,
+    JSXFragment: jsxElement
+  } as AncestorVisitors<unknown>);
 
   if (input !== undefined) {
     checkAssignments(node, {locals, references, globals, input});

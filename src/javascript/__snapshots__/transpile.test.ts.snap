@@ -1126,6 +1126,197 @@ return (
 }
 `;
 
+exports[`transpiles TSX expressions 1`] = `
+{
+  "autodisplay": true,
+  "body": "(a,JSX) => {
+return (
+JSX.jsx("div", {"className": "x", children: a})
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "a",
+    "JSX",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX expressions 2`] = `
+{
+  "autodisplay": true,
+  "body": "(Foo,x,JSX) => {
+return (
+JSX.jsx(Foo, {"bar": x})
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "Foo",
+    "x",
+    "JSX",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX expressions 3`] = `
+{
+  "autodisplay": true,
+  "body": "(xs,JSX) => {
+return (
+JSX.jsx(JSX.Fragment, {children: xs.map((x) => JSX.jsx("li", {children: x}, x))})
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "xs",
+    "JSX",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX object literal expressions 1`] = `
+{
+  "autodisplay": true,
+  "body": "(JSX) => {
+return (
+{a: 1, b: JSX.jsx("p", {})}
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX object literal expressions 2`] = `
+{
+  "autodisplay": true,
+  "body": "(JSX) => {
+return (
+// comment
+{a: JSX.jsx("p", {})} /* comment */
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX programs 1`] = `
+{
+  "autodisplay": false,
+  "body": "(a,JSX) => {
+const el = JSX.jsx("p", {children: a});
+return {el};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "a",
+    "JSX",
+  ],
+  "outputs": [
+    "el",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX programs 2`] = `
+{
+  "autodisplay": false,
+  "body": "(JSX) => {
+function Hello({name}) { return JSX.jsx("b", {children: name}); }
+return {Hello};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+  ],
+  "outputs": [
+    "Hello",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX programs 3`] = `
+{
+  "autodisplay": false,
+  "body": "async (JSX) => {
+const {Button} = await import("https://esm.sh/ui").then((module) => {
+  if (!("Button" in module)) throw new SyntaxError(\`export 'Button' not found\`);
+  return module;
+});
+
+const b = JSX.jsx(Button, {});
+return {Button,b};
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {
+    "npm:ui",
+  },
+  "inputs": [
+    "JSX",
+  ],
+  "outputs": [
+    "Button",
+    "b",
+  ],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX with top-level await and file attachments 1`] = `
+{
+  "autodisplay": true,
+  "body": "async (FileAttachment,JSX) => {
+return (
+JSX.jsx("pre", {children: await FileAttachment(new URL("a.txt", import.meta.url).href).text()})
+)
+}",
+  "databases": Set {},
+  "files": Set {
+    "a.txt",
+  },
+  "imports": Set {},
+  "inputs": [
+    "FileAttachment",
+    "JSX",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
 exports[`transpiles TypeScript class expressions 1`] = `
 {
   "autodisplay": false,

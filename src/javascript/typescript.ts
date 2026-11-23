@@ -1,10 +1,10 @@
 import type {Node, Token} from "acorn";
 import {tokenizer, tokTypes} from "acorn";
-import {base, recursive} from "acorn-walk";
+import {base} from "acorn-walk";
 import type {JavaScriptCell} from "./parse.js";
 import type {Sourcemap} from "./sourcemap.js";
 import {syntaxError} from "./syntaxError.js";
-import {simple} from "./walk.js";
+import {recursive, simple} from "./walk.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped acorn-typescript nodes
 type AnyNode = any;

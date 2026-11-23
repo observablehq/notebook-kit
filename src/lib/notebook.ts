@@ -18,6 +18,7 @@ export type NotebookTheme =
 export type CellMode =
   | "js"
   | "ts"
+  | "tsx"
   | "ojs"
   | "md"
   | "html"
@@ -140,8 +141,8 @@ export function isDatabase(mode: Cell["mode"]): mode is "sql" | "sql.view" {
   return mode === "sql" || mode === "sql.view";
 }
 
-function isJavaScript(mode: Cell["mode"]): mode is "js" | "ts" | "ojs" {
-  return mode === "js" || mode === "ts" || mode === "ojs";
+function isJavaScript(mode: Cell["mode"]): mode is "js" | "ts" | "tsx" | "ojs" {
+  return mode === "js" || mode === "ts" || mode === "tsx" || mode === "ojs";
 }
 
 function asDate(date: Date | string | number): Date {

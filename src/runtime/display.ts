@@ -2,8 +2,18 @@ import {unprefix} from "../lib/unprefix.js";
 import type {Definition} from "./define.js";
 import {inspect, inspectError, getExpanded} from "./inspect.js";
 import {mapAssets} from "./stdlib/assets.js";
+import {ReactDOM} from "./stdlib/recommendedLibraries.js";
 
 export type DisplayMode = "table" | "default";
+
+type ReactRoot = {render(element: unknown): void; unmount(): void};
+
+// React elements are plain objects tagged with a well-known symbol, so they can
+// be detected without loading React.
+const REACT_ELEMENT = Symbol.for("react.transitional.element");
+
+// The React root rendered into each displayed container, for unmounting on clear.
+const reactRoots = new WeakMap<Node, ReactRoot>();
 
 export type DisplayState = {
   /** the HTML element in which to render this cell’s display */
@@ -20,7 +30,11 @@ export function display(
   name?: string,
   mode?: DisplayMode
 ): void {
-  return mode === "table" ? displayTable(state, value) : displayDefault(state, value, name);
+  return mode === "table"
+    ? displayTable(state, value)
+    : isReactElement(value)
+      ? displayReactElement(state, value)
+      : displayDefault(state, value, name);
 }
 
 function displayDefault(state: DisplayState, value: unknown, name?: string) {
@@ -36,6 +50,27 @@ function displayTable(state: DisplayState, value: unknown) {
     if (!placeholder.parentNode) return; // don’t bother rendering if detached
     placeholder.replaceWith(table(value));
   });
+}
+
+function displayReactElement(state: DisplayState, element: unknown): void {
+  const container = document.createElement("div");
+  displayNode(state, container);
+  ReactDOM().then(
+    ({createRoot}) => {
+      if (!container.parentNode) return; // don’t bother rendering if detached
+      const root: ReactRoot = createRoot(container);
+      reactRoots.set(container, root);
+      root.render(element);
+    },
+    (error) => {
+      if (!container.parentNode) return;
+      container.replaceWith(inspectError(error));
+    }
+  );
+}
+
+function isReactElement(value: unknown): boolean {
+  return typeof value === "object" && value !== null && (value as {$$typeof?: unknown}).$$typeof === REACT_ELEMENT; // prettier-ignore
 }
 
 function displayNode(state: DisplayState, node: Node): void {
@@ -67,6 +102,7 @@ function isDisplayable(value: unknown, root: HTMLDivElement): value is Node {
 export function clear(state: DisplayState): void {
   state.autoclear = false;
   state.expanded = Array.from(state.root.childNodes, getExpanded);
+  for (const child of state.root.childNodes) reactRoots.get(child)?.unmount();
   while (state.root.lastChild) state.root.lastChild.remove();
 }
 
