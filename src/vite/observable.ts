@@ -10,13 +10,15 @@ import {JSDOM} from "jsdom";
 import {Mime} from "mime/lite";
 import standardTypes from "mime/types/standard.js";
 import type {DevEnvironment, EnvironmentModuleNode, ResolvedConfig} from "vite";
-import type {PluginOption, IndexHtmlTransformContext} from "vite";
+import type {Plugin, PluginOption, IndexHtmlTransformContext} from "vite";
 import {normalizePath} from "vite";
 import {getQueryCachePath} from "../databases/index.js";
 import {getInterpreterCachePath, getInterpreterCommand} from "../interpreters/index.js";
 import {getInterpreterMethod, isInterpreter} from "../lib/interpreters.js";
 import type {Cell, Notebook} from "../lib/notebook.js";
 import {deserialize} from "../lib/serialize.js";
+import {resolveJsrImport} from "../javascript/imports/jsr.js";
+import {resolveNpmImport} from "../javascript/imports/npm.js";
 import {Sourcemap} from "../javascript/sourcemap.js";
 import type {TranspiledJavaScript} from "../javascript/transpile.js";
 import {transpile} from "../javascript/transpile.js";
@@ -125,13 +127,28 @@ const mime = new Mime(standardTypes, {
   "application/vnd.sqlite3": ["sqlite"]
 });
 
-export function observable({
+export function observable(options?: ObservableOptions): PluginOption {
+  return [observableResolve(), observableRender(options)];
+}
+
+function observableResolve(): Plugin {
+  return {
+    name: "observable:resolve",
+    enforce: "pre",
+    resolveId(source) {
+      if (source.startsWith("npm:")) return {id: resolveNpmImport(source), external: true};
+      if (source.startsWith("jsr:")) return {id: resolveJsrImport(source), external: true};
+    }
+  };
+}
+
+function observableRender({
   window = new JSDOM().window,
   parser = new window.DOMParser(),
   template = fileURLToPath(import.meta.resolve("../templates/default.html")),
   transformTemplate = (template) => template,
   transformNotebook = (notebook) => notebook
-}: ObservableOptions = {}): PluginOption {
+}: ObservableOptions = {}): Plugin {
   /** The most recently-rendered notebooks in the preview server, by filename. */
   const notebooks = new Map<string, RenderedNotebook>();
 

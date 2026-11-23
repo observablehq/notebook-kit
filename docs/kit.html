@@ -380,12 +380,12 @@
   <script id="42" type="text/markdown">
     #### <code class="language-ts">observable({template?: string, transformTemplate?: (template: string) => string | Promise&lt;string&gt;, transformNotebook?: (notebook: Notebook) => Notebook | Promise&lt;Notebook&gt;, window?: Window, parser?: DOMParser} = {}): PluginOption</code>
 
-    Returns a Vite plugin for rendering notebook HTML as vanilla HTML. Markdown and HTML cells are rendered statically (without any interpolated dynamic values), and then, if needed, replaced with dynamic content when the page loads. Other cell modes are exclusively dynamic. Pinned cells display their source code statically rendered below any output. Supported languages are syntax-highlighted using Lezer.
+    Returns a Vite plugin for rendering notebook HTML as vanilla HTML. Markdown and HTML cells are rendered statically (without any interpolated dynamic values), and then, if needed, replaced with dynamic content when the page loads. Other cell modes are exclusively dynamic. Pinned cells display their source code statically rendered below any output. Supported languages are syntax-highlighted using Lezer. The plugin also resolves `npm:` and `jsr:` imports to [esm.sh](https://esm.sh).
   </script>
   <script id="41" type="text/markdown">
     #### <code class="language-ts">config(): UserConfig</code>
 
-    Returns the base Vite config needed to use the `observable()` Vite plugin; this enables top-level await, multi-page application behavior, and adds resolvers for `npm:`, `jsr:`, and `observable:` import protocols.
+    Returns the base Vite config needed to use the `observable()` Vite plugin; this enables top-level await, multi-page application behavior, and adds a resolver for the `observable:` import protocol (as used by CSS imports).
   </script>
   <script id="17" type="text/markdown">
     ### Build API
