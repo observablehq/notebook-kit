@@ -101,10 +101,6 @@ export function isIntrinsicName(name: string): boolean {
   return /^[a-z]/.test(name) || name.includes("-");
 }
 
-function isElement(node: Node): node is JSXElement | JSXFragment {
-  return node.type === "JSXElement" || node.type === "JSXFragment";
-}
-
 // Returns the outermost JSX nodes within the given node, in source order.
 function findRoots(node: Node): (JSXElement | JSXFragment)[] {
   const roots: (JSXElement | JSXFragment)[] = [];
@@ -129,10 +125,7 @@ export function rewriteJSX(node: Node, output: Sourcemap): void {
 // is preserved (an expression, or a nested element that is itself rewritten).
 type Part = string | Node;
 
-// Any generated code that immediately precedes the element (such as a comma
-// separating it from an adjacent element) is passed as a prefix, since it can’t
-// be part of a replaced range of JSX syntax.
-function rewriteElement(node: JSXElement | JSXFragment, output: Sourcemap, prefix = ""): void {
+function rewriteElement(node: JSXElement | JSXFragment, output: Sourcemap): void {
   let type = "JSX.Fragment";
   let key: string | null = null;
   const props: Part[][] = [];
@@ -164,7 +157,7 @@ function rewriteElement(node: JSXElement | JSXFragment, output: Sourcemap, prefi
   emit(
     node,
     [
-      `${prefix}JSX.${isStatic ? "jsxs" : "jsx"}(${type}, {`,
+      `JSX.${isStatic ? "jsxs" : "jsx"}(${type}, {`,
       ...join(props).flat(),
       key === null ? "})" : `}, ${key})`
     ],
@@ -186,12 +179,10 @@ function emit(node: Node, parts: Part[], output: Sourcemap): void {
       output.replaceLeft(index, part.start, code);
       code = "";
     }
-    if (isElement(part)) {
-      rewriteElement(part, output, code);
-    } else {
-      if (code) output.insertLeft(part.start, code);
-      rewriteJSX(part, output);
-    }
+    rewriteJSX(part, output);
+    // Insert any remaining code (such as a comma separating adjacent elements)
+    // after rewriting, so that it precedes any edits at the start of the part.
+    if (code) output.insertLeft(part.start, code);
     index = part.end;
     code = "";
   }
