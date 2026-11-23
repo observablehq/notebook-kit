@@ -87,7 +87,7 @@ interface Asset {
 interface FileReference extends FileInfo {
   /** the name of the file, as passed to FileAttachment */
   name: string;
-  /** the import path of the file (typically starting with ./), or an absolute URL */
+  /** the import path of the file (typically starting with ./) */
   path: string;
 }
 
@@ -550,7 +550,6 @@ function getLocalDependencies({
 }: TranspiledJavaScript): string[] {
   const dependencies = Array.from(imports).filter(isPathSpecifier);
   for (const file of files) {
-    if (isUrl(file)) continue;
     dependencies.push(isPathSpecifier(file) ? file : `./${file}`);
   }
   return dependencies;
@@ -560,55 +559,44 @@ function isPathSpecifier(specifier: string): boolean {
   return /^\.{0,2}\//.test(specifier);
 }
 
-function isUrl(specifier: string): boolean {
-  return /^\w+:/.test(specifier);
-}
-
 /**
  * Resolves the given file names (as passed to FileAttachment, relative to the
  * given notebook directory) to file references, including their MIME type,
  * modification time, and size. Files that do not exist are omitted, such that
- * attempting to load them throws an error. URLs are passed through as-is.
+ * attempting to load them throws an error.
  */
 async function resolveFiles(
   names: Iterable<string>,
   dir: string,
-  {root, publicDir}: ResolvedConfig
+  {root}: ResolvedConfig
 ): Promise<FileReference[]> {
   const files = await Promise.all(
     Array.from(names, async (name): Promise<FileReference | undefined> => {
-      const mimeType = mime.getType(cleanUrl(name)) ?? undefined;
-      if (isUrl(name)) return {name, path: name, mimeType};
-      const paths = name.startsWith("/")
-        ? [join(root, cleanUrl(name)), ...(publicDir ? [join(publicDir, cleanUrl(name))] : [])]
-        : [join(dir, cleanUrl(name))];
-      for (const path of paths) {
-        const stats = await stat(path).catch(() => undefined);
-        if (!stats?.isFile()) continue;
-        return {
-          name,
-          path: isPathSpecifier(name) ? name : `./${name}`,
-          mimeType,
-          lastModified: Math.round(stats.mtimeMs),
-          size: stats.size
-        };
-      }
-      console.warn(`warning: file not found: ${name}`);
+      const path = join(name.startsWith("/") ? root : dir, name);
+      const stats = await stat(path).catch(() => undefined);
+      if (!stats?.isFile()) return void console.warn(`warning: file not found: ${name}`);
+      return {
+        name,
+        path: isPathSpecifier(name) ? name : `./${name}`,
+        mimeType: mime.getType(name) ?? undefined,
+        lastModified: Math.round(stats.mtimeMs),
+        size: stats.size
+      };
     })
   );
   return files.filter((file) => file !== undefined);
 }
 
 /**
- * Renders the FileInfo for the given file. Local paths are resolved via
+ * Renders the FileInfo for the given file. Paths are resolved via
  * import.meta.url, so that Vite treats the file as an asset.
  */
 function renderFileInfo({path, mimeType, lastModified, size}: FileReference): string {
-  return `{path: ${
-    isUrl(path) ? JSON.stringify(path) : `new URL(${JSON.stringify(path)}, import.meta.url).href`
-  }${mimeType === undefined ? "" : `, mimeType: ${JSON.stringify(mimeType)}`}${
-    lastModified === undefined ? "" : `, lastModified: ${lastModified}`
-  }${size === undefined ? "" : `, size: ${size}`}}`;
+  return `{path: new URL(${JSON.stringify(path)}, import.meta.url).href${
+    mimeType === undefined ? "" : `, mimeType: ${JSON.stringify(mimeType)}`
+  }${lastModified === undefined ? "" : `, lastModified: ${lastModified}`}${
+    size === undefined ? "" : `, size: ${size}`
+  }}`;
 }
 
 function renderFileMap(files: FileReference[]): string {
