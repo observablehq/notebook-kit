@@ -1,6 +1,4 @@
-import {tsPlugin} from "@sveltejs/acorn-typescript";
 import type {Expression, Literal, Node} from "acorn";
-import {Parser} from "acorn";
 import type {RecursiveVisitors} from "acorn-walk";
 import {Sourcemap} from "./sourcemap.js";
 import {recursive} from "./walk.js";
@@ -109,8 +107,6 @@ function findRoots(node: Node): (JSXElement | JSXFragment)[] {
   return roots;
 }
 
-export const JsxParser = Parser.extend(tsPlugin({jsx: true}));
-
 /**
  * Rewrites any JSX within the given node as calls to JSX.jsx or JSX.jsxs, in
  * place. Only JSX syntax is replaced; the source of embedded expressions (such
@@ -136,10 +132,7 @@ function rewriteElement(node: JSXElement | JSXFragment, output: Sourcemap): void
       if (attr.type === "JSXSpreadAttribute") {
         props.push(["...", attr.argument]);
       } else {
-        const name =
-          attr.name.type === "JSXNamespacedName"
-            ? `${attr.name.namespace.name}:${attr.name.name.name}`
-            : attr.name.name;
+        const name = jsxName(attr.name);
         if (name === "key") key = compileKey(attr.value, output);
         else props.push([`${JSON.stringify(name)}: `, compileAttributeValue(attr.value)]);
       }
@@ -175,14 +168,10 @@ function emit(node: Node, parts: Part[], output: Sourcemap): void {
       code += part;
       continue;
     }
-    if (index < part.start) {
-      output.replaceLeft(index, part.start, code);
-      code = "";
-    }
+    // Rewrite the part first, so that any code inserted before it (such as a
+    // comma separating adjacent elements) precedes any edits at its start.
     rewriteJSX(part, output);
-    // Insert any remaining code (such as a comma separating adjacent elements)
-    // after rewriting, so that it precedes any edits at the start of the part.
-    if (code) output.insertLeft(part.start, code);
+    if (index < part.start || code) output.replaceLeft(index, part.start, code);
     index = part.end;
     code = "";
   }
@@ -200,8 +189,13 @@ function compileName(n: JSXElementName): string {
     case "JSXMemberExpression":
       return `${n.object.type === "JSXIdentifier" ? n.object.name : compileName(n.object)}.${n.property.name}`;
     case "JSXNamespacedName":
-      return JSON.stringify(`${n.namespace.name}:${n.name.name}`);
+      return JSON.stringify(jsxName(n));
   }
+}
+
+// Returns the name of a tag or attribute, such as div or svg:rect.
+function jsxName(n: JSXIdentifier | JSXNamespacedName): string {
+  return n.type === "JSXNamespacedName" ? `${n.namespace.name}:${n.name.name}` : n.name;
 }
 
 function compileText(c: JSXText): string | null {
@@ -232,7 +226,7 @@ function compileChild(c: JSXChild): Part | null {
 function compileAttributeValue(v: JSXAttribute["value"]): Part {
   if (v == null) return "true";
   if (v.type === "Literal") return JSON.stringify(v.value);
-  if (v.type === "JSXExpressionContainer") return v.expression.type === "JSXEmptyExpression" ? "undefined" : v.expression; // prettier-ignore
+  if (v.type === "JSXExpressionContainer") return v.expression; // can’t be empty in an attribute
   return v;
 }
 

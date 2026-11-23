@@ -5,7 +5,6 @@ import {findAwaits} from "./awaits.js";
 import {findDeclarations} from "./declarations.js";
 import type {FeatureExpression} from "./features.js";
 import {findFeatures} from "./features.js";
-import {JsxParser} from "./jsx.js";
 import {findReferences} from "./references.js";
 import {checkErasableSyntax} from "./typescript.js";
 
@@ -35,6 +34,7 @@ type Dialect = "js" | "ts" | "tsx";
 
 const JsParser = Parser;
 const TsParser = Parser.extend(tsPlugin());
+const JsxParser = Parser.extend(tsPlugin({jsx: true}));
 
 function getParser(dialect: Dialect = "js"): typeof Parser {
   return dialect === "tsx" ? JsxParser : dialect === "ts" ? TsParser : JsParser;

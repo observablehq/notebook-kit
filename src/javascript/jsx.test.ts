@@ -1,16 +1,12 @@
-import type {Node} from "acorn";
 import {assert, test} from "vitest";
-import {JsxParser, rewriteJSX} from "./jsx.js";
+import {rewriteJSX} from "./jsx.js";
+import {parseJavaScript} from "./parse.js";
 import {Sourcemap} from "./sourcemap.js";
 
-function parseJSX(code: string): Node {
-  return JsxParser.parse(code, {ecmaVersion: "latest", sourceType: "module"});
-}
-
 /** Returns the given code with any JSX replaced with calls to JSX.jsx or JSX.jsxs. */
-function transformJSX(code: string, node = parseJSX(code)): string {
+function transformJSX(code: string): string {
   const output = new Sourcemap(code);
-  rewriteJSX(node, output);
+  rewriteJSX(parseJavaScript(code, "tsx").body, output);
   return String(output);
 }
 
@@ -112,17 +108,15 @@ test("compiles nested JSX within expressions", () => {
 test("preserves surrounding code, including shorthand properties", () => {
   assert.strictEqual(transformJSX("const o = {a}; <p />;"), 'const o = {a}; JSX.jsx("p", {});');
   assert.strictEqual(transformJSX("const {b} = o; <p />;"), 'const {b} = o; JSX.jsx("p", {});');
-  assert.strictEqual(transformJSX("let c; export {c}; <p />;"), 'let c; export {c}; JSX.jsx("p", {});'); // prettier-ignore
+  assert.strictEqual(transformJSX("let c; f({c}); <p />;"), 'let c; f({c}); JSX.jsx("p", {});'); // prettier-ignore
   assert.strictEqual(
     transformJSX("// comment\nconst a = /* b */ <p />;\n"),
     '// comment\nconst a = /* b */ JSX.jsx("p", {});\n'
   );
 });
 
-test("compiles JSX within the given node, preserving surrounding code", () => {
-  const code = "// comment\n{a: <p />} /* comment */";
-  const node = JsxParser.parseExpressionAt(code, code.indexOf("{"), {ecmaVersion: "latest"});
-  assert.strictEqual(transformJSX(code, node), '// comment\n{a: JSX.jsx("p", {})} /* comment */');
+test("compiles JSX within expressions, preserving surrounding code", () => {
+  assert.strictEqual(transformJSX("// comment\n{a: <p />} /* comment */"), '// comment\n{a: JSX.jsx("p", {})} /* comment */'); // prettier-ignore
 });
 
 test("compiles keys after props, including nested JSX", () => {
