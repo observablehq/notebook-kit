@@ -63,6 +63,8 @@ async function getParser(language: string): Promise<Parser | undefined> {
     case "ts":
     case "jsx":
       return (await import("@lezer/javascript")).parser.configure({dialect: language});
+    case "tsx":
+      return (await import("@lezer/javascript")).parser.configure({dialect: "jsx ts"});
     case "python":
       return (await import("@lezer/python")).parser;
     case "html":

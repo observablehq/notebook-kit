@@ -1,5 +1,5 @@
 import {tsPlugin} from "@sveltejs/acorn-typescript";
-import type {Expression, Literal, Node, Options} from "acorn";
+import type {Expression, Literal, Node} from "acorn";
 import {Parser} from "acorn";
 import type {RecursiveVisitors} from "acorn-walk";
 import {Sourcemap} from "./sourcemap.js";
@@ -152,13 +152,19 @@ function rewriteElement(node: JSXElement | JSXFragment, output: Sourcemap, prefi
       }
     }
   }
-  const children = node.children.map(compileChild).filter((c): c is Part => c !== null);
-  if (children.length === 1) props.push(["children: ", children[0]]);
-  else if (children.length > 1) props.push(["children: [", ...join(children), "]"]);
+  // Spread children are passed as an array (or spread into one); like multiple
+  // children, the array is static, so it is passed to jsxs rather than jsx.
+  const children = node.children.flatMap((c) => {
+    const part = compileChild(c);
+    return part === null ? [] : [{part, spread: c.type === "JSXSpreadChild"}];
+  });
+  const isStatic = children.length > 1 || children.some((c) => c.spread);
+  if (children.length === 1) props.push(["children: ", children[0].part]);
+  else if (children.length > 1) props.push(["children: [", ...join(children.map((c) => (c.spread ? ["...", c.part] : [c.part]))).flat(), "]"]); // prettier-ignore
   emit(
     node,
     [
-      `${prefix}JSX.${children.length > 1 ? "jsxs" : "jsx"}(${type}, {`,
+      `${prefix}JSX.${isStatic ? "jsxs" : "jsx"}(${type}, {`,
       ...join(props).flat(),
       key === null ? "})" : `}, ${key})`
     ],
