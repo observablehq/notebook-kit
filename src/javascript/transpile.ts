@@ -1,6 +1,6 @@
-import {normalize} from "node:path/posix";
 import type {Cell} from "../lib/notebook.js";
 import {toCell} from "../lib/notebook.js";
+import {normalize} from "../lib/path.js";
 import {rewriteFileExpressions} from "./files.js";
 import type {ImportOptions} from "./imports.js";
 import {hasImportDeclaration} from "./imports.js";
