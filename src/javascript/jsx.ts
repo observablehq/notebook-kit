@@ -147,15 +147,7 @@ function rewriteElement(node: JSXElement | JSXFragment, output: Sourcemap): void
   const isStatic = children.length > 1 || children.some((c) => c.spread);
   if (children.length === 1) props.push(["children: ", children[0].part]);
   else if (children.length > 1) props.push(["children: [", ...join(children.map((c) => (c.spread ? ["...", c.part] : [c.part]))).flat(), "]"]); // prettier-ignore
-  emit(
-    node,
-    [
-      `JSX.${isStatic ? "jsxs" : "jsx"}(${type}, {`,
-      ...join(props).flat(),
-      key === null ? "})" : `}, ${key})`
-    ],
-    output
-  );
+  emit(node, [`JSX.${isStatic ? "jsxs" : "jsx"}(${type}, {`, ...join(props).flat(), key === null ? "})" : `}, ${key})`], output); // prettier-ignore
 }
 
 // Replaces the source of the given element with the given parts, replacing the
