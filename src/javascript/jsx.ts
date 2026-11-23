@@ -110,7 +110,7 @@ function findRoots(node: Node): (JSXElement | JSXFragment)[] {
   const roots: (JSXElement | JSXFragment)[] = [];
   const push = (node: JSXElement | JSXFragment) => void roots.push(node);
   recursive(node, null, {JSXElement: push, JSXFragment: push} as RecursiveVisitors<unknown>);
-  return roots.sort((a, b) => a.start - b.start);
+  return roots;
 }
 
 export const JsxParser = Parser.extend(tsPlugin({jsx: true}));
