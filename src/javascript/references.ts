@@ -169,6 +169,13 @@ export function findReferences(
     identifier(node as Identifier, _state, parents);
   }
 
+  // JSX elements and fragments compile to calls to JSX.jsx or JSX.jsxs, so they
+  // reference JSX (which may be a local, or defined by another cell).
+  function jsxElement(node: Node, _state: unknown, parents: Node[]) {
+    const jsx = {type: "Identifier", name: "JSX", start: node.start, end: node.start};
+    identifier(jsx as Identifier, _state, parents);
+  }
+
   ancestor(node, {
     Pattern(node, _state, parents) {
       if (node.type === "Identifier") {
@@ -176,7 +183,9 @@ export function findReferences(
       }
     },
     Identifier: identifier,
-    JSXIdentifier: jsxIdentifier
+    JSXIdentifier: jsxIdentifier,
+    JSXElement: jsxElement,
+    JSXFragment: jsxElement
   } as AncestorVisitors<unknown>);
 
   if (input !== undefined) {

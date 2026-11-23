@@ -1129,7 +1129,7 @@ return (
 exports[`transpiles TSX expressions 1`] = `
 {
   "autodisplay": true,
-  "body": "(JSX,a) => {
+  "body": "(a,JSX) => {
 return (
 JSX.jsx("div", {"className": "x", children: a})
 )
@@ -1138,8 +1138,8 @@ JSX.jsx("div", {"className": "x", children: a})
   "files": Set {},
   "imports": Set {},
   "inputs": [
-    "JSX",
     "a",
+    "JSX",
   ],
   "outputs": [],
   "secrets": Set {},
@@ -1149,7 +1149,7 @@ JSX.jsx("div", {"className": "x", children: a})
 exports[`transpiles TSX expressions 2`] = `
 {
   "autodisplay": true,
-  "body": "(JSX,Foo,x) => {
+  "body": "(Foo,x,JSX) => {
 return (
 JSX.jsx(Foo, {"bar": x})
 )
@@ -1158,9 +1158,9 @@ JSX.jsx(Foo, {"bar": x})
   "files": Set {},
   "imports": Set {},
   "inputs": [
-    "JSX",
     "Foo",
     "x",
+    "JSX",
   ],
   "outputs": [],
   "secrets": Set {},
@@ -1170,7 +1170,7 @@ JSX.jsx(Foo, {"bar": x})
 exports[`transpiles TSX expressions 3`] = `
 {
   "autodisplay": true,
-  "body": "(JSX,xs) => {
+  "body": "(xs,JSX) => {
 return (
 JSX.jsx(JSX.Fragment, {children: xs.map((x) => JSX.jsx("li", {children: x}, x))})
 )
@@ -1179,8 +1179,47 @@ JSX.jsx(JSX.Fragment, {children: xs.map((x) => JSX.jsx("li", {children: x}, x))}
   "files": Set {},
   "imports": Set {},
   "inputs": [
-    "JSX",
     "xs",
+    "JSX",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX object literal expressions 1`] = `
+{
+  "autodisplay": true,
+  "body": "(JSX) => {
+return (
+{a: 1, b: JSX.jsx("p", {})}
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
+  ],
+  "outputs": [],
+  "secrets": Set {},
+}
+`;
+
+exports[`transpiles TSX object literal expressions 2`] = `
+{
+  "autodisplay": true,
+  "body": "(JSX) => {
+return (
+// comment
+{a: JSX.jsx("p", {})} /* comment */
+)
+}",
+  "databases": Set {},
+  "files": Set {},
+  "imports": Set {},
+  "inputs": [
+    "JSX",
   ],
   "outputs": [],
   "secrets": Set {},
@@ -1190,7 +1229,7 @@ JSX.jsx(JSX.Fragment, {children: xs.map((x) => JSX.jsx("li", {children: x}, x))}
 exports[`transpiles TSX programs 1`] = `
 {
   "autodisplay": false,
-  "body": "(JSX,a) => {
+  "body": "(a,JSX) => {
 const el = JSX.jsx("p", {children: a});
 return {el};
 }",
@@ -1198,8 +1237,8 @@ return {el};
   "files": Set {},
   "imports": Set {},
   "inputs": [
-    "JSX",
     "a",
+    "JSX",
   ],
   "outputs": [
     "el",
@@ -1259,7 +1298,7 @@ return {Button,b};
 exports[`transpiles TSX with top-level await and file attachments 1`] = `
 {
   "autodisplay": true,
-  "body": "async (JSX,FileAttachment) => {
+  "body": "async (FileAttachment,JSX) => {
 return (
 JSX.jsx("pre", {children: await FileAttachment(new URL("a.txt", import.meta.url).href).text()})
 )
@@ -1270,8 +1309,8 @@ JSX.jsx("pre", {children: await FileAttachment(new URL("a.txt", import.meta.url)
   },
   "imports": Set {},
   "inputs": [
-    "JSX",
     "FileAttachment",
+    "JSX",
   ],
   "outputs": [],
   "secrets": Set {},

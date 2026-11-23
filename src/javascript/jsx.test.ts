@@ -1,5 +1,18 @@
+import type {Node} from "acorn";
 import {assert, test} from "vitest";
-import {transformJSX} from "./jsx.js";
+import {JsxParser, rewriteJSX} from "./jsx.js";
+import {Sourcemap} from "./sourcemap.js";
+
+function parseJSX(code: string): Node {
+  return JsxParser.parse(code, {ecmaVersion: "latest", sourceType: "module"});
+}
+
+/** Returns the given code with any JSX replaced with calls to JSX.jsx or JSX.jsxs. */
+function transformJSX(code: string, node = parseJSX(code)): string {
+  const output = new Sourcemap(code);
+  rewriteJSX(node, output);
+  return String(output);
+}
 
 test("leaves code without JSX unchanged", () => {
   assert.strictEqual(transformJSX("const a = 1 + 2;"), "const a = 1 + 2;");
@@ -43,7 +56,7 @@ test("compiles attributes", () => {
 
 test("compiles spread attributes in order", () => {
   assert.strictEqual(transformJSX("<a {...p} />;"), 'JSX.jsx("a", {...p});');
-  assert.strictEqual(transformJSX("<a b={1} {...p} c={2} />;"), 'JSX.jsx("a", {"b": 1, ...p, "c": 2});');
+  assert.strictEqual(transformJSX("<a b={1} {...p} c={2} />;"), 'JSX.jsx("a", {"b": 1, ...p, "c": 2});'); // prettier-ignore
 });
 
 test("passes key as a separate argument", () => {
@@ -91,27 +104,44 @@ test("compiles nested JSX within expressions", () => {
     transformJSX("class A { m() { return <F {...{x: <g />}} />; } }"),
     'class A { m() { return JSX.jsx(F, {...{x: JSX.jsx("g", {})}}); } }'
   );
-  assert.strictEqual(
-    transformJSX("const {c = <i />} = o;"),
-    'const {c = JSX.jsx("i", {})} = o;'
-  );
+  assert.strictEqual(transformJSX("const {c = <i />} = o;"), 'const {c = JSX.jsx("i", {})} = o;');
 });
 
 test("preserves surrounding code, including shorthand properties", () => {
   assert.strictEqual(transformJSX("const o = {a}; <p />;"), 'const o = {a}; JSX.jsx("p", {});');
   assert.strictEqual(transformJSX("const {b} = o; <p />;"), 'const {b} = o; JSX.jsx("p", {});');
-  assert.strictEqual(transformJSX("let c; export {c}; <p />;"), 'let c; export {c}; JSX.jsx("p", {});');
+  assert.strictEqual(transformJSX("let c; export {c}; <p />;"), 'let c; export {c}; JSX.jsx("p", {});'); // prettier-ignore
   assert.strictEqual(
     transformJSX("// comment\nconst a = /* b */ <p />;\n"),
     '// comment\nconst a = /* b */ JSX.jsx("p", {});\n'
   );
 });
 
+test("compiles JSX within the given node, preserving surrounding code", () => {
+  const code = "// comment\n{a: <p />} /* comment */";
+  const node = JsxParser.parseExpressionAt(code, code.indexOf("{"), {ecmaVersion: "latest"});
+  assert.strictEqual(transformJSX(code, node), '// comment\n{a: JSX.jsx("p", {})} /* comment */');
+});
+
+test("compiles keys after props, including nested JSX", () => {
+  assert.strictEqual(transformJSX("<a key={f(<b />)} c={1} />;"), 'JSX.jsx("a", {"c": 1}, f(JSX.jsx("b", {})));'); // prettier-ignore
+  assert.strictEqual(transformJSX("<a key=<b /> />;"), 'JSX.jsx("a", {}, JSX.jsx("b", {}));');
+});
+
+test("compiles adjacent elements and nested elements in attributes", () => {
+  assert.strictEqual(transformJSX("<a><b /><c /></a>;"), 'JSX.jsxs("a", {children: [JSX.jsx("b", {}), JSX.jsx("c", {})]});'); // prettier-ignore
+  assert.strictEqual(transformJSX("<a b=<c /> d={<e />} />;"), 'JSX.jsx("a", {"b": JSX.jsx("c", {}), "d": JSX.jsx("e", {})});'); // prettier-ignore
+  assert.strictEqual(transformJSX("<a>{<b />}{<c />}</a>;"), 'JSX.jsxs("a", {children: [JSX.jsx("b", {}), JSX.jsx("c", {})]});'); // prettier-ignore
+});
+
 test("compiles JSX within TypeScript, preserving the TypeScript", () => {
   assert.strictEqual(transformJSX("const a: Foo = <p />;"), 'const a: Foo = JSX.jsx("p", {});');
   assert.strictEqual(transformJSX("(<p /> as any);"), '(JSX.jsx("p", {}) as any);');
   assert.strictEqual(transformJSX("<p>{x!}</p>;"), 'JSX.jsx("p", {children: x!});');
-  assert.strictEqual(transformJSX("<p>{x satisfies T}</p>;"), 'JSX.jsx("p", {children: x satisfies T});');
+  assert.strictEqual(
+    transformJSX("<p>{x satisfies T}</p>;"),
+    'JSX.jsx("p", {children: x satisfies T});'
+  );
   assert.strictEqual(transformJSX("const f = <T,>(x: T) => <p>{x}</p>;"), 'const f = <T,>(x: T) => JSX.jsx("p", {children: x});'); // prettier-ignore
   assert.strictEqual(transformJSX("type T = string; <p />;"), 'type T = string; JSX.jsx("p", {});');
 });

@@ -98,3 +98,14 @@ test("line-level granularity", () => {
   sm.insertLeft(0, "foo");
   assert.deepStrictEqual(sm.translate({line: 1, column: 4}), {line: 1, column: 1});
 });
+
+test("slice applies only the edits within the given range", () => {
+  const sm = new Sourcemap("a + b + c");
+  sm.replaceLeft(0, 1, "x");
+  sm.replaceLeft(4, 5, "y");
+  sm.insertLeft(9, ";");
+  assert.strictEqual(sm.slice(4, 5), "y");
+  assert.strictEqual(sm.slice(2, 9), "+ y + c;");
+  assert.strictEqual(sm.slice(), "x + y + c;");
+  assert.strictEqual(sm.toString(), "x + y + c;");
+});

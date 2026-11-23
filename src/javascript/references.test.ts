@@ -50,9 +50,22 @@ test("ignores globals", () => {
   expect(find(`window + bar`)).toMatchSnapshot();
 });
 
+// Excludes references to JSX, which are tested separately.
 function findTsx(input: string): string[] {
-  return parseJavaScript(input, "tsx").references.map((r) => r.name);
+  return parseJavaScript(input, "tsx")
+    .references.map((r) => r.name)
+    .filter((name) => name !== "JSX");
 }
+
+test("JSX elements and fragments reference JSX, unless it is a local", () => {
+  const find = (input: string) => parseJavaScript(input, "tsx").references.map((r) => r.name);
+  expect(find(`<div />`)).toEqual(["JSX"]);
+  expect(find(`<></>`)).toEqual(["JSX"]);
+  expect(find(`<Foo>{a}</Foo>`)).toEqual(["Foo", "a", "JSX"]);
+  expect(find(`1 + 2`)).toEqual([]);
+  expect(find(`(JSX) => <div />`)).toEqual([]);
+  expect(find(`{ const JSX = {}; <div />; }`)).toEqual([]);
+});
 
 test("finds references in JSX expressions and attributes", () => {
   expect(findTsx(`<div title={a}>{b}{...c}</div>`)).toEqual(["a", "b", "c"]);

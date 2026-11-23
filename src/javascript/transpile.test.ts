@@ -116,6 +116,29 @@ it("transpiles TSX programs", () => {
   expect(transpile('import {Button} from "npm:ui";\nimport type {Props} from "npm:ui";\nconst b = <Button />;', "tsx")).toMatchSnapshot(); // prettier-ignore
 });
 
+it("transpiles TSX object literal expressions", () => {
+  expect(transpile("{a: 1, b: <p />}", "tsx")).toMatchSnapshot();
+  expect(transpile("// comment\n{a: <p />} /* comment */", "tsx")).toMatchSnapshot();
+});
+
+it("transpiles TSX with TypeScript inside JSX", () => {
+  expect(transpile("<Foo a={x as T} b={(y!)} c={<i>{z satisfies U}</i>} />", "tsx").body).toBe(`(Foo,x,y,z,JSX) => {
+return (
+JSX.jsx(Foo, {"a": x, "b": (y), "c": JSX.jsx("i", {children: z})})
+)
+}`); // prettier-ignore
+  expect(transpile("<ul>{xs.map(<T,>(x: T) => <li key={x as string}>{x}</li>)}</ul>", "tsx").body).toBe(`(xs,JSX) => {
+return (
+JSX.jsx("ul", {children: xs.map((x) => JSX.jsx("li", {children: x}, x))})
+)
+}`); // prettier-ignore
+  expect(transpile("<p><a />{x!}<b /></p>", "tsx").body).toBe(`(JSX,x) => {
+return (
+JSX.jsxs("p", {children: [JSX.jsx("a", {}), x, JSX.jsx("b", {})]})
+)
+}`); // prettier-ignore
+});
+
 it("transpiles TSX with top-level await and file attachments", () => {
   expect(transpile('<pre>{await FileAttachment("a.txt").text()}</pre>', "tsx", {resolveFiles: true})).toMatchSnapshot(); // prettier-ignore
 });
