@@ -66,13 +66,13 @@ test("sets the default path for various libraries", () => {
   );
   assert.strictEqual(
     resolveNpmImport("npm:react-dom"),
-    "https://esm.sh/react-dom@19.3.1/client" //
+    "https://esm.sh/react-dom/client" //
   );
 });
 
-test("sets the default version of react and react-dom to match the standard library", () => {
-  assert.strictEqual(resolveNpmImport("npm:react"), "https://esm.sh/react@19.3.1");
-  assert.strictEqual(resolveNpmImport("npm:react/jsx-runtime"), "https://esm.sh/react@19.3.1/jsx-runtime"); // prettier-ignore
-  assert.strictEqual(resolveNpmImport("npm:react-dom"), "https://esm.sh/react-dom@19.3.1/client"); // prettier-ignore
+test("resolves react and react-dom to the latest version, like the standard library", () => {
+  assert.strictEqual(resolveNpmImport("npm:react"), "https://esm.sh/react");
+  assert.strictEqual(resolveNpmImport("npm:react/jsx-runtime"), "https://esm.sh/react/jsx-runtime"); // prettier-ignore
+  assert.strictEqual(resolveNpmImport("npm:react-dom"), "https://esm.sh/react-dom/client"); // prettier-ignore
   assert.strictEqual(resolveNpmImport("npm:react@18"), "https://esm.sh/react@18");
 });
