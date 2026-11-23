@@ -21,7 +21,7 @@ it("transpiles JavaScript programs", () => {
   expect(transpile("const x = 1, y = 2;", "js")).toMatchSnapshot();
   expect(transpile("x + y;", "js")).toMatchSnapshot();
   expect(transpile("await z;", "js")).toMatchSnapshot();
-  expect(transpile('import data from "https://example.com" with {type: "json"};', "js")).toMatchSnapshot();
+  expect(transpile('import data from "https://example.com" with {type: "json"};', "js")).toMatchSnapshot(); // prettier-ignore
 });
 
 it("transpiles TypeScript expressions", () => {
@@ -55,7 +55,7 @@ it("transpiles TypeScript imports", () => {
   expect(transpile('import {foo} from "npm:bar";', "ts")).toMatchSnapshot();
   expect(transpile('import {type foo} from "npm:bar";', "ts")).toMatchSnapshot();
   expect(transpile('import type {foo} from "npm:bar";', "ts")).toMatchSnapshot();
-  expect(transpile('import data from "https://example.com" with {type: "json"};', "ts")).toMatchSnapshot();
+  expect(transpile('import data from "https://example.com" with {type: "json"};', "ts")).toMatchSnapshot(); // prettier-ignore
 });
 
 it("throws SyntaxError on invalid TypeScript syntax", () => {
@@ -92,7 +92,7 @@ it("errors on TypeScript features that require runtime support", () => {
   expect(() => transpile("const enum Direction { Up, Down }", "ts")).toThrow(SyntaxError);
   expect(() => transpile("namespace N { export const x = 1; }", "ts")).toThrow(SyntaxError);
   expect(() => transpile("module M { export const x = 1; }", "ts")).toThrow(SyntaxError);
-  expect(() => transpile("class C { constructor(private x: number) {} }", "ts")).toThrow(SyntaxError);
+  expect(() => transpile("class C { constructor(private x: number) {} }", "ts")).toThrow(SyntaxError); // prettier-ignore
   expect(() => transpile('import fs = require("fs");', "ts")).toThrow(SyntaxError);
   expect(() => transpile("import x = A.B;", "ts")).toThrow(SyntaxError);
   expect(() => transpile("export = foo;", "ts")).toThrow(SyntaxError);
@@ -105,13 +105,13 @@ it("erases ambient TypeScript declarations", () => {
 });
 
 it("transpiles Observable JavaScript viewof declarations and references", () => {
-  expect(transpile('viewof foo = Inputs.range()', "ojs")).toMatchSnapshot();
-  expect(transpile('viewof foo.value', "ojs")).toMatchSnapshot();
+  expect(transpile("viewof foo = Inputs.range()", "ojs")).toMatchSnapshot();
+  expect(transpile("viewof foo.value", "ojs")).toMatchSnapshot();
 });
 
 it("transpiles Observable JavaScript mutable declarations and references", () => {
-  expect(transpile('mutable foo = 42', "ojs")).toMatchSnapshot();
-  expect(transpile('mutable foo++', "ojs")).toMatchSnapshot();
+  expect(transpile("mutable foo = 42", "ojs")).toMatchSnapshot();
+  expect(transpile("mutable foo++", "ojs")).toMatchSnapshot();
 });
 
 it("transpiles static npm: imports", () => {
@@ -209,6 +209,17 @@ it("transpiles node cells", () => {
 
 it("transpiles SQL cells", () => {
   expect(transpile("SELECT 1 + 2", "sql")).toMatchSnapshot();
-  expect(transpile(toCell({id: 1, value: "SELECT 1 + 2", output: "three", mode: "sql"}))).toMatchSnapshot();
+  expect(transpile(toCell({id: 1, value: "SELECT 1 + 2", output: "three", mode: "sql"}))).toMatchSnapshot(); // prettier-ignore
   expect(transpile(toCell({id: 1, value: "SELECT 1 + 2", output: "three", mode: "sql", hidden: true}))).toMatchSnapshot(); // prettier-ignore
+});
+
+it("normalizes file attachment names relative to the notebook", () => {
+  const files = (input: string) => Array.from(transpile(input, "js").files ?? []);
+  expect(files('FileAttachment("foo.txt")')).toEqual(["foo.txt"]);
+  expect(files('FileAttachment("./foo.txt")')).toEqual(["foo.txt"]);
+  expect(files('FileAttachment("path/to/file.txt")')).toEqual(["path/to/file.txt"]);
+  expect(files('FileAttachment("./path/./to/../to/file.txt")')).toEqual(["path/to/file.txt"]);
+  expect(files('FileAttachment("../data/file.txt")')).toEqual(["../data/file.txt"]);
+  expect(files('FileAttachment("/data/file.txt")')).toEqual(["/data/file.txt"]);
+  expect(files('FileAttachment("foo.txt"), FileAttachment("./foo.txt")')).toEqual(["foo.txt"]);
 });
