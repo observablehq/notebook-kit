@@ -549,9 +549,7 @@ function getLocalDependencies({
   files = new Set()
 }: TranspiledJavaScript): string[] {
   const dependencies = Array.from(imports).filter(isPathSpecifier);
-  for (const file of files) {
-    dependencies.push(isPathSpecifier(file) ? file : `./${file}`);
-  }
+  for (const file of files) dependencies.push(isPathSpecifier(file) ? file : `./${file}`);
   return dependencies;
 }
 
