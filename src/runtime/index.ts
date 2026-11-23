@@ -5,6 +5,7 @@ import {define as _define} from "./define.js";
 import type {observe} from "./display.js";
 import {fileAttachments, fileDatabase} from "./stdlib/fileAttachment.js";
 import {library} from "./stdlib/index.js";
+import {vg} from "./stdlib/vgplot.js";
 
 export type {DefineState, Definition} from "./define.js";
 export * from "./display.js";
@@ -33,6 +34,7 @@ export class NotebookRuntime {
     this.runtime = Object.assign(runtime, {fileAttachments, fileDatabase});
     this.main = runtime.module();
     this.main.builtin("db", ...fileDatabase());
+    this.main.builtin("vg", ...vg());
   }
 
   define(state: DefineState, definition: Definition, observer?: typeof observe): void {
@@ -45,11 +47,3 @@ const defaultNotebook = new NotebookRuntime();
 export const runtime = defaultNotebook.runtime;
 export const main = defaultNotebook.main;
 export const define = defaultNotebook.define.bind(defaultNotebook);
-
-main.constructor.prototype.defines = function (this: Module, name: string): boolean {
-  return (
-    this._scope.has(name) || // prettier
-    this._builtins.has(name) ||
-    this._runtime._builtin._scope.has(name)
-  );
-};

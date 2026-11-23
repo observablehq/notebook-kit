@@ -265,8 +265,13 @@
       username?: string;
       warehouse?: string;
       password?: string;
+      privateKey?: string;
+      privateKeyPath?: string;
+      privateKeyPass?: string;
     }
     ```
+
+    To use [key-pair authentication](https://docs.snowflake.com/en/user-guide/key-pair-auth) instead of a password, set either **privateKey** to an unencrypted PKCS #8 private key in PEM format, or **privateKeyPath** to the path to a private key file. If the private key file is encrypted, also set **privateKeyPass** to its passphrase.
 
     See the [Snowflake Node.js driver documentation](https://docs.snowflake.com/en/developer-guide/node-js/nodejs-driver-authenticate) for details.
   </script>

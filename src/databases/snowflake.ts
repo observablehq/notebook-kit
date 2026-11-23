@@ -15,6 +15,9 @@ export type SnowflakeConfig = {
   username?: string;
   warehouse?: string;
   password?: string;
+  privateKey?: string;
+  privateKeyPath?: string;
+  privateKeyPass?: string;
 };
 
 export default function snowflake(options: SnowflakeConfig): QueryTemplateFunction {
@@ -23,6 +26,10 @@ export default function snowflake(options: SnowflakeConfig): QueryTemplateFuncti
       account: String(options.account),
       username: optionalString(options.username),
       password: optionalString(options.password),
+      authenticator: options.privateKey || options.privateKeyPath ? "SNOWFLAKE_JWT" : undefined,
+      privateKey: optionalString(options.privateKey),
+      privateKeyPath: optionalString(options.privateKeyPath),
+      privateKeyPass: optionalString(options.privateKeyPass),
       database: optionalString(options.database),
       schema: optionalString(options.schema),
       warehouse: optionalString(options.warehouse),

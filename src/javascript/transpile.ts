@@ -1,5 +1,6 @@
 import type {Cell} from "../lib/notebook.js";
 import {toCell} from "../lib/notebook.js";
+import {normalize} from "../lib/path.js";
 import {rewriteFileExpressions} from "./files.js";
 import type {ImportOptions} from "./imports.js";
 import {hasImportDeclaration} from "./imports.js";
@@ -118,7 +119,7 @@ function transpileCell(
   output.insertRight(output.length, "\n}");
   const body = String(output);
   const autodisplay = cell.expression && !(inputs.includes("display") || inputs.includes("view"));
-  const files = new Set(cell.files.map((f) => f.argument));
+  const files = new Set(cell.files.map((f) => normalize(f.argument)));
   const databases = new Set(cell.databases.map((f) => f.argument));
   const secrets = new Set(cell.secrets.map((f) => f.argument));
   const imports = new Set([...importDeclarations, ...importExpressions]);

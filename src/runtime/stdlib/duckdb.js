@@ -33,11 +33,11 @@ import {sql} from "../index.js";
 const bundles = {
   mvp: {
     mainModule: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-mvp.wasm",
-    mainWorker: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-mvp.worker.js" // prettier-ignore
+    mainWorker: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-mvp.worker.js?raw" // prettier-ignore
   },
   eh: {
     mainModule: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-eh.wasm",
-    mainWorker: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-eh.worker.js" // prettier-ignore
+    mainWorker: "https://esm.sh/@duckdb/duckdb-wasm@1.32.0/dist/duckdb-browser-eh.worker.js?raw" // prettier-ignore
   }
 };
 const bundle = duckdb.selectBundle(bundles);
