@@ -70,12 +70,8 @@ test("compiles a single child with jsx and multiple children with jsxs", () => {
   assert.strictEqual(transformJSX("<p>a{b}</p>;"), 'JSX.jsxs("p", {children: ["a", b]});');
 });
 
-test("compiles expression and spread children", () => {
+test("compiles expression children", () => {
   assert.strictEqual(transformJSX("<p>{a + b}</p>;"), 'JSX.jsx("p", {children: a + b});');
-  assert.strictEqual(transformJSX("<p>{...xs}</p>;"), 'JSX.jsxs("p", {children: xs});');
-  assert.strictEqual(transformJSX("<p>{...xs.map((x) => <i>{x}</i>)}</p>;"), 'JSX.jsxs("p", {children: xs.map((x) => JSX.jsx("i", {children: x}))});'); // prettier-ignore
-  assert.strictEqual(transformJSX("<p>a{...xs}{b}</p>;"), 'JSX.jsxs("p", {children: ["a", ...xs, b]});');
-  assert.strictEqual(transformJSX("<p>{...xs}{...ys}</p>;"), 'JSX.jsxs("p", {children: [...xs, ...ys]});');
   assert.strictEqual(transformJSX("<p>{}</p>;"), 'JSX.jsx("p", {});');
   assert.strictEqual(transformJSX("<p>{/* comment */}</p>;"), 'JSX.jsx("p", {});');
 });

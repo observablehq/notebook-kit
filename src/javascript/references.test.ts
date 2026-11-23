@@ -68,7 +68,7 @@ test("JSX elements and fragments reference JSX, unless it is a local", () => {
 });
 
 test("finds references in JSX expressions and attributes", () => {
-  expect(findTsx(`<div title={a}>{b}{...c}</div>`)).toEqual(["a", "b", "c"]);
+  expect(findTsx(`<div title={a}>{b}{c}</div>`)).toEqual(["a", "b", "c"]);
   expect(findTsx(`<div {...a} b={<i>{c}</i>} />`)).toEqual(["a", "c"]);
   expect(findTsx(`<>{a}</>`)).toEqual(["a"]);
 });

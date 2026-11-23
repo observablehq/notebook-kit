@@ -1,6 +1,7 @@
 import type {Expression, Literal, Node} from "acorn";
 import type {RecursiveVisitors} from "acorn-walk";
-import {Sourcemap} from "./sourcemap.js";
+import type {Sourcemap} from "./sourcemap.js";
+import {syntaxError} from "./syntaxError.js";
 import {recursive} from "./walk.js";
 
 interface JSXIdentifier extends Node {
@@ -121,7 +122,12 @@ export function rewriteJSX(node: Node, output: Sourcemap): void {
 // is preserved (an expression, or a nested element that is itself rewritten).
 type Part = string | Node;
 
+// Rewrites the given element or fragment, such as <Foo a={x}>b</Foo>, as a call
+// such as JSX.jsx(Foo, {"a": x, children: "b"}), along with any nested JSX.
 function rewriteElement(node: JSXElement | JSXFragment, output: Sourcemap): void {
+  // Compute the type and props from the tag name and attributes. Each prop is a
+  // list of parts, such as ['"a": ', x] for a={x}, where x is preserved. The
+  // key isn’t a prop; it’s passed separately as the last argument.
   let type = "JSX.Fragment";
   let key: string | null = null;
   const props: Part[][] = [];
@@ -138,21 +144,28 @@ function rewriteElement(node: JSXElement | JSXFragment, output: Sourcemap): void
       }
     }
   }
-  // Spread children are passed as an array (or spread into one); like multiple
-  // children, the array is static, so it is passed to jsxs rather than jsx.
-  const children = node.children.flatMap((c) => {
-    const part = compileChild(c);
-    return part === null ? [] : [{part, spread: c.type === "JSXSpreadChild"}];
-  });
-  const isStatic = children.length > 1 || children.some((c) => c.spread);
-  if (children.length === 1) props.push(["children: ", children[0].part]);
-  else if (children.length > 1) props.push(["children: [", ...join(children.map((c) => (c.spread ? ["...", c.part] : [c.part]))).flat(), "]"]); // prettier-ignore
-  emit(node, [`JSX.${isStatic ? "jsxs" : "jsx"}(${type}, {`, ...join(props).flat(), key === null ? "})" : `}, ${key})`], output); // prettier-ignore
-}
 
-// Replaces the source of the given element with the given parts, replacing the
-// source between preserved nodes with the generated code.
-function emit(node: Node, parts: Part[], output: Sourcemap): void {
+  // Compute the children prop. Text becomes a string literal (or is dropped if
+  // only whitespace); expressions and nested elements are preserved. A single
+  // child is passed directly; multiple children are passed as an array, which
+  // React expects via jsxs rather than jsx (so it doesn’t warn about keys).
+  const children = node.children.map((c) => compileChild(c, output)).filter((c): c is Part => c !== null); // prettier-ignore
+  const mulipleChildren = children.length > 1;
+  if (children.length === 1) props.push(["children: ", children[0]]);
+  else if (mulipleChildren) props.push(["children: [", ...join(children), "]"]);
+
+  // Construct the jsx (or jsxs) call and argument parts. For <Foo
+  // a={x}>b</Foo>, this is (with adjacent strings combined) ['JSX.jsx(Foo,
+  // {"a": ', x, ', children: "b"})'].
+  const parts = [
+    `JSX.${mulipleChildren ? "jsxs" : "jsx"}(${type}, {`,
+    ...join(props).flat(),
+    key === null ? "})" : `}, ${key})`
+  ];
+
+  // Rewrite the output: the source between preserved nodes (the JSX syntax,
+  // such as <Foo a={ and }>b</Foo>) is replaced with the generated code, and
+  // each preserved node is rewritten recursively.
   let index = node.start;
   let code = "";
   for (const part of parts) {
@@ -202,14 +215,14 @@ function compileText(c: JSXText): string | null {
   return text ? JSON.stringify(text) : null;
 }
 
-function compileChild(c: JSXChild): Part | null {
+function compileChild(c: JSXChild, output: Sourcemap): Part | null {
   switch (c.type) {
     case "JSXText":
       return compileText(c);
     case "JSXExpressionContainer":
       return c.expression.type === "JSXEmptyExpression" ? null : c.expression;
-    case "JSXSpreadChild":
-      return c.expression;
+    case "JSXSpreadChild": // {...xs}; not supported by React (and rejected by Babel)
+      throw syntaxError("Spread children are not supported", c, output.input);
     default:
       return c;
   }

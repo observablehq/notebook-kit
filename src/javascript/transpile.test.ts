@@ -149,6 +149,12 @@ it("throws SyntaxError on invalid TSX", () => {
   expect(() => transpile("enum Direction { Up, Down }", "tsx")).toThrow(SyntaxError);
 });
 
+it("throws SyntaxError on spread children in TSX", () => {
+  expect(() => transpile("<p>{...xs}</p>", "tsx")).toThrow(new SyntaxError("Spread children are not supported (1:3)")); // prettier-ignore
+  expect(() => transpile("<p>a{...xs}{b}</p>", "tsx")).toThrow(SyntaxError);
+  expect(() => transpile("f(() => <><i>{...xs}</i></>)", "tsx")).toThrow(SyntaxError);
+});
+
 it("transpiles Observable JavaScript viewof declarations and references", () => {
   expect(transpile("viewof foo = Inputs.range()", "ojs")).toMatchSnapshot();
   expect(transpile("viewof foo.value", "ojs")).toMatchSnapshot();
