@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import {jsx} from "react/jsx-runtime";
 import {beforeEach, expect, test, vi} from "vitest";
 import type {DisplayState} from "./display.js";
-import {clear, display} from "./display.js";
+import {clear, display, flush} from "./display.js";
 
 const {createRoot} = vi.hoisted(() => ({createRoot: vi.fn()}));
 
@@ -58,29 +58,94 @@ test("renders each displayed React element into its own root", async () => {
   expect(createRoot).toHaveBeenCalledTimes(2);
 });
 
-test("unmounts React roots when cleared", async () => {
-  let mounted = false;
-  function Effect() {
-    useEffect(() => {
-      mounted = true;
-      return () => void (mounted = false);
-    }, []);
-    return null;
+function Effect({log}: {log: string[]}) {
+  useEffect(() => {
+    log.push("mount");
+    return () => void log.push("unmount");
+  }, []);
+  return null;
+}
+
+test("unmounts React roots when cleared and flushed", async () => {
+  const log: string[] = [];
+  const s = state();
+  display(s, jsx(Effect, {log}));
+  await vi.waitFor(() => expect(log).toEqual(["mount"]));
+  clear(s);
+  expect(s.root.childNodes).toHaveLength(0);
+  expect(log).toEqual(["mount"]);
+  flush(s);
+  await vi.waitFor(() => expect(log).toEqual(["mount", "unmount"]));
+});
+
+test("reuses React roots, in order, across clears", async () => {
+  function Counter({label}: {label: string}) {
+    const [count] = useState(() => Math.random());
+    return jsx("i", {children: `${label}:${count}`});
   }
   const s = state();
-  display(s, jsx(Effect, {}));
-  await vi.waitFor(() => expect(mounted).toBe(true));
+  display(s, jsx(Counter, {label: "a"}));
+  display(s, jsx(Counter, {label: "b"}));
+  await vi.waitFor(() => expect(s.root.textContent).toMatch(/^a:.*b:/));
+  const [c1, c2] = s.root.childNodes;
+  const [t1, t2] = Array.from(s.root.childNodes, (n) => n.textContent!.slice(2));
   clear(s);
-  expect(mounted).toBe(false);
-  expect(s.root.childNodes).toHaveLength(0);
+  display(s, jsx(Counter, {label: "c"}));
+  display(s, jsx(Counter, {label: "d"}));
+  flush(s);
+  expect(s.root.childNodes[0]).toBe(c1);
+  expect(s.root.childNodes[1]).toBe(c2);
+  await vi.waitFor(() => expect(s.root.textContent).toBe(`c:${t1}d:${t2}`));
+  expect(createRoot).toHaveBeenCalledTimes(2);
+});
+
+test("unmounts React roots that are not reused", async () => {
+  const log1: string[] = [];
+  const log2: string[] = [];
+  const s = state();
+  display(s, jsx(Effect, {log: log1}));
+  display(s, jsx(Effect, {log: log2}));
+  await vi.waitFor(() => expect(log2).toEqual(["mount"]));
+  clear(s);
+  display(s, jsx(Effect, {log: log1}));
+  flush(s);
+  expect(log1).toEqual(["mount"]);
+  await vi.waitFor(() => expect(log2).toEqual(["mount", "unmount"]));
+});
+
+test("does not reuse React roots when autoclear is set", async () => {
+  const log: string[] = [];
+  const s = state();
+  display(s, jsx(Effect, {log}));
+  await vi.waitFor(() => expect(log).toEqual(["mount"]));
+  const container = s.root.firstChild;
+  s.autoclear = true; // simulate redefinition
+  expect(s.root.firstChild).toBe(container); // retained until cleared
+  expect(log).toEqual(["mount"]);
+  clear(s);
+  await vi.waitFor(() => expect(log).toEqual(["mount", "unmount"]));
+  display(s, jsx(Effect, {log}));
+  expect(s.root.firstChild).not.toBe(container);
+  await vi.waitFor(() => expect(log).toEqual(["mount", "unmount", "mount"]));
+  expect(createRoot).toHaveBeenCalledTimes(2);
+});
+
+test("renders a reused container cleared before React loads", async () => {
+  const s = state();
+  display(s, jsx("p", {children: "a"}));
+  clear(s);
+  display(s, jsx("p", {children: "b"}));
+  await vi.waitFor(() => expect(s.root.innerHTML).toBe("<div><p>b</p></div>"));
+  expect(createRoot).toHaveBeenCalledTimes(1);
 });
 
 test("does not render React elements that are cleared before React loads", async () => {
   const s = state();
   display(s, jsx("p", {}));
+  const container = s.root.firstChild as HTMLDivElement;
   clear(s);
   await tick();
-  expect(createRoot).not.toHaveBeenCalled();
+  expect(container.innerHTML).toBe("");
 });
 
 test("does not treat other objects with $$typeof as React elements", async () => {

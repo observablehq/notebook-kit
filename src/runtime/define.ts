@@ -1,7 +1,7 @@
 import type {Module, Variable, VariableDefinition} from "@observablehq/runtime";
 import {unprefix} from "../lib/unprefix.js";
 import type {DisplayState, DisplayMode} from "./display.js";
-import {clear, display, observe} from "./display.js";
+import {clear, display, flush, observe} from "./display.js";
 import {input} from "./stdlib/generators/index.js";
 import {Mutator} from "./stdlib/mutable.js";
 
@@ -98,6 +98,7 @@ export function define(
 
 /** Deletes the runtime variables previously defined by define for the given state. */
 export function undefine(state: DefineState): void {
+  flush(state); // unmount any retained React roots
   const variables = state.variables;
   state.variables = [];
   for (const v of variables) {
