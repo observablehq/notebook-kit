@@ -5,11 +5,8 @@
     "type": "git",
     "url": "git+https://github.com/observablehq/notebook-kit.git"
   },
-  "version": "2.12.0-rc.2",
+  "version": "2.12.0",
   "type": "module",
-  "publishConfig": {
-    "tag": "next"
-  },
   "scripts": {
     "test": "TZ=America/Los_Angeles vitest",
     "prepublishOnly": "rm -rf dist && tsc && chmod +x dist/bin/*.js && cp -r src/styles src/templates dist/src && cp src/runtime/stdlib/*.css dist/src/runtime/stdlib",
