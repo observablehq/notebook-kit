@@ -41,11 +41,23 @@ export interface FileAttachment {
   tsv(options?: Omit<DsvOptions, "delimiter">): Promise<DsvResult>;
   /** Returns the contents of this file as an image. */
   image(props?: Partial<HTMLImageElement>): Promise<HTMLImageElement>;
-  /** Returns the contents of this Arrow IPC file as an Apache Arrow table. */
+  /**
+   * Returns the contents of this Arrow IPC file as an Apache Arrow table. The
+   * options are passed to Flechette’s tableFromIPC. By default, dates and
+   * timestamps are Date objects (useDate: true), and 64-bit integers are
+   * BigInt values (useBigInt: true). With useBigInt: false, 64-bit integers
+   * are numbers, and loading fails if a value is outside the safe integer range.
+   */
   arrow(options?: any): Promise<any>;
   /** Returns the contents of this file as an Arquero table. */
   arquero(options?: any): Promise<any>;
-  /** Returns the contents of this Parquet file as an Apache Arrow table. */
+  /**
+   * Returns the contents of this Parquet file as an Apache Arrow table. The
+   * options are passed to Flechette’s tableFromIPC. By default, dates and
+   * timestamps are Date objects (useDate: true), and 64-bit integers are
+   * BigInt values (useBigInt: true). With useBigInt: false, 64-bit integers
+   * are numbers, and loading fails if a value is outside the safe integer range.
+   */
   parquet(options?: any): Promise<any>;
   /** Returns a DuckDBClient initialized from this DuckDB file. */
   duckdb(): Promise<DuckDBClient>;
